@@ -155,6 +155,9 @@ class RustTranspiler(CLikeTranspiler):
         if fname in dispatch_map:
             return dispatch_map[fname](node, vargs)
 
+        if not vargs:
+            return None
+
         # small one liners are inlined here as lambdas
         small_dispatch_map = {
             "int": lambda: f"i32::from({vargs[0]})",
@@ -170,7 +173,11 @@ class RustTranspiler(CLikeTranspiler):
             "list": lambda: f"{vargs[0]}.collect::<Vec<_>>()",
         }
         if fname in small_dispatch_map:
-            return small_dispatch_map[fname]()
+            try:
+                return small_dispatch_map[fname]()
+            except IndexError as e:
+                print("vargs = {}".format(vargs))
+                raise e
         return None
 
     def visit_Call(self, node):
