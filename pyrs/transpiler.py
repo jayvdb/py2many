@@ -15,7 +15,13 @@ from py2many.scope import add_scope_context
 from py2many.annotation_transformer import add_annotation_flags
 from py2many.mutability_transformer import detect_mutable_vars
 from py2many.context import add_variable_context, add_list_calls
-from py2many.analysis import add_imports, is_void_function, get_id, is_mutable
+from py2many.analysis import (
+    add_imports,
+    get_id,
+    get_element_types,
+    is_mutable,
+    is_void_function,
+)
 from typing import List, Optional
 
 container_types = {"List": "Vec", "Dict": "HashMap", "Set": "Set", "Optional": "Option"}
@@ -470,10 +476,14 @@ class RustTranspiler(CLikeTranspiler):
     def visit_Assign(self, node):
         target = node.targets[0]
 
+        let_or_static = "let"
+        if isinstance(node.scopes[-1], ast.Module):
+            let_or_static = "static"
+
         if isinstance(target, ast.Tuple):
-            elts = [self.visit(e) for e in target.elts]
+            elts = ", ".join([self.visit(e) for e in target.elts])
             value = self.visit(node.value)
-            return "let ({0}) = {1};".format(", ".join(elts), value)
+            return f"{let_or_static} ({elts}) = {value};"
 
         if isinstance(node.scopes[-1], ast.If):
             outer_if = node.scopes[-1]
@@ -495,13 +505,17 @@ class RustTranspiler(CLikeTranspiler):
             value = self.visit(node.value)
             return "{0} = {1};".format(target, value)
         elif isinstance(node.value, ast.List):
-            elements = [self.visit(e) for e in node.value.elts]
+            elements = ", ".join([self.visit(e) for e in node.value.elts])
             mut = ""
             if is_mutable(node.scopes, get_id(target)):
                 mut = "mut "
-            return "let {0}{1} = vec![{2}];".format(
-                mut, self.visit(target), ", ".join(elements)
-            )
+            types = get_element_types(node.value.elts, node.scopes, self._type_map)
+            if len(set(types)) == 1 and types[0] is not None:
+                typename = types[0]
+            else:
+                typename = "_"
+
+            return f"{let_or_static} {mut}{self.visit(target)}: [{typename}; {len(elements)}] = vec![{elements}];"
         else:
             mut = ""
             if is_mutable(node.scopes, get_id(target)):
@@ -522,7 +536,7 @@ class RustTranspiler(CLikeTranspiler):
                 ):  # if assignment is module level it must be const
                     return f"const {target}: {typename} = {value};"
 
-            return f"let {mut}{target}: {typename} = {value};"
+            return f"{let_or_static} {mut}{target}: {typename} = {value};"
 
     def visit_Delete(self, node):
         target = node.targets[0]
