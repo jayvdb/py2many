@@ -28,9 +28,10 @@ class CodeGeneratorTests(unittest.TestCase):
         settings = self.SETTINGS[lang]
         if not os.path.exists(f"cases/{case}.py"):
             raise unittest.SkipTest(f"cases/{case}.py not found")
-        formatter = settings.formatter.split()[0]
-        if not spawn.find_executable(formatter):
-            raise unittest.SkipTest(f"{formatter} not available")
+        if settings.formatter:
+            formatter = settings.formatter.split()[0]
+            if not spawn.find_executable(formatter):
+                raise unittest.SkipTest(f"{formatter} not available")
         ext = settings.ext
         sys.argv = ["test", f"--{lang}=1", f"cases/{case}.py"]
         try:
