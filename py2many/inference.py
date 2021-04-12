@@ -194,6 +194,10 @@ class InferTypesTransformer(ast.NodeTransformer):
                 left_id = "int"
             if right_id in self.FIXED_WIDTH_INTS_NAME:
                 right_id = "int"
+            if isinstance(node.op, ast.Mod) and left_id == "str":
+                # old style string formatting, e.g.: "%d" % 3
+                node.annotation = ast.Name(id="str")
+                return node
             if (left_id, right_id) in {("int", "float"), ("float", "int")}:
                 node.annotation = ast.Name(id="float")
                 return node
