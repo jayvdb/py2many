@@ -383,6 +383,9 @@ class RustTranspiler(CLikeTranspiler):
 
         names = [n.name for n in node.names]
         names = ", ".join(names)
+        if not node.module:
+            print("import ignored", node, names)
+            return ""
         module_path = node.module.replace(".", "::")
         return "use {0}::{{{1}}};".format(module_path, names)
 
