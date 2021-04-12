@@ -21,8 +21,8 @@ jobs:
       - name: Install tox
         run: pip install tox
 
-      - name: Install rust-script
-        run: cargo install rust-script
+      - name: Install rust-script and cargo-script
+        run: cargo install rust-script cargo-script
 
       - name: Run tox
         run: tox
