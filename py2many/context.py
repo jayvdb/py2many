@@ -21,6 +21,8 @@ class ListCallTransformer(ast.NodeTransformer):
     def visit_Call(self, node):
         if self.is_list_addition(node):
             var = node.scopes.find(node.func.value.id)
+            if not hasattr(var, "assigned_from"):
+                return node
             if self.is_list_assignment(var.assigned_from):
                 if not hasattr(var, "calls"):
                     var.calls = []
@@ -28,6 +30,8 @@ class ListCallTransformer(ast.NodeTransformer):
         return node
 
     def is_list_assignment(self, node):
+        if not hasattr(node, 'value'):
+            return False
         return isinstance(node.value, ast.List) and isinstance(
             node.targets[0].ctx, ast.Store
         )
@@ -35,6 +39,8 @@ class ListCallTransformer(ast.NodeTransformer):
     def is_list_addition(self, node):
         """Check if operation is adding something to a list"""
         list_operations = ["append", "extend", "insert"]
+        if not hasattr(node.func, 'attr'):
+            return False
         return (
             isinstance(node.func.ctx, ast.Load)
             and hasattr(node.func, "value")
