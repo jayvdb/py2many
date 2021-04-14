@@ -59,7 +59,10 @@ jobs:
         run: cargo install rust-script cargo-script
 
       - name: Run tox
-        run: tox
+        shell: bash
+        run: |
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          tox
 
   lint:
     runs-on: ubuntu-latest
