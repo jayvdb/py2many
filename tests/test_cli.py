@@ -133,7 +133,7 @@ class CodeGeneratorTests(unittest.TestCase):
                     with open(f"expected/{case}{ext}", "w") as f:
                         f.write(generated)
 
-            if exe.exists() and (exe.suffix == ".exe" or os.access(exe, os.X_OK)):
+            if exe.exists() and os.access(exe, os.X_OK):
                 run([exe], check=True)
             elif ext in [".go", ".rs", ".kt"] and not is_script:
                 raise unittest.SkipTest(f"{case}{ext} needs main() to be invoked")
