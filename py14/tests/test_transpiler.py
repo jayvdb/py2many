@@ -76,7 +76,7 @@ def test_print_program_args():
     )
     cpp = transpile(source)
     assert cpp == parse(
-        "int main(int argc, char ** argv) {",
+        "int main(int argc, char * const argv[]) {",
         "py14::sys::argv = std::vector<std::string>(argv, argv + argc);",
         "for(auto arg : py14::sys::argv) {",
         "std::cout << arg << std::endl;",

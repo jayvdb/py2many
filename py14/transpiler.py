@@ -60,6 +60,10 @@ def generate_template_fun(node, body):
     if is_void_function(node):
         return_type = "void"
 
+    if node.name == "main":
+        template = ""
+        return_type = "int"
+
     funcdef = "{0}{1} {2}({3})".format(
         template, return_type, node.name, ", ".join(params)
     )
@@ -245,7 +249,7 @@ class CppTranspiler(CLikeTranspiler):
 
         if self.visit(node.test) == '__name__ == std::string {"__main__"}':
             buf = [
-                "int main(int argc, char ** argv) {",
+                "int main(int argc, char * const argv[]) {",
                 "py14::sys::argv = " "std::vector<std::string>(argv, argv + argc);",
             ]
             buf.extend([self.visit(child) for child in node.body])
