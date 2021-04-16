@@ -1,18 +1,21 @@
-// cargo-deps: flagset
-use flagset::flags;
-use flagset::FlagSet;
-use std::os::raw::c_int;
+// cargo-deps: strum, strum_macros
+use strum::IntoEnumIterator;
+use strum_macros::Display;
+use strum_macros::EnumIter;
 
+#[derive(Debug, Display, EnumIter, PartialEq)]
 enum Colors {
     RED,
     GREEN,
     BLUE,
 }
 
-flags! {
-    enum Permissions: c_int {
-        R = 1,
-        W = 2,
-        X = 16,
+fn show() {
+    for color in Colors::iter() {
+        println!("{}", color);
     }
+}
+
+fn main() {
+    show();
 }

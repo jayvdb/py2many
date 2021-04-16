@@ -8,10 +8,10 @@ class Colors(str, Enum):
 
 
 def show():
-	for color in ColorNames:
-		print(color)
-		print(color.value)
+    for color in Colors:
+        print(color)
+        print(color.value)
 
 
 if __name__ == "__main__":
-	show()
+    show()

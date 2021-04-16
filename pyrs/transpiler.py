@@ -199,7 +199,7 @@ class RustTranspiler(CLikeTranspiler):
         target = self.visit(node.target)
         it = self.visit(node.iter)
         buf = []
-        buf.append("for {0} in {1}.iter() {{".format(target, it))
+        buf.append("for {0} in {1}::iter() {{".format(target, it))
         buf.extend([self.visit(c) for c in node.body])
         buf.append("}")
         return "\n".join(buf)
@@ -325,6 +325,8 @@ class RustTranspiler(CLikeTranspiler):
         return "{0}{1}{2} \n}}".format(struct_def, impl_def, "\n".join(buf))
 
     def visit_IntEnum(self, node):
+        self._usings.add("strum::IntoEnumIterator")
+        self._usings.add("strum_macros::{Display, EnumIter}")
         extractor = DeclarationExtractor(RustTranspiler())
         extractor.visit(node)
 
@@ -335,7 +337,7 @@ class RustTranspiler(CLikeTranspiler):
             else:
                 fields.append(f"{member} = {var},")
         fields = "\n".join(fields)
-        return f"enum {node.name} {{\n{fields}\n}}\n\n"
+        return f"#[derive(Debug, EnumIter, PartialEq)]\nenum {node.name} {{\n{fields}\n}}\n\n"
 
     def visit_StrEnum(self, node):
         self._usings.add("strum")
