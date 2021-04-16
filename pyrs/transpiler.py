@@ -145,6 +145,9 @@ class RustTranspiler(CLikeTranspiler):
         placeholders = []
         for n in node.args:
             placeholders.append("{}")
+        print(node.args, placeholders, vargs)
+        if not placeholders:
+            return "println!({0});".format(", ".join(vargs))
         return 'println!("{0}",{1});'.format(" ".join(placeholders), ", ".join(vargs))
 
     def _dispatch(self, node, fname: str, vargs: List[str]) -> Optional[str]:
