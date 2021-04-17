@@ -35,7 +35,7 @@ TEST_CASES = [
     for item in (TESTS_DIR / "cases").glob("*.py")
     if not item.stem.startswith("test_")
 ]
-COMPARABLE = ["fib", "hello_world", "infer", "infer_ops", "print", "rect", "int_enum", "str_enum"]
+COMPARABLE = ["fib", "hello_world", "infer", "infer_ops", "print", "rect", "int_enum", "str_enum", "none"]
 
 EXPECTED_COMPILE_FAILURES = [
     "binit.go",  # https://github.com/adsharma/py2many/issues/23
