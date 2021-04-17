@@ -8,9 +8,10 @@ class Colors(str, Enum):
 
 
 def show():
-    print(Colors.RED.value)
-    print(Colors.GREEN.value)
-    print(Colors.BLUE.value)
+    assert str(Colors.RED) == "red", str(Colors.RED)
+    assert str(Colors.GREEN) == "green"
+    assert str(Colors.BLUE) == "blue"
+    print("OK")
 
 
 if __name__ == "__main__":

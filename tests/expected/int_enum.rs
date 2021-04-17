@@ -1,18 +1,17 @@
-// cargo-deps: flagset
-use flagset::flags;
-use flagset::FlagSet;
-use std::os::raw::c_int;
-
+#[derive(PartialEq)]
 enum Colors {
     RED,
     GREEN,
     BLUE,
 }
 
-flags! {
-    enum Permissions: c_int {
-        R = 1,
-        W = 2,
-        X = 16,
+fn show() {
+    if Colors::RED == Colors::RED {
+        println!("{}", "OK");
     }
+    println!("{}", "OK");
+}
+
+fn main() {
+    show();
 }

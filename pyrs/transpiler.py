@@ -333,7 +333,7 @@ class RustTranspiler(CLikeTranspiler):
             else:
                 fields.append(f"{member} = {var},")
         fields = "\n".join(fields)
-        return f"enum {node.name} {{\n{fields}\n}}\n\n"
+        return f"#[derive(PartialEq)]\nenum {node.name} {{\n{fields}\n}}\n\n"
 
     def visit_StrEnum(self, node):
         self._usings.add("strum")

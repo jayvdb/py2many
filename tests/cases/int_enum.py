@@ -14,9 +14,10 @@ class Colors(IntEnum):
 
 
 def show():
-    print(Colors.RED.value)
-    print(Colors.GREEN.value)
-    print(Colors.BLUE.value)
+    assert Colors.RED is not None
+    #assert int(Colors.GREEN) == 2
+    #assert int(Colors.BLUE) == 3
+    print("OK")
     #for perm in Permissions:
     #    print(perm)
     #    print(perm.value)
