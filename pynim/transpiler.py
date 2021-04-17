@@ -8,11 +8,17 @@ from py2many.tracer import (
     is_class_or_module,
 )
 
+from py2many.analysis import (
+    add_imports,
+    get_id,
+    is_global,
+    is_mutable,
+    is_void_function,
+)
 from py2many.scope import add_scope_context
 from py2many.annotation_transformer import add_annotation_flags
 from py2many.mutability_transformer import detect_mutable_vars
 from py2many.context import add_variable_context, add_list_calls
-from py2many.analysis import add_imports, is_void_function, get_id, is_mutable
 from typing import Optional, List
 
 container_types = {
@@ -486,6 +492,8 @@ class NimTranspiler(CLikeTranspiler):
             elements = [self.visit(e) for e in node.value.elts]
             elements = ", ".join(elements)
             target = self.visit(target)
+            if is_global(node):
+                return f"const {target} = @[{elements}]"
             return f"{target} = @[{elements}]"
         else:
             mutable = False
@@ -495,11 +503,8 @@ class NimTranspiler(CLikeTranspiler):
             target = self.visit(target)
             value = self.visit(node.value)
 
-            if len(node.scopes) == 1:
-                if isinstance(
-                    node.scopes[0], ast.Module
-                ):  # if assignment is module level it must be const
-                    return f"const {target} = {value};"
+            if is_global(node):  # if assignment is module level it must be const
+                return f"const {target} = {value}"
             kw = "var" if mutable else "let"
             return f"{kw} {target} = {value}"
 
