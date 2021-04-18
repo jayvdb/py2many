@@ -50,6 +50,8 @@ jobs:
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install kscript
           julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
+          find ~/.julia -name format.jl
+          exit 1
 
       - name: Install dart sprintf
         shell: bash
