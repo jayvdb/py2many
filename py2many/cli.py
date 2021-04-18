@@ -69,7 +69,7 @@ def rust_settings(args):
 
 
 def julia_settings(args):
-    return LanguageSettings(JuliaTranspiler(), ".jl", ["jlfmt"])
+    return LanguageSettings(JuliaTranspiler(), ".jl", ["format.jl"])
 
 
 def kotlin_settings(args):
