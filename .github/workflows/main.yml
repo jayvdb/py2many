@@ -46,6 +46,7 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
               choco install zip curl
               assoc .jl=$(which julia)
+              find ~/.julia -name 'format.*'
               (cd /usr/bin && ln -s $(find ~/.julia -name format.jl))
           fi
           dart pub global activate stagehand
