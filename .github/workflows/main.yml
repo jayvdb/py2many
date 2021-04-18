@@ -17,8 +17,6 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-20.04
-          - macos-10.15
           - windows-2019
     runs-on: ${{ matrix.os }}
 
@@ -47,6 +45,7 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
           elif [ "$RUNNER_OS" == "Windows" ]; then
               choco install zip curl
+              assoc .jl=$(which julia)
               (cd /usr/bin && ln -s $(find ~/.julia -name format.jl))
           fi
           dart pub global activate stagehand
