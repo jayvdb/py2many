@@ -68,6 +68,8 @@ jobs:
         # https://github.com/sdkman/sdkman-action/issues/8
         run: |
           source "$HOME/.sdkman/bin/sdkman-init.sh"
+          echo $PATHEXT
+          export PATHEXT="$PATHEXT;.jl"
           tox
 
   lint:
