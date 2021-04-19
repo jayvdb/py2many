@@ -342,11 +342,11 @@ class RustTranspiler(CLikeTranspiler):
             else:
                 fields.append(f"{member} = {var},")
         fields = "\n".join(fields)
-        return f"#[derive(Clone, Eq, Hash, PartialEq)]\nenum {node.name} {{\n{fields}\n}}\n\n"
+        return f"#[derive(Clone, Eq, Hash, PartialEq)]\npub enum {node.name} {{\n{fields}\n}}\n\n"
 
     def visit_StrEnum(self, node):
         self._usings.add("strum")
-        self._usings.add("strum_macros::EnumString")
+        self._usings.add("strum_macros::{Display,EnumString}")
 
         extractor = DeclarationExtractor(RustTranspiler())
         extractor.visit(node)
@@ -359,7 +359,7 @@ class RustTranspiler(CLikeTranspiler):
                 fields.append(f"#[strum(serialize = {var})]{member},")
         fields = "\n".join(fields)
 
-        return f"#[derive(Clone, Debug, Eq, Hash, PartialEq, EnumString)]\nenum {node.name} {{\n{fields}\n}}\n\n"
+        return f"#[derive(Clone, Debug, EnumString, Eq, Hash, PartialEq)]\npub enum {node.name} {{\n{fields}\n}}\n\n"
 
     def visit_IntFlag(self, node):
         self._usings.add("flagset::flags")
@@ -497,14 +497,14 @@ class RustTranspiler(CLikeTranspiler):
     def visit_Assign(self, node):
         target = node.targets[0]
 
-        kw = "static" if is_global(node) else "let mut"
+        kw = "pub static" if is_global(node) else "let mut"
         # Note that static are not really supported, as modifying them requires adding
         # "unsafe" blocks, which pyrs does not do.
         if not is_mutable(node.scopes, get_id(target)):
             if kw == "let mut":
                 kw = "let"
-            elif kw == "static":
-                kw = "const"
+            elif kw == "pub static":
+                kw = "pub const"
 
         if isinstance(target, ast.Tuple):
             elts = ", ".join([self.visit(e) for e in target.elts])
@@ -539,7 +539,7 @@ class RustTranspiler(CLikeTranspiler):
             else:
                 typename = "_"
 
-            if kw in ["const", "static"]:
+            if kw.startswith("pub "):
                 # Use arrays instead of Vec as globals must have fixed size
                 return (
                     f"{kw} {self.visit(target)}: [{typename}; {count}] = [{elements}];"
@@ -556,7 +556,7 @@ class RustTranspiler(CLikeTranspiler):
             target = self.visit(target)
             value = self.visit(node.value)
 
-            if kw in ["const", "static"]:
+            if kw.startswith("pub "):
                 self._usings.add("lazy_static::lazy_static")
                 if typename == "&str":
                     typename = "&'static str"
@@ -580,7 +580,7 @@ class RustTranspiler(CLikeTranspiler):
             target = self.visit(target)
             value = self.visit(node.value)
 
-            if kw in ["const", "static"]:
+            if kw.startswith("pub "):
                 if key_typename == "&str":
                     key_typename = "&'static str"
                 if value_typename == "&str":
