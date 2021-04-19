@@ -36,6 +36,25 @@ def get_inferred_type(node):
     return None
 
 
+def get_element_types(elements, scopes, type_map=None):
+    """Identifies the element types used by list of elements."""
+    types = []
+    for element in elements:
+        item_id = get_id(element)
+        if item_id:
+            definition = scopes.find(item_id)
+        else:
+            definition = element
+        if hasattr(definition, "annotation"):
+            type_name = get_id(definition.annotation)
+            if type_map and type_name in type_map:
+                type_name = type_map[type_name]
+            types.append(type_name)
+            continue
+        types.append(None)
+    return types
+
+
 class InferTypesTransformer(ast.NodeTransformer):
     """
     Tries to infer types
