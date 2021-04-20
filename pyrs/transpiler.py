@@ -372,7 +372,7 @@ class RustTranspiler(CLikeTranspiler):
                 fields.append(f"#[strum(serialize = {var})]{member},")
         fields = "\n".join(fields)
 
-        return f"#[derive(Clone, Debug, EnumString, Eq, Hash, PartialEq)]\npub enum {node.name} {{\n{fields}\n}}\n\n"
+        return f"#[derive(Clone, Debug, Display, EnumString, Eq, Hash, PartialEq)]\npub enum {node.name} {{\n{fields}\n}}\n\n"
 
     def visit_IntFlag(self, node):
         self._usings.add("flagset::flags")
