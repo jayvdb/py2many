@@ -1,4 +1,5 @@
 import ast
+from textwrap import dedent
 
 from .clike import CLikeTranspiler
 from .declaration_extractor import DeclarationExtractor
@@ -55,7 +56,19 @@ class RustTranspiler(CLikeTranspiler):
         uses = "\n".join(
             f"use {mod};" for mod in usings if mod not in ("strum", "lazy_static")
         )
-        return f"// cargo-deps: {deps}\n{externs}\n{uses}" if deps else f"{uses}"
+        # https://github.com/Hoverbear/rust-protobuf/blob/ec9a164/protobuf-codegen/src/code_writer.rs#L53
+        lint_ignores = dedent("""
+        #![allow(clippy::all)]
+        #![allow(unknown_lints)]
+        #![allow(non_camel_case_types)]
+        #![allow(non_snake_case)]
+        #![allow(non_upper_case_globals)]
+        #![allow(trivial_casts)]
+        #![allow(unsafe_code)]
+        #![allow(unused_imports)]
+        #![allow(unused_results)]
+        """)
+        return f"{lint_ignores}// cargo-deps: {deps}\n{externs}\n{uses}" if deps else f"{uses}"
 
     def visit_FunctionDef(self, node):
         body = "\n".join([self.visit(n) for n in node.body])
