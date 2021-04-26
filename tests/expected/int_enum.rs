@@ -19,6 +19,12 @@ flags! {
         X = 16,
     }
 }
+struct PermissionsContainer(FlagSet<Permissions>);
+impl PermissionsContainer {
+    fn new(flags: impl Into<FlagSet<Permissions>>) -> PermissionsContainer {
+        PermissionsContainer(flags.into())
+    }
+}
 
 fn show() {
     let color_map: _ = [
@@ -35,11 +41,21 @@ fn show() {
     } else {
         println!("{}", "Not green");
     }
-    let b: _ = Permissions::R;
-    if b == Permissions::R {
+    let b: PermissionsContainer = PermissionsContainer::new(Permissions::R | Permissions::W);
+    if (b.0 & Permissions::R).bits() != 0b0 {
         println!("{}", "R");
     } else {
         println!("{}", "Not R");
+    }
+    if (b.0 & Permissions::W).bits() != 0b0 {
+        println!("{}", "W");
+    } else {
+        println!("{}", "Not W");
+    }
+    if (b.0 & Permissions::X).bits() != 0b0 {
+        println!("{}", "X");
+    } else {
+        println!("{}", "Not X");
     }
 }
 

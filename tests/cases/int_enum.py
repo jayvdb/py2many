@@ -20,11 +20,19 @@ def show():
         print("green")
     else:
         print("Not green")
-    b = Permissions.R
-    if b == Permissions.R:
+    b = Permissions.R | Permissions.W
+    if b & Permissions.R:
         print("R")
     else:
         print("Not R")
+    if b & Permissions.W:
+        print("W")
+    else:
+        print("Not W")
+    if b & Permissions.X:
+        print("X")
+    else:
+        print("Not X")
 
 
 if __name__ == "__main__":
