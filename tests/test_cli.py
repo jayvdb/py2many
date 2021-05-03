@@ -97,9 +97,14 @@ class CodeGeneratorTests(unittest.TestCase):
         is_script = has_main(case_filename)
         sys.argv = ["test", f"--{lang}=1", str(case_filename)]
 
-        expected_output = run(
-            [sys.executable, str(case_filename)], capture_output=True, check=True
-        ).stdout
+        proc = run(
+            [sys.executable, str(case_filename)], capture_output=True
+        )
+        if proc.returncode:
+            print(proc.stderr)
+            print(proc.stdout)
+            self.assertEqual(0, proc.returncode)
+        expected_output = proc.stdout
         self.assertTrue(expected_output)
         expected_output = expected_output.splitlines()
 

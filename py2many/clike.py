@@ -108,6 +108,7 @@ class CLikeTranspiler(ast.NodeVisitor):
     def _typename_from_annotation(self, node, attr="annotation") -> str:
         default_type = self._default_type
         typename = default_type
+        print(node, get_id(node))
         if hasattr(node, attr):
             typename = getattr(node, attr)
             if isinstance(typename, ast.Subscript):
