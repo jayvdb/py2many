@@ -49,11 +49,12 @@ class RustTranspiler(CLikeTranspiler):
         super().__init__()
         self._container_type_map = self.CONTAINER_TYPE_MAP
         self._default_type = "_"
+        self._usings.add("core::any::Any")
 
     def usings(self):
         usings = sorted(list(set(self._usings)))
         deps = sorted(
-            set(mod.split("::")[0] for mod in usings if not mod.startswith("std:"))
+            set(mod.split("::")[0] for mod in usings if mod.split(":", 1)[0] not in ["core", "std"])
         )
         externs = [f"extern crate {dep};" for dep in deps]
         deps = ",".join(deps)
@@ -665,10 +666,12 @@ class RustTranspiler(CLikeTranspiler):
             typename = self._typename_from_annotation(node.value)
 
             if kw.startswith("pub "):
-                self._usings.add("lazy_static::lazy_static")
+                self._usings.add("static_init::dynamic")
                 if "str" in typename:
                     typename = typename.replace("str", "'static str")
-                return f"lazy_static! {{ pub static ref {target}: {typename} = {value}; }}"
+                if "Any" in typename:
+                    typename = typename.replace("Any", "Box<Any>")
+                return f"#[dynamic]\npub static {target}: {typename} = {value};"
 
             mut = "mut " if is_mutable(node.scopes, target) else ""
             if hasattr(node.value, "container_type"):
@@ -681,6 +684,7 @@ class RustTranspiler(CLikeTranspiler):
             typename = self._typename_from_annotation(node.value)
 
             if kw.startswith("pub "):
+                self._usings.add("static_init::dynamic")
                 if hasattr(node.value, "container_type"):
                     container_type, element_type = node.value.container_type
                     key_typename, value_typename = self._map_types(element_type)
@@ -688,9 +692,11 @@ class RustTranspiler(CLikeTranspiler):
                         key_typename = "&'static str"
                     if value_typename == "&str":
                         value_typename = "&'static str"
+                    if value_typename == "Any":
+                        value_typename = "Box<Any>"
                     typename = f"{key_typename}, {value_typename}"
 
-                return f"lazy_static! {{ pub static ref {target}: HashMap<{typename}> = {value}; }}"
+                return f"#[dynamic]\npub static {target}: HashMap<{typename}> = {value};"
 
             mut = "mut " if is_mutable(node.scopes, target) else ""
             if hasattr(node.value, "container_type"):
