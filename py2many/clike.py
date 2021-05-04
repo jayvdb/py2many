@@ -90,12 +90,17 @@ class CLikeTranspiler(ast.NodeVisitor):
 
     def _visit_container_type(self, typename: Tuple) -> str:
         value_type, index_type = typename
+        print(value_type, index_type)
         value_type = self._map_container_type(value_type)
+        print("   ", value_type)
         if isinstance(index_type, List):
             index_contains_default = "Any" in index_type
             if not index_contains_default:
                 index_type = [self._map_type(e) for e in index_type]
-                index_type = ", ".join(index_type)
+                if any(i is None for i in index_type):
+                    index_type = None
+                else:
+                    index_type = ", ".join(index_type)
         else:
             index_contains_default = index_type == "Any"
             if not index_contains_default:
@@ -106,6 +111,7 @@ class CLikeTranspiler(ast.NodeVisitor):
         return self._combine_value_index(value_type, index_type)
 
     def _typename_from_annotation(self, node, attr="annotation") -> str:
+        print("_typename_from_annotation", get_id(node))
         default_type = self._default_type
         typename = default_type
         if hasattr(node, attr):
@@ -127,6 +133,7 @@ class CLikeTranspiler(ast.NodeVisitor):
             elif isinstance(typename, ast.ClassDef):
                 return get_id(typename)
             else:
+                return default_type
                 raise Exception(typename, type(typename))
         return typename
 
