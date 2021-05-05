@@ -132,7 +132,6 @@ class CodeGeneratorTests(unittest.TestCase):
                     [*compiler, f"cases/{case}{ext}"], env=env, check=not expect_failure
                 )
 
-                assert not expect_failure or proc.returncode != 0
                 if proc.returncode:
                     raise unittest.SkipTest(f"{case}{ext} doesnt compile")
 
@@ -157,7 +156,6 @@ class CodeGeneratorTests(unittest.TestCase):
 
                 stdout = proc.stdout
 
-                assert not expect_failure or proc.returncode != 0
                 if proc.returncode:
                     raise unittest.SkipTest(f"{case}{ext} doesnt compile")
             else:
@@ -167,16 +165,20 @@ class CodeGeneratorTests(unittest.TestCase):
                 stdout = stdout.splitlines()
                 self.assertEqual(expected_output, stdout)
 
-            if settings.linter:
-                if not spawn.find_executable(settings.linter[0]):
-                    raise unittest.SkipTest(f"{settings.linter[0]} not available")
-                if settings.ext == ".kt" and case_output.is_absolute():
-                    # KtLint does not support absolute path in globs
-                    case_output = case_output.relative_to(Path.cwd())
-                run(
-                    [*settings.linter, case_output],
-                    check=not expect_failure,
-                )
+                if settings.linter:
+                    if not spawn.find_executable(settings.linter[0]):
+                        raise unittest.SkipTest(f"{settings.linter[0]} not available")
+                    if settings.ext == ".kt" and case_output.is_absolute():
+                        # KtLint does not support absolute path in globs
+                        case_output = case_output.relative_to(Path.cwd())
+                    proc = run(
+                        [*settings.linter, case_output],
+                    )
+                    if proc.returncode:
+                        raise unittest.SkipTest(f"{case}{ext} failed linter")
+
+                    if expect_failure:
+                        raise AssertionError(f"{case}{ext} passed unexpectedly")
 
         finally:
             if not KEEP_GENERATED:
