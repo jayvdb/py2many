@@ -44,7 +44,11 @@ TEST_CASES = [
     if not item.stem.startswith("test_")
 ]
 
-EXPECTED_COMPILE_FAILURES = []
+EXPECTED_COMPILE_FAILURES = [
+    "int_enum.go",
+    "rect.go",
+    "str_enum.go",
+]
 
 
 def has_main(filename):
