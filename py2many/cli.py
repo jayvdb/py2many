@@ -2,10 +2,10 @@ import argparse
 import ast
 import os
 import pathlib
-import subprocess
 
 from dataclasses import dataclass, field
 from distutils import spawn
+from subprocess import run
 from typing import Callable, List, Optional
 
 from .analysis import add_imports
@@ -106,7 +106,7 @@ def transpile(source, transpiler, rewriters, transformers, post_rewriters):
 class LanguageSettings:
     transpiler: CLikeTranspiler
     ext: str
-    formatter: Optional[List[str]] = None
+    external_formatters: Optional[List[List[str]]] = None
     indent: Optional[int] = None
     rewriters: List[ast.NodeVisitor] = field(default_factory=list)
     transformers: List[Callable] = field(default_factory=list)
@@ -115,13 +115,32 @@ class LanguageSettings:
 
 
 def cpp_settings(args):
+    clang_format_style = os.environ.get("CLANG_FORMAT_STYLE")
+    if clang_format_style:
+        clang_format_cmd = ["clang-format", f"-style={clang_format_style}", "-i"]
+    else:
+        clang_format_cmd = ["clang-format", "-i"]
     return LanguageSettings(
         CppTranspiler(),
         ".cpp",
-        ["clang-format", "-i"],
+        [
+            #["uncrustify", "--replace", "--no-backup"],
+            #["astyle", "--style=google", "--mode=c"],
+            clang_format_cmd,
+        ],
         None,
         [CppListComparisonRewriter()],
-        linter=["clang++", "-std=c++14", "-I", str(ROOT_DIR), "-stdlib=libc++", "-Wall", "-Werror"]
+        linter=["cpplint", "--filter=-legal/copyright,-build/include_order"]
+        #["clang-tidy", "{filename}", "--", "-I",str(ROOT_DIR),"-std=c++14","-stdlib=libc++",]
+        #[
+        #    "clang++",
+        #    "-std=c++14",
+        #    "-I",
+        #    str(ROOT_DIR),
+        #    "-stdlib=libc++",
+        #    "-Wall",
+        #    "-Werror",
+        #],
     )
 
 
@@ -129,7 +148,7 @@ def rust_settings(args):
     return LanguageSettings(
         RustTranspiler(),
         ".rs",
-        ["rustfmt"],
+        [["rustfmt"]],
         None,
         [RustNoneCompareRewriter()],
         [infer_rust_types],
@@ -144,7 +163,7 @@ def julia_settings(args):
     else:
         format_jl = ["format.jl"]
     return LanguageSettings(
-        JuliaTranspiler(), ".jl", format_jl, None, [], [], [JuliaMethodCallRewriter()]
+        JuliaTranspiler(), ".jl", [format_jl], None, [], [], [JuliaMethodCallRewriter()]
     )
 
 
@@ -152,7 +171,7 @@ def kotlin_settings(args):
     return LanguageSettings(
         KotlinTranspiler(),
         ".kt",
-        ["ktlint", "-F"],
+        [["ktlint", "-F"]],
         None,
         [KotlinPrintRewriter()],
         [infer_kotlin_types],
@@ -169,7 +188,7 @@ def nim_settings(args):
     return LanguageSettings(
         NimTranspiler(**nim_args),
         ".nim",
-        ["nimpretty", *nimpretty_args],
+        [["nimpretty", *nimpretty_args]],
         None,
         [NimNoneCompareRewriter()],
         [infer_nim_types],
@@ -177,7 +196,7 @@ def nim_settings(args):
 
 
 def dart_settings(args):
-    return LanguageSettings(DartTranspiler(), ".dart", ["dart", "format"])
+    return LanguageSettings(DartTranspiler(), ".dart", [["dart", "format"]])
 
 
 def go_settings(args):
@@ -205,7 +224,14 @@ def _get_all_settings(args):
     }
 
 
-def _process_once(settings, filename, outdir):
+def _create_cmd(parts, filename):
+    cmd = [arg.format(filename=filename) for arg in parts]
+    if cmd != parts:
+        return cmd
+    return [*parts, filename]
+
+
+def _process_once(settings, filename, outdir, _env=None):
     """Transpile and reformat.
 
     Returns False if reformatter failed.
@@ -227,19 +253,28 @@ def _process_once(settings, filename, outdir):
                 settings.post_rewriters,
             )
         )
-    if settings.formatter:
-        if subprocess.call([*settings.formatter, output_path]):
-            print(f"Error: Could not reformat: {output_path}")
+
+    rv = True
+    for formatter in settings.external_formatters or []:
+        if not spawn.find_executable(formatter[0]):
+            print(f"Warning: {formatter[0]} not available")
+            rv = False
+            continue
+        cmd = _create_cmd(formatter, output_path)
+        proc = run(cmd, env=_env)
+        if proc.returncode:
+            print(f"Error: {formatter} failed: {output_path}")
             return False
-    if settings.ext == ".kt":
-        # ktlint formatter needs to be invoked twice before output is lint free
-        if subprocess.call([*settings.formatter, output_path]):
-            print(f"Error: Could not reformat: {output_path}")
-            return False
-    return True
+        if settings.ext == ".kt":
+            # ktlint formatter needs to be invoked twice before output is lint free
+            proc = run(cmd, env=_env)
+            if proc.returncode:
+                print(f"Error: {formatter} failed: {output_path}")
+                return False
+    return rv
 
 
-def main():
+def main(_env=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--cpp", type=bool, default=False, help="Generate C++ code")
     parser.add_argument("--rust", type=bool, default=False, help="Generate Rust code")
@@ -283,7 +318,7 @@ def main():
 
         if source.is_file():
             print(f"Writing to: {outdir}")
-            _process_once(settings, source, outdir)
+            rv = _process_once(settings, source, outdir, _env=_env)
         else:
             if args.outdir is None:
                 outdir = source.parent / f"{source.name}-py2many"
@@ -302,7 +337,7 @@ def main():
                 os.makedirs(target_dir, exist_ok=True)
 
                 try:
-                    if _process_once(settings, path, target_dir):
+                    if _process_once(settings, path, target_dir, _env=_env):
                         print(f"Error: Could not reformat: {path}")
                         format_errors += 1
                     successful += 1
@@ -317,3 +352,5 @@ def main():
                 print(f"Failed to reformat: {format_errors}")
             print(f"Failed to convert: {failures}")
             print()
+            rv = not failures or format_errors
+        return rv

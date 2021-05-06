@@ -19,13 +19,17 @@ ROOT_DIR = TESTS_DIR.parent
 
 KEEP_GENERATED = os.environ.get("KEEP_GENERATED", False)
 UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
+CXX = os.environ.get("CXX", "clang++")
 ENV = {
+    "cpp": {
+        "UNCRUSTIFY_CONFIG": str(TESTS_DIR / "uncrustify-indent-2.cfg"),
+    },
     "rust": {
         "RUSTFLAGS": "--deny warnings",
     },
 }
 COMPILERS = {
-    "cpp": ["clang++", "-std=c++14", "-I", str(ROOT_DIR), "-stdlib=libc++"],
+    "cpp": [CXX, "-std=c++14", "-I", str(ROOT_DIR), "-stdlib=libc++"],
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
     "julia": ["julia", "--compiled-modules=yes"],
@@ -146,7 +150,7 @@ class CodeGeneratorTests(unittest.TestCase):
 
     @foreach(SETTINGS.keys())
     @foreach(sorted(TEST_CASES.keys()))
-    def test_cli(self, case, lang):
+    def test_snippet(self, case, lang):
         settings = self.SETTINGS[lang]
         ext = settings.ext
         source_data = TEST_CASES[case]
@@ -173,9 +177,9 @@ class CodeGeneratorTests(unittest.TestCase):
         except NotImplementedError as e:
             raise unittest.SkipTest(str(e))
 
-        if settings.formatter:
-            if not spawn.find_executable(settings.formatter[0]):
-                raise unittest.SkipTest(f"{settings.formatter[0]} not available")
+        for formatter in settings.external_formatters or []:
+            if not spawn.find_executable(formatter[0]):
+                raise unittest.SkipTest(f"{formatter[0]} not available")
 
         if ext == ".kt":
             class_name = str(case.title()) + "Kt"
@@ -194,21 +198,21 @@ class CodeGeneratorTests(unittest.TestCase):
         with open(case_output, "w") as f:
             f.write(result)
 
-        if settings.formatter:
-            if settings.ext == ".kt" and case_output.is_absolute():
-                # KtLint does not support absolute path in globs
-                case_output = case_output.relative_to(Path.cwd())
-            proc = run([*settings.formatter, case_output], capture_output=True)
-            if proc.returncode:
-                raise unittest.SkipTest(
-                    f"Error: Could not reformat:\n{proc.stdout}{proc.stderr}"
-                )
-
         if ENV.get(lang):
             env = os.environ.copy()
             env.update(ENV.get(lang))
         else:
             env = None
+
+        for formatter in settings.external_formatters or []:
+            if settings.ext == ".kt" and case_output.is_absolute():
+                # KtLint does not support absolute path in globs
+                case_output = case_output.relative_to(Path.cwd())
+            proc = run([*formatter, case_output], env=env, capture_output=True)
+            if proc.returncode:
+                raise unittest.SkipTest(
+                    f"Error: Could not reformat using {formatter}:\n{proc.stdout}{proc.stderr}"
+                )
 
         try:
             compiler = COMPILERS[lang]

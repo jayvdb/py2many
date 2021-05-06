@@ -8,7 +8,7 @@ from unittest.mock import Mock
 
 from unittest_expander import foreach, expand
 
-from py2many.cli import main, _get_all_settings
+from py2many.cli import main, _create_cmd, _get_all_settings
 
 SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
 
@@ -17,13 +17,18 @@ ROOT_DIR = TESTS_DIR.parent
 
 KEEP_GENERATED = os.environ.get("KEEP_GENERATED", False)
 UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
+CXX = os.environ.get("CXX", "clang++")
 ENV = {
+    "cpp": {
+        "CLANG_FORMAT_STYLE": "Google",
+        "UNCRUSTIFY_CONFIG": str(TESTS_DIR / "uncrustify-google.cfg"), #"uncrustify-indent-2.cfg"),
+    },
     "rust": {
         "RUSTFLAGS": "--deny warnings",
     },
 }
 COMPILERS = {
-    "cpp": ["clang++", "-std=c++14", "-I", str(ROOT_DIR), "-stdlib=libc++"],
+    "cpp": [CXX, "-std=c++14", "-I", str(ROOT_DIR), "-stdlib=libc++"],
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
     "julia": ["julia", "--compiled-modules=yes"],
@@ -78,9 +83,10 @@ class CodeGeneratorTests(unittest.TestCase):
             and not os.path.exists(f"expected/{case}{ext}")
         ):
             raise unittest.SkipTest(f"expected/{case}{ext} not found")
-        if settings.formatter:
-            if not spawn.find_executable(settings.formatter[0]):
-                raise unittest.SkipTest(f"{settings.formatter[0]} not available")
+
+        for formatter in settings.external_formatters or []:
+            if not spawn.find_executable(formatter[0]):
+                raise unittest.SkipTest(f"{formatter[0]} not available")
 
         if ext == ".kt":
             class_name = str(case.title()) + "Kt"
@@ -119,7 +125,7 @@ class CodeGeneratorTests(unittest.TestCase):
             env = None
 
         try:
-            main()
+            rv = main(_env=env)
             with open(f"cases/{case}{ext}") as actual:
                 generated = actual.read()
                 if os.path.exists(f"expected/{case}{ext}") and not UPDATE_EXPECTED:
@@ -130,6 +136,12 @@ class CodeGeneratorTests(unittest.TestCase):
             expect_failure = (
                 not SHOW_ERRORS and f"{case}{ext}" in EXPECTED_COMPILE_FAILURES
             )
+
+            if not expect_failure:
+                assert rv, "formatting failed"
+            elif not rv:
+                raise unittest.SkipTest("formatting failed")
+
             compiler = COMPILERS[lang]
             if compiler:
                 if not spawn.find_executable(compiler[0]):
@@ -177,20 +189,22 @@ class CodeGeneratorTests(unittest.TestCase):
                     if settings.ext == ".kt" and case_output.is_absolute():
                         # KtLint does not support absolute path in globs
                         case_output = case_output.relative_to(Path.cwd())
-                    linter = settings.linter.copy()
-                    if ext == ".cpp":
+                    linter = _create_cmd(settings.linter, case_output)
+                    if ext == ".cpp": # and linter[0] == CXX:
                         linter.append("-Wno-unused-variable")
                         if case == "coverage":
                             linter.append("-Wno-null-arithmetic")
-                    proc = run([*linter, case_output])
-                    if proc.returncode:
+                    proc = run(linter)
+                    if proc.returncode and expect_failure:
                         raise unittest.SkipTest(f"{case}{ext} failed linter")
+                    self.assertFalse(proc.returncode)
 
                     if expect_failure:
                         raise AssertionError(f"{case}{ext} passed unexpectedly")
 
         finally:
             if not KEEP_GENERATED:
+                print("deleting output")
                 case_output.unlink(missing_ok=True)
             exe.unlink(missing_ok=True)
 

@@ -42,7 +42,7 @@ class CLikeTranspiler(CommonCLikeTranspiler):
         return " ".join([left, self.visit(node.op), right])
 
     def visit_In(self, node):
-        self._headers.append("#include <algorithm>")
+        self._usings.add("<algorithm>")
         left = self.visit(node.left)
         right = self.visit(node.comparators[0])
         return f"(std::find({right}.begin(), {right}.end(), {left}) != {right}.end())"
