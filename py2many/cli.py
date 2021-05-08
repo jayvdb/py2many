@@ -116,10 +116,16 @@ class LanguageSettings:
 
 def cpp_settings(args):
     clang_format_style = os.environ.get("CLANG_FORMAT_STYLE")
+    cxx_flags = os.environ.get("CXXFLAGS")
+    if not cxx_flags:
+        cxx_flags = ["-std=c++14","-stdlib=libc++","-Wall","-Werror"]
+    cxx_flags = ["-I",str(ROOT_DIR)] + cxx_flags
+
     if clang_format_style:
         clang_format_cmd = ["clang-format", f"-style={clang_format_style}", "-i"]
     else:
         clang_format_cmd = ["clang-format", "-i"]
+
     return LanguageSettings(
         CppTranspiler(),
         ".cpp",
@@ -130,16 +136,11 @@ def cpp_settings(args):
         ],
         None,
         [CppListComparisonRewriter()],
-        linter=["cpplint", "--filter=-legal/copyright,-build/include_order"]
-        #["clang-tidy", "{filename}", "--", "-I",str(ROOT_DIR),"-std=c++14","-stdlib=libc++",]
+        linter=["cpplint", "--filter=-legal/copyright,-whitespace/comments"]
+        #["clang-tidy", "{filename}", "--", *cxx_flags]
         #[
         #    "clang++",
-        #    "-std=c++14",
-        #    "-I",
-        #    str(ROOT_DIR),
-        #    "-stdlib=libc++",
-        #    "-Wall",
-        #    "-Werror",
+        #    *cxx_flags,
         #],
     )
 
