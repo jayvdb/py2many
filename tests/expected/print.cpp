@@ -1,6 +1,6 @@
-#include "py14/runtime/builtins.h"
-#include "py14/runtime/sys.h"
-#include <iostream>
+#include "py14/runtime/builtins.h" // NOLINT(build/include_order)
+#include "py14/runtime/sys.h"      // NOLINT(build/include_order)
+#include <iostream>                // NOLINT(build/include_order)
 inline void show() {
   std::cout << std::string{"b"};
   std::cout << std::endl;

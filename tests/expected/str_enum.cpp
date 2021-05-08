@@ -1,11 +1,11 @@
-#include "py14/runtime/builtins.h"
-#include "py14/runtime/sys.h"
-#include <iostream>
-#include <map>
+#include "py14/runtime/builtins.h" // NOLINT(build/include_order)
+#include "py14/runtime/sys.h"      // NOLINT(build/include_order)
+#include <iostream>                // NOLINT(build/include_order)
+#include <map>                     // NOLINT(build/include_order)
 
 class Colors : public std::string {
-public:
-  Colors(const char *s) : std::string(s) {}
+public:                                     // NOLINT(whitespace/indent)
+  Colors(const char *s) : std::string(s) {} // NOLINT(runtime/explicit)
   static const Colors RED;
   static const Colors GREEN;
   static const Colors BLUE;
