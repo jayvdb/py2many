@@ -4,7 +4,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches:
   pull_request:
     branches: [ main ]
 
@@ -17,99 +17,13 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-18.04
-          - macos-10.15
           - windows-2019
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '2.0.5'
-      - uses: julia-actions/setup-julia@v1
-      - uses: fwilhe2/setup-kotlin@main
-      - uses: jiro4989/setup-nim-action@v1
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
 
-      - name: Install go packages
+      - name: Install brew
         shell: bash
         run: |
-          (go get github.com/hgfischer/go-iter \
-           && go get github.com/google/go-cmp/cmp \
-           && go get golang.org/x/lint/golint \
-           && go get github.com/adsharma/py2many/pygo/runtime \
-          )
-
-      - name: Install tox
-        run: |
-          pip3 --version
-          pip3 install setuptools tox
-
-      - name: Install Julia dependencies for ${{ runner.os }}.
-        shell: bash
-        run: |
-          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
-          julia -e 'using Pkg; Pkg.add("SuperEnum")'
-          if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo apt-get install --yes astyle
-              curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
-              chmod a+x ktlint
-              sudo mv ktlint /usr/local/bin/
-              (cd /usr/local/bin && sudo ln -s $(find ~/.julia -name format.jl))
-              (cd /usr/local/bin && sudo ln -s $HOME/go/bin/golint)
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-              brew tap holgerbrandl/tap https://github.com/holgerbrandl/homebrew-tap
-              brew install clang-format kscript ktlint astyle
-              (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
-              (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install zip curl astyle llvm
-          fi
-          dart pub global activate stagehand
-          curl -s "https://get.sdkman.io" | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install kscript
-
-      - name: Install dart dependencies
-        shell: bash
-        run: |
-          (cd tests && dart pub global run stagehand:stagehand --override package-simple \
-           && dart pub add sprintf \
-           && dart pub add tuple \
-           && flutter pub add vnum)
-
-      - name: Install cargo-script
-        run: cargo install cargo-script
-
-      - name: Run tox
-        shell: bash
-        # sdkman init can be replaced with actions setup when the following is fixed
-        # https://github.com/sdkman/sdkman-action/issues/8
-        run: |
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          LINT=1
-          tox
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install linters
-        run: pip install black pyflakes cpplint
-
-      - name: Remove tests/cases/*.py
-        run: rm tests/cases/*.py
-
-      - name: Run black
-        run: black */ *.py
-
-      - name: Run pyflakes
-        run: pyflakes */ *.py
-
-      - name: Run cpplint
-        run: cpplint --filter=-legal/copyright tests/expected/*.cpp
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
