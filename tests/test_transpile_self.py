@@ -1,8 +1,8 @@
 import os.path
 import unittest
 
-from distutils import spawn
 from pathlib import Path
+from shutil import which
 from unittest.mock import Mock
 
 from py2many.cli import _get_all_settings, _process_dir
@@ -55,28 +55,25 @@ class SelfTranspileTests(unittest.TestCase):
     def test_kotlin_recursive(self):
         settings = self.SETTINGS["kotlin"]
 
-        suppress_exceptions = False
-        if settings.formatter:
-            if not spawn.find_executable(settings.formatter[0]):
-                suppress_exceptions = FileNotFoundError
+        formatter_available = which(settings.formatter[0])
 
         transpiler_module = ROOT_DIR / "pykt"
         successful, format_errors, failures = _process_dir(
             settings,
             transpiler_module,
             OUT_DIR,
-            _suppress_exceptions=suppress_exceptions,
+            _suppress_exceptions=False,
         )
-        if not suppress_exceptions:
+        if formatter_available:
             assert len(successful) == 1  # The __init__.py
 
         successful, format_errors, failures = _process_dir(
             settings,
             PY2MANY_MODULE,
             OUT_DIR,
-            _suppress_exceptions=suppress_exceptions,
+            _suppress_exceptions=False,
         )
-        if suppress_exceptions:
+        if not formatter_available:
             raise unittest.SkipTest(f"{settings.formatter[0]} not available")
 
         assert len(successful) == 3
@@ -149,9 +146,7 @@ class SelfTranspileTests(unittest.TestCase):
         settings = self.SETTINGS["julia"]
 
         suppress_exceptions = (NotImplementedError,)
-        if settings.formatter:
-            if not spawn.find_executable(settings.formatter[0]):
-                suppress_exceptions = (FileNotFoundError, NotImplementedError)
+        formatter_available = which(settings.formatter[0])
 
         transpiler_module = ROOT_DIR / "pyjl"
         successful, format_errors, failures = _process_dir(
@@ -160,17 +155,17 @@ class SelfTranspileTests(unittest.TestCase):
             OUT_DIR,
             _suppress_exceptions=suppress_exceptions,
         )
-        if FileNotFoundError not in suppress_exceptions:
+        if formatter_available:
             assert len(successful) == 1  # The __init__.py
 
-        suppress_exceptions = suppress_exceptions + (ValueError,)
+        suppress_exceptions = suppress_exceptions + (ValueError, KeyError)
         successful, format_errors, failures = _process_dir(
             settings,
             PY2MANY_MODULE,
             OUT_DIR,
             _suppress_exceptions=suppress_exceptions,
         )
-        if FileNotFoundError in suppress_exceptions:
+        if not formatter_available:
             raise unittest.SkipTest(f"{settings.formatter[0]} not available")
 
         assert len(successful) == 4
