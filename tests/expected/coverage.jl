@@ -82,6 +82,7 @@ function show()
     println(join([s], " "))
     @assert(infer_bool(1))
     _escape_quotes = " foo \"bar\" baz "
+    @assert(findfirst(" \"bar\" ", _escape_quotes) != Nothing)
     @assert(findfirst("bbc", "aaabbccc") != Nothing)
     @assert(Bool(1))
     2

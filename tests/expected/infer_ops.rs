@@ -28,18 +28,27 @@ use anyhow::Result;
 pub fn foo() {
     let a: i32 = 10;
     let b: i32 = 20;
-    let _c1: i32 = (a + b);
-    let _c2: i32 = (a - b);
-    let _c3: i32 = (a * b);
-    let _c4: f64 = ((a as f64) / (b as f64));
-    let _c5: i32 = -(a);
+    let c1: i32 = (a + b);
+    assert!(c1 == 30);
+    let c2: i32 = (a - b);
+    assert!(c2 == -10);
+    let c3: i32 = (a * b);
+    assert!(c3 == 200);
+    let c4: f64 = ((a as f64) / (b as f64));
+    assert!(c4 == 0.5);
+    let c5: i32 = -(a);
+    assert!(c5 == -10);
     let d: f64 = 2.0;
-    let _e1: f64 = ((a as f64) + d);
-    let _e2: f64 = ((a as f64) - d);
-    let _e3: f64 = ((a as f64) * d);
-    let _e4: f64 = ((a as f64) / d);
-    let _f: f64 = -3.0;
-    let _g: i32 = -(a);
+    let e1: f64 = ((a as f64) + d);
+    assert!(e1 == 12.0);
+    let e2: f64 = ((a as f64) - d);
+    assert!(e2 == 8.0);
+    let e3: f64 = ((a as f64) * d);
+    assert!(e3 == 20.0);
+    let e4: f64 = ((a as f64) / d);
+    assert!(e4 == 5.0);
+    let f: f64 = -3.0;
+    assert!(f < -2.9);
 }
 
 pub fn add1(x: i8, y: i8) -> i16 {
@@ -91,6 +100,7 @@ pub fn fadd1(x: i8, y: f64) -> f64 {
 }
 
 pub fn show() {
+    foo();
     assert!(fadd1(6, 6.0) == (12 as f64));
     println!("{}", "OK");
 }

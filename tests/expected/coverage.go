@@ -110,6 +110,9 @@ func Show() {
 	}
 	var _escape_quotes string = " foo \"bar\" baz "
 	_ = _escape_quotes
+	if !(strings.Contains(_escape_quotes, " \"bar\" ")) {
+		panic("assert")
+	}
 	if !(strings.Contains("aaabbccc", "bbc")) {
 		panic("assert")
 	}

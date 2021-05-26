@@ -7,29 +7,47 @@ import (
 func Foo() {
 	var a int = 10
 	var b int = 20
-	var _c1 int = (a + b)
-	_ = _c1
-	var _c2 int = (a - b)
-	_ = _c2
-	var _c3 int = (a * b)
-	_ = _c3
-	var _c4 float64 = float64((a / b))
-	_ = _c4
-	var _c5 int = -(a)
-	_ = _c5
+	var c1 int = (a + b)
+	if !(c1 == 30) {
+		panic("assert")
+	}
+	var c2 int = (a - b)
+	if !(c2 == -10) {
+		panic("assert")
+	}
+	var c3 int = (a * b)
+	if !(c3 == 200) {
+		panic("assert")
+	}
+	var c4 float64 = float64((a / b))
+	if !(c4 == 0.5) {
+		panic("assert")
+	}
+	var c5 int = -(a)
+	if !(c5 == -10) {
+		panic("assert")
+	}
 	var d float64 = 2.0
-	var _e1 float64 = (float64(a) + d)
-	_ = _e1
-	var _e2 float64 = (float64(a) - d)
-	_ = _e2
-	var _e3 float64 = (float64(a) * d)
-	_ = _e3
-	var _e4 float64 = (float64(a) / d)
-	_ = _e4
-	var _f float64 = -3.0
-	_ = _f
-	var _g int = -(a)
-	_ = _g
+	var e1 float64 = (float64(a) + d)
+	if !(e1 == 12.0) {
+		panic("assert")
+	}
+	var e2 float64 = (float64(a) - d)
+	if !(e2 == 8.0) {
+		panic("assert")
+	}
+	var e3 float64 = (float64(a) * d)
+	if !(e3 == 20.0) {
+		panic("assert")
+	}
+	var e4 float64 = (float64(a) / d)
+	if !(e4 == 5.0) {
+		panic("assert")
+	}
+	var f float64 = -3.0
+	if !(f < -2.9) {
+		panic("assert")
+	}
 }
 
 func Add1(x int8, y int8) int16 {
@@ -81,6 +99,7 @@ func Fadd1(x int8, y float64) float64 {
 }
 
 func Show() {
+	Foo()
 	if !(Fadd1(6, 6.0) == 12) {
 		panic("assert")
 	}

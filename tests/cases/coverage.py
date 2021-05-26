@@ -87,6 +87,7 @@ def show():
     # assert 1 != 2 != 3
     # Escape quotes
     _escape_quotes = """ foo "bar" baz """
+    assert ' "bar" ' in _escape_quotes
     assert "bbc" in "aaabbccc"
     assert bool(1)
     (_c1, _, _c2) = (1, 2, 3)

@@ -4,7 +4,7 @@ import 'package:sprintf/sprintf.dart';
 show() {
   try {
     throw new Exception("foo");
-  } on Exception catch (e) {
+  } on Exception {
     print(sprintf("%s", ["caught"]));
   } finally {
     print(sprintf("%s", ["Finally"]));

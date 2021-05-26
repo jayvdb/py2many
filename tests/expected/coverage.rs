@@ -112,6 +112,7 @@ pub fn show() {
     println!("{}", s);
     assert!(infer_bool(1));
     let _escape_quotes: &'static str = " foo \"bar\" baz ";
+    assert!(_escape_quotes.contains(" \"bar\" "));
     assert!("aaabbccc".contains("bbc"));
     assert!((1 != 0));
     let _c1: i32 = 1;

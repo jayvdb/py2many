@@ -109,6 +109,7 @@ inline void show() {
   std::cout << std::endl;
   assert(infer_bool(1));
   std::string _escape_quotes = std::string{" foo \"bar\" baz "};
+  assert(_escape_quotes.find(std::string{" \"bar\" "}) != std::string::npos);
   assert(std::string{"aaabbccc"}.find(std::string{"bbc"}) != std::string::npos);
   assert(static_cast<bool>(1));
   int _c1 = 1;

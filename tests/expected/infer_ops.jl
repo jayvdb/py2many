@@ -2,18 +2,27 @@
 function foo()
     a = 10
     b = 20
-    _c1 = (a + b)
-    _c2 = (a - b)
-    _c3 = (a * b)
-    _c4 = (a / b)
-    _c5 = -(a)
+    c1 = (a + b)
+    @assert(c1 == 30)
+    c2 = (a - b)
+    @assert(c2 == -10)
+    c3 = (a * b)
+    @assert(c3 == 200)
+    c4 = (a / b)
+    @assert(c4 == 0.5)
+    c5 = -(a)
+    @assert(c5 == -10)
     d = 2.0
-    _e1 = (a + d)
-    _e2 = (a - d)
-    _e3 = (a * d)
-    _e4 = (a / d)
-    _f = -3.0
-    _g = -(a)
+    e1 = (a + d)
+    @assert(e1 == 12.0)
+    e2 = (a - d)
+    @assert(e2 == 8.0)
+    e3 = (a * d)
+    @assert(e3 == 20.0)
+    e4 = (a / d)
+    @assert(e4 == 5.0)
+    f = -3.0
+    @assert(f < -2.9)
 end
 
 function add1(x::Int8, y::Int8)::Int16
@@ -65,6 +74,7 @@ function fadd1(x::Int8, y::Float64)::Float64
 end
 
 function show()
+    foo()
     @assert(fadd1(convert(Int8, 6), 6.0) == 12)
     println(join(["OK"], " "))
 end

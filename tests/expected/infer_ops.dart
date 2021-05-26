@@ -4,18 +4,27 @@ import 'package:sprintf/sprintf.dart';
 foo() {
   final int a = 10;
   final int b = 20;
-  final int _c1 = (a + b);
-  final int _c2 = (a - b);
-  final int _c3 = (a * b);
-  final int _c4 = (a ~/ b);
-  final int _c5 = -(a);
+  final int c1 = (a + b);
+  assert(c1 == 30);
+  final int c2 = (a - b);
+  assert(c2 == -10);
+  final int c3 = (a * b);
+  assert(c3 == 200);
+  final int c4 = (a ~/ b);
+  assert(c4 == 0.5);
+  final int c5 = -(a);
+  assert(c5 == -10);
   final double d = 2.0;
-  final double _e1 = (a + d);
-  final double _e2 = (a - d);
-  final double _e3 = (a * d);
-  final double _e4 = (a / d);
-  final double _f = -3.0;
-  final int _g = -(a);
+  final double e1 = (a + d);
+  assert(e1 == 12.0);
+  final double e2 = (a - d);
+  assert(e2 == 8.0);
+  final double e3 = (a * d);
+  assert(e3 == 20.0);
+  final double e4 = (a / d);
+  assert(e4 == 5.0);
+  final double f = -3.0;
+  assert(f < -2.9);
 }
 
 int add1(int x, int y) {
@@ -67,6 +76,7 @@ double fadd1(int x, double y) {
 }
 
 show() {
+  foo();
   assert(fadd1(6, 6.0) == 12);
   print(sprintf("%s", ["OK"]));
 }

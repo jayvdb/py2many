@@ -7,18 +7,27 @@
 inline void foo() {
   int a = 10;
   int b = 20;
-  int _c1 = a + b;
-  int _c2 = a - b;
-  int _c3 = a * b;
-  double _c4 = a / b;
-  int _c5 = -(a);
+  int c1 = a + b;
+  assert(c1 == 30);
+  int c2 = a - b;
+  assert(c2 == -10);
+  int c3 = a * b;
+  assert(c3 == 200);
+  double c4 = a / b;
+  assert(c4 == 0.5);
+  int c5 = -(a);
+  assert(c5 == -10);
   double d = 2.0;
-  double _e1 = a + d;
-  double _e2 = a - d;
-  double _e3 = a * d;
-  double _e4 = a / d;
-  double _f = -3.0;
-  int _g = -(a);
+  double e1 = a + d;
+  assert(e1 == 12.0);
+  double e2 = a - d;
+  assert(e2 == 8.0);
+  double e3 = a * d;
+  assert(e3 == 20.0);
+  double e4 = a / d;
+  assert(e4 == 5.0);
+  double f = -3.0;
+  assert(f < -2.9);
 }
 
 inline int16_t add1(int8_t x, int8_t y) { return x + y; }
@@ -46,6 +55,7 @@ inline int16_t mul(int8_t x, int8_t y) { return x * y; }
 inline double fadd1(int8_t x, double y) { return x + y; }
 
 inline void show() {
+  foo();
   assert(fadd1(6, 6.0) == 12);
   std::cout << std::string{"OK"};
   std::cout << std::endl;

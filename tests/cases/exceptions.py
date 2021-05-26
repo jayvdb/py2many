@@ -4,7 +4,7 @@
 def show():
     try:
         raise Exception("foo")
-    except Exception as e:
+    except Exception:
         print("caught")
     finally:
         print("Finally")

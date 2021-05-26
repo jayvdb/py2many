@@ -2,18 +2,27 @@
 proc foo() =
   let a = 10
   let b = 20
-  let _ = (a + b)
-  let _ = (a - b)
-  let _ = (a * b)
-  let _ = (a / b)
-  let _ = -(a)
+  let c1 = (a + b)
+  assert(c1 == 30)
+  let c2 = (a - b)
+  assert(c2 == -10)
+  let c3 = (a * b)
+  assert(c3 == 200)
+  let c4 = (a / b)
+  assert(c4 == 0.5)
+  let c5 = -(a)
+  assert(c5 == -10)
   let d = 2.0
-  let _ = (float64(a) + d)
-  let _ = (float64(a) - d)
-  let _ = (float64(a) * d)
-  let _ = (float64(a) / d)
-  let _ = -3.0
-  let _ = -(a)
+  let e1 = (float64(a) + d)
+  assert(e1 == 12.0)
+  let e2 = (float64(a) - d)
+  assert(e2 == 8.0)
+  let e3 = (float64(a) * d)
+  assert(e3 == 20.0)
+  let e4 = (float64(a) / d)
+  assert(e4 == 5.0)
+  let f = -3.0
+  assert(f < -2.9)
 
 proc add1(x: int8, y: int8): int16 =
   return int16((x + y))
@@ -52,6 +61,7 @@ proc fadd1(x: int8, y: float64): float64 =
   return (float64(x) + y)
 
 proc show() =
+  foo()
   assert(fadd1(6, 6.0) == 12)
   echo "OK"
 
