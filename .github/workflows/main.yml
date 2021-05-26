@@ -4,7 +4,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches:
   pull_request:
     branches: [ main ]
 
@@ -17,8 +17,6 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-18.04
-          - macos-10.15
           - windows-2019
     runs-on: ${{ matrix.os }}
 
@@ -50,11 +48,9 @@ jobs:
           pip3 --version
           pip3 install setuptools tox
 
-      - name: Install Julia dependencies for ${{ runner.os }}.
+      - name: Install dependencies for ${{ runner.os }}.
         shell: bash
         run: |
-          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
-          julia -e 'using Pkg; Pkg.add("SuperEnum")'
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt-get install --yes astyle
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
@@ -74,6 +70,12 @@ jobs:
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install kscript
+
+      - name: Install Julia dependencies
+        shell: bash
+        run: |
+          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
+          julia -e 'using Pkg; Pkg.add("SuperEnum")'
 
       - name: Install dart dependencies
         shell: bash
