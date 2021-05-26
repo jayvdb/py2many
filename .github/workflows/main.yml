@@ -71,6 +71,8 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             export PATH="$PATH:/C/Program Files/LLVM/bin"
             export PATH="$PATH:$GITHUB_WORKSPACE/kscript-3.1.0/bin/"
+            export KOTLIN_HOME=/c/hostedtoolcache/windows/kotlin/1.4.30/x64/kotlinc
+            find $KOTLIN_HOME
             set
           fi
           tox -e py38 -- -k 'kotlin and print'
