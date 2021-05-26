@@ -53,7 +53,7 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
               (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              true
+              ls .
           fi
 
       - name: Run tox
