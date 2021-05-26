@@ -29,6 +29,11 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
+      - uses: sdkman/sdkman-action@master
+        id: sdkman
+        with:
+          candidate: kscript
+          version: 3.1.0
 
       - name: Install tox
         run: |
@@ -51,12 +56,8 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
               (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install zip curl
+              true
           fi
-          dart pub global activate stagehand
-          curl -s "https://get.sdkman.io" | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install kscript
 
       - name: Run tox
         shell: bash
