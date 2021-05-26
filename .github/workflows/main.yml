@@ -101,7 +101,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             export PATH="$PATH:/C/Program Files/LLVM/bin"
           fi
-          tox -e py38 -- -k kotlin
+          tox -e py38 -- -k 'kotlin and print'
 
   lint:
     runs-on: ubuntu-latest
