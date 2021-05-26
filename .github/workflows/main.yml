@@ -53,7 +53,9 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
               (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
           elif [ "$RUNNER_OS" == "Windows" ]; then
+              unzip kscript-3.1.0.zip
               ls .
+              exit 1
           fi
 
       - name: Run tox
