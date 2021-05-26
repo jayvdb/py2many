@@ -141,6 +141,10 @@ def process_once_data(source_data, filename, settings):
 
 
 def _create_cmd(parts, filename, **kw):
+    if sys.platform == "win32":
+        maybe_bat = which(parts[0])
+        if maybe_bat and maybe_bat.lower().endswith(".bat"):
+            parts = [maybe_bat] + parts[1:]
     cmd = [arg.format(filename=filename, **kw) for arg in parts]
     if cmd != parts:
         return cmd
