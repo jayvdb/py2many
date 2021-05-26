@@ -56,7 +56,11 @@ jobs:
               pwd
               unzip kscript-3.1.0.zip
               ls .
-              export PATH="$PATH:kscript-3.1.0/bin/"
+              export PATH="$PATH:$GITHUB_WORKSPACE/kscript-3.1.0/bin/"
+              echo $PATHEXT
+              export PATHEXT=".JAR;$PATHEXT"
+              curl -o jarfix.exe http://johann.loefflmann.net/downloads/jarfix.exe
+              ./jarfix.exe /s
               which kscript
               echo $PATHEXT
           fi
@@ -69,8 +73,9 @@ jobs:
           LINT=1
           if [ "$RUNNER_OS" == "Windows" ]; then
             export PATH="$PATH:/C/Program Files/LLVM/bin"
-            export PATH="$PATH:kscript-3.1.0/bin/"
-            export PATHEXT="$PATHEXT;.JAR"
+            export PATH="$PATH:$GITHUB_WORKSPACE/kscript-3.1.0/bin/"
+            export PATHEXT=".JAR;$PATHEXT"
+            set
           fi
           tox -e py38 -- -k 'kotlin and print'
 
