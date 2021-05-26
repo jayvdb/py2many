@@ -3,6 +3,7 @@ import ast
 import functools
 import os
 import pathlib
+import sys
 
 from dataclasses import dataclass, field
 from distutils import spawn
@@ -126,6 +127,7 @@ def transpile(filename, source, transpiler, rewriters, transformers, post_rewrit
         out.append(transpiler.extension_module(tree))
     return "\n".join(out)
 
+
 @lru_cache(maxsize=100)
 def process_once_data(source_data, filename, settings):
     return transpile(
@@ -178,7 +180,7 @@ def cpp_settings(args, env=os.environ):
     else:
         cxx_flags = ["-std=c++14", "-Wall", "-Werror"]
     cxx_flags = ["-I", str(ROOT_DIR)] + cxx_flags
-    if cxx == "clang++":
+    if cxx.startswith("clang++") and not sys.platform == "win32":
         cxx_flags += ["-stdlib=libc++"]
 
     if clang_format_style:
