@@ -23,7 +23,8 @@ ENV = {
 }
 COMPILERS = {
     "cpp": [CXX, "-std=c++14", "-I", str(ROOT_DIR)]
-    + (["-stdlib=libc++"] if CXX == "clang++" else []),
+    + (["-stdlib=libc++"] if CXX == "clang++" else [])
+    + (["-o", "{exe}", "{filename}"] if sys.platform == "win32" else []),
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
     "kotlin": ["kotlinc"],
@@ -161,7 +162,8 @@ class CodeGeneratorTests(unittest.TestCase):
                 )
                 if expect_compile_failure:
                     return
-                cmd = _create_cmd(compiler, f"cases/{case}{ext}")
+                cmd = _create_cmd(compiler, filename=case_output, exe=exe)
+                print(f"Running {cmd}")
                 proc = run(cmd, env=env, check=not expect_failure)
 
                 if proc.returncode:
@@ -179,9 +181,10 @@ class CodeGeneratorTests(unittest.TestCase):
                 invoker = INVOKER.get(lang)
                 if not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
-                print([*invoker, case_output, *main_args])
+                cmd = _create_cmd(invoker, filename=case_output, exe=exe)
+                cmd += main_args
                 proc = run(
-                    [*invoker, case_output, *main_args],
+                    cmd,
                     env=env,
                     capture_output=True,
                 )
@@ -198,13 +201,15 @@ class CodeGeneratorTests(unittest.TestCase):
                     with open(f"expected/{case}{ext}", "w") as f:
                         f.write(generated)
             elif exe.exists() and os.access(exe, os.X_OK):
+                print(f"Running {exe}")
                 stdout = run(
                     [exe, *main_args], env=env, capture_output=True, check=True
                 ).stdout
             else:
-                raise RuntimeError("Compiled output not detected")
+                raise RuntimeError(f"Compiled output {exe} not detected")
 
-            if expected_output and stdout:
+            self.assertTrue(stdout, "Invoked code produced no stdout")
+            if True:
                 stdout = stdout.splitlines()
                 self.assertEqual(expected_output, stdout)
 
@@ -237,7 +242,7 @@ class CodeGeneratorTests(unittest.TestCase):
         finally:
             if not self.KEEP_GENERATED:
                 case_output.unlink(missing_ok=True)
-            exe.unlink(missing_ok=True)
+                exe.unlink(missing_ok=True)
         if settings.ext == ".rs":
             assert in_cargo_toml(case)
 
