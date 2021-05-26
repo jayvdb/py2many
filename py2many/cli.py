@@ -299,7 +299,7 @@ def _process_once(settings, filename, outdir, env=None):
     print(f"{filename}...{output_path}")
     with open(filename) as f:
         source_data = f.read()
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(
             transpile(
                 filename,

@@ -227,7 +227,7 @@ class CodeGeneratorTests(unittest.TestCase):
         case_output = TESTS_DIR / "cases" / f"{case}{ext}"
         expect_success = f"{case}{ext}" in EXPECTED_SUCCESSES
 
-        with open(case_output, "w") as f:
+        with open(case_output, "w", encoding="utf-8") as f:
             f.write(result)
 
         if settings.formatter:

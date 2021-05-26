@@ -177,7 +177,7 @@ class CodeGeneratorTests(unittest.TestCase):
                     raise unittest.SkipTest(f"{case}{ext} doesnt compile")
 
                 if overwrite_expected or not os.path.exists(f"expected/{case}{ext}"):
-                    with open(f"expected/{case}{ext}", "w") as f:
+                    with open(f"expected/{case}{ext}", "w", encoding="utf-8") as f:
                         f.write(generated)
 
             stdout = None
@@ -205,7 +205,7 @@ class CodeGeneratorTests(unittest.TestCase):
                 ), f"Execution of {case}{ext} failed:\n{stdout}{proc.stderr}"
 
                 if overwrite_expected or not os.path.exists(f"expected/{case}{ext}"):
-                    with open(f"expected/{case}{ext}", "w") as f:
+                    with open(f"expected/{case}{ext}", "w", encoding="utf-8") as f:
                         f.write(generated)
             elif exe.exists() and os.access(exe, os.X_OK):
                 cmd = [exe, *main_args]
@@ -344,7 +344,7 @@ class CodeGeneratorTests(unittest.TestCase):
                         print("expected = generated")
 
             if self.UPDATE_EXPECTED or not os.path.exists(f"ext_expected/{case}{ext}"):
-                with open(f"ext_expected/{case}{ext}", "w") as f:
+                with open(f"ext_expected/{case}{ext}", "w", encoding="utf-8") as f:
                     f.write(generated)
 
         finally:
