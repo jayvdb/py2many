@@ -2,8 +2,8 @@ import ast
 import os.path
 import unittest
 import sys
-from distutils import spawn
 from pathlib import Path
+from shutil import which
 from subprocess import run
 from textwrap import dedent
 from unittest.mock import Mock
@@ -211,9 +211,8 @@ class CodeGeneratorTests(unittest.TestCase):
         except NotImplementedError as e:
             raise unittest.SkipTest(str(e))
 
-        if settings.formatter:
-            if not spawn.find_executable(settings.formatter[0]):
-                raise unittest.SkipTest(f"{settings.formatter[0]} not available")
+        if not which(settings.formatter[0]):
+            raise unittest.SkipTest(f"{settings.formatter[0]} not available")
 
         if ext == ".kt":
             class_name = str(case.title()) + "Kt"
@@ -246,7 +245,7 @@ class CodeGeneratorTests(unittest.TestCase):
         try:
             compiler = COMPILERS[lang]
             if compiler:
-                if not spawn.find_executable(compiler[0]):
+                if not which(compiler[0]):
                     raise unittest.SkipTest(f"{compiler[0]} not available")
                 proc = run([*compiler, case_output], env=env, capture_output=True)
 
@@ -269,7 +268,7 @@ class CodeGeneratorTests(unittest.TestCase):
 
             elif INVOKER.get(lang):
                 invoker = INVOKER.get(lang)
-                if not spawn.find_executable(invoker[0]):
+                if not which(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 proc = run([*invoker, case_output], env=env, capture_output=True)
 
