@@ -47,6 +47,8 @@ jobs:
       - name: Use ktlint
         shell: bash
         run: |
+          sed -i 's/^ *//g' tests/expected/print.kt
+          git diff
           java -jar ./ktlint -F tests/expected/print.kt
           git diff --exit-code tests/expected/print.kt
           exit 12
