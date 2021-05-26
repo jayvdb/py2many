@@ -6,8 +6,8 @@ import pathlib
 import sys
 
 from dataclasses import dataclass, field
-from distutils import spawn
 from functools import lru_cache
+from shutil import which
 from subprocess import run
 from typing import Callable, List, Optional
 
@@ -151,7 +151,7 @@ def _create_cmd(parts, filename, **kw):
 class LanguageSettings:
     transpiler: CLikeTranspiler
     ext: str
-    formatter: Optional[List[str]] = None
+    formatter: List[str] = None
     indent: Optional[int] = None
     rewriters: List[ast.NodeVisitor] = field(default_factory=list)
     transformers: List[Callable] = field(default_factory=list)
@@ -164,12 +164,12 @@ def cpp_settings(args, env=os.environ):
     cxx = env.get("CXX")
     default_cxx = ["clang++", "g++-11", "g++"]
     if cxx:
-        if not spawn.find_executable(cxx):
+        if not which(cxx):
             print(f"Warning: CXX({cxx}) not found")
             cxx = None
     if not cxx:
         for exe in default_cxx:
-            if spawn.find_executable(exe):
+            if which(exe):
                 cxx = exe
                 break
         else:
@@ -211,7 +211,7 @@ def rust_settings(args, env=os.environ):
 
 
 def julia_settings(args, env=os.environ):
-    format_jl = spawn.find_executable("format.jl")
+    format_jl = which("format.jl")
     if format_jl:
         format_jl = ["julia", "-O0", "--compile=min", "--startup=no", format_jl, "-v"]
     else:
@@ -307,8 +307,11 @@ def _process_once(settings, filename, outdir, env=None):
             )
         )
 
-    if settings.formatter:
-        cmd = _create_cmd(settings.formatter, filename=output_path)
+    cmd = _create_cmd(settings.formatter, filename=output_path)
+    if not which(cmd[0]):
+        print(f"Warning: {cmd[0]} not available")
+        return False
+    else:
         proc = run(cmd, env=env)
         if proc.returncode:
             # format.jl exit code is unreliable
