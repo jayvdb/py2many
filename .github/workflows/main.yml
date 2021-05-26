@@ -68,6 +68,7 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
               choco install zip curl astyle llvm
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
+              java -jar ./ktlint tests/expected/print.kt
               mv ktlint tests/
           fi
           dart pub global activate stagehand
