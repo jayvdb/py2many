@@ -40,13 +40,14 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
               (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
           elif [ "$RUNNER_OS" == "Windows" ]; then
+              # --no-progress
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
           fi
 
       - name: Use ktlint
         shell: bash
         run: |
-          java -jar ./ktlint tests/expected/print.kt
+          java -jar ./ktlint -F tests/expected/print.kt
           git diff --exit-code tests/expected/print.kt
           exit 12
 
