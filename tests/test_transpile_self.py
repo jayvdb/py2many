@@ -67,7 +67,8 @@ class SelfTranspileTests(unittest.TestCase):
             OUT_DIR,
             _suppress_exceptions=suppress_exceptions,
         )
-        assert len(successful) == 1  # The __init__.py
+        if not suppress_exceptions:
+            assert len(successful) == 1  # The __init__.py
 
         successful, format_errors, failures = _process_dir(
             settings,
@@ -159,7 +160,8 @@ class SelfTranspileTests(unittest.TestCase):
             OUT_DIR,
             _suppress_exceptions=suppress_exceptions,
         )
-        assert len(successful) == 1  # The __init__.py
+        if FileNotFoundError not in suppress_exceptions:
+            assert len(successful) == 1  # The __init__.py
 
         suppress_exceptions = suppress_exceptions + (ValueError,)
         successful, format_errors, failures = _process_dir(
