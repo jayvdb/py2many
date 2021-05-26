@@ -25,37 +25,15 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '2.0.5'
-      - uses: julia-actions/setup-julia@v1
       - uses: fwilhe2/setup-kotlin@main
-      - uses: jiro4989/setup-nim-action@v1
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-
-      - name: Install go packages
-        shell: bash
-        run: |
-          find /C/hostedtoolcache/windows/kotlin/
-          which kotlinc
-          file $(which kotlinc)
-          (go get github.com/hgfischer/go-iter \
-           && go get github.com/google/go-cmp/cmp \
-           && go get golang.org/x/lint/golint \
-           && go get github.com/adsharma/py2many/pygo/runtime \
-          )
 
       - name: Install tox
         run: |
           pip3 --version
           pip3 install setuptools tox
-
-      - name: Install Julia packages
-        shell: bash
-        run: |
-          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
-          julia -e 'using Pkg; Pkg.add("SuperEnum")'
 
       - name: Install dependencies for ${{ runner.os }}.
         shell: bash
@@ -73,23 +51,12 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
               (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install zip curl astyle llvm
+              choco install zip curl
           fi
           dart pub global activate stagehand
           curl -s "https://get.sdkman.io" | bash
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install kscript
-
-      - name: Install dart dependencies
-        shell: bash
-        run: |
-          (cd tests && dart pub global run stagehand:stagehand --override package-simple \
-           && dart pub add sprintf \
-           && dart pub add tuple \
-           && flutter pub add vnum)
-
-      - name: Install cargo-script
-        run: cargo install cargo-script
 
       - name: Run tox
         shell: bash
