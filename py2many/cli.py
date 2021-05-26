@@ -7,6 +7,7 @@ import pathlib
 from dataclasses import dataclass, field
 from distutils import spawn
 from functools import lru_cache
+from shutil import which
 from subprocess import run
 from typing import Callable, List, Optional
 
@@ -222,13 +223,13 @@ def julia_settings(args, env=os.environ):
 
 def kotlin_settings(args, env=os.environ):
     linter = ["ktlint"]
-    if not spawn.find_executable("ktlint") and os.path.exists("ktlint"):
+    if not which("ktlint") and os.path.exists("ktlint"):
         # c.f. https://github.com/pinterest/ktlint/issues/400
         linter = ["java", "-jar", "ktlint"]
     return LanguageSettings(
         KotlinTranspiler(),
         ".kt",
-        ["ktlint", "-F"],
+        [*linter, "-F"],
         rewriters=[KotlinBitOpRewriter()],
         transformers=[infer_kotlin_types],
         post_rewriters=[KotlinPrintRewriter()],
