@@ -22,37 +22,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
-        with:
-          flutter-version: '2.0.5'
-      - uses: julia-actions/setup-julia@v1
       - uses: fwilhe2/setup-kotlin@main
-      - uses: jiro4989/setup-nim-action@v1
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-
-      - name: Install go packages
-        shell: bash
-        run: |
-          (go get github.com/hgfischer/go-iter \
-           && go get github.com/google/go-cmp/cmp \
-           && go get golang.org/x/lint/golint \
-           && go get github.com/adsharma/py2many/pygo/runtime \
-          )
-
-      - name: Install tox
-        run: |
-          pip3 --version
-          pip3 install setuptools tox
 
       - name: Install Julia dependencies for ${{ runner.os }}.
         shell: bash
         run: |
-          julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
-          julia -e 'using Pkg; Pkg.add("SuperEnum")'
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt-get install --yes astyle
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
@@ -69,6 +43,8 @@ jobs:
               choco install zip curl astyle llvm
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
               java -jar ./ktlint tests/expected/print.kt
+              git diff --exit-code tests/expected/print.kt
+              exit 1
               mv ktlint tests/
           fi
           dart pub global activate stagehand
