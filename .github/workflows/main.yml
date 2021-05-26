@@ -68,8 +68,9 @@ jobs:
           LINT=1
           if [ "$RUNNER_OS" == "Windows" ]; then
             export PATH="$PATH:/C/Program Files/LLVM/bin"
+            export PATH="$PATH:kscript-3.1.0/bin/"
           fi
-          tox -e py38 -- -k 'kotlin'
+          tox -e py38 -- -k 'kotlin and print'
 
   lint:
     runs-on: ubuntu-latest
