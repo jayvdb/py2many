@@ -23,6 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: fwilhe2/setup-kotlin@main
+        with:
+          version: 1.5.0
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
@@ -71,7 +73,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             export PATH="$PATH:/C/Program Files/LLVM/bin"
             export PATH="$PATH:$GITHUB_WORKSPACE/kscript-3.1.0/bin/"
-            export KOTLIN_HOME=/c/hostedtoolcache/windows/kotlin/1.4.30/x64/kotlinc
+            export KOTLIN_HOME=/c/hostedtoolcache/windows/kotlin/1.5.0/x64/kotlinc
             find $KOTLIN_HOME
             set
           fi
