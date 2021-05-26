@@ -3,8 +3,8 @@ import os.path
 import unittest
 import sys
 
-from distutils import spawn
 from pathlib import Path
+from shutil import which
 from subprocess import run
 from unittest.mock import Mock
 from unittest_expander import foreach, expand
@@ -103,9 +103,10 @@ class CodeGeneratorTests(unittest.TestCase):
         ):
             raise unittest.SkipTest(f"expected/{case}{ext} not found")
 
-        if settings.formatter:
-            if not spawn.find_executable(settings.formatter[0]):
-                raise unittest.SkipTest(f"{settings.formatter[0]} not available")
+        assert settings.formatter
+        formatter_available = which(settings.formatter[0])
+
+        overwrite_expected = formatter_available and self.UPDATE_EXPECTED
 
         if ext == ".kt":
             class_name = str(case.title()) + "Kt"
@@ -141,21 +142,27 @@ class CodeGeneratorTests(unittest.TestCase):
                 generated = actual.read()
                 if os.path.exists(f"expected/{case}{ext}") and not self.UPDATE_EXPECTED:
                     with open(f"expected/{case}{ext}") as f2:
-                        self.assertEqual(f2.read(), generated)
-                        print("expected = generated")
+                        expected = f2.read()
+                        if formatter_available:
+                            self.assertEqual(expected, generated)
+                            print("expected = generated")
+                        elif expected != generated:
+                            print("expected != generated, due to missing formatter")
+                        else:
+                            print("expected == generated, despite missing formatter")
 
             expect_failure = (
                 not self.SHOW_ERRORS and f"{case}{ext}" in EXPECTED_LINT_FAILURES
             )
 
-            if not expect_failure:
+            if not expect_failure and formatter_available:
                 assert rv == 0, "formatting failed"
-            elif rv:
+            elif rv and formatter_available:
                 raise unittest.SkipTest("formatting failed")
 
             compiler = COMPILERS.get(lang)
             if compiler:
-                if not spawn.find_executable(compiler[0]):
+                if not which(compiler[0]):
                     raise unittest.SkipTest(f"{compiler[0]} not available")
                 expect_compile_failure = (
                     not self.SHOW_ERRORS and f"{case}{ext}" in EXPECTED_COMPILE_FAILURES
@@ -169,7 +176,7 @@ class CodeGeneratorTests(unittest.TestCase):
                 if proc.returncode:
                     raise unittest.SkipTest(f"{case}{ext} doesnt compile")
 
-                if self.UPDATE_EXPECTED or not os.path.exists(f"expected/{case}{ext}"):
+                if overwrite_expected or not os.path.exists(f"expected/{case}{ext}"):
                     with open(f"expected/{case}{ext}", "w") as f:
                         f.write(generated)
 
@@ -179,7 +186,7 @@ class CodeGeneratorTests(unittest.TestCase):
 
             if INVOKER.get(lang):
                 invoker = INVOKER.get(lang)
-                if not spawn.find_executable(invoker[0]):
+                if not which(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 cmd = _create_cmd(invoker, filename=case_output, exe=exe)
                 cmd += main_args
@@ -197,7 +204,7 @@ class CodeGeneratorTests(unittest.TestCase):
                     not proc.returncode
                 ), f"Execution of {case}{ext} failed:\n{stdout}{proc.stderr}"
 
-                if self.UPDATE_EXPECTED or not os.path.exists(f"expected/{case}{ext}"):
+                if overwrite_expected or not os.path.exists(f"expected/{case}{ext}"):
                     with open(f"expected/{case}{ext}", "w") as f:
                         f.write(generated)
             elif exe.exists() and os.access(exe, os.X_OK):
@@ -211,8 +218,8 @@ class CodeGeneratorTests(unittest.TestCase):
             stdout = stdout.splitlines()
             self.assertEqual(expected_output, stdout)
 
-            if settings.linter and self.LINT:
-                if not spawn.find_executable(settings.linter[0]):
+            if settings.linter and self.LINT and which(settings.linter[0]):
+                if not which(settings.linter[0]):
                     raise unittest.SkipTest(f"{settings.linter[0]} not available")
                 if settings.ext == ".kt" and case_output.is_absolute():
                     # KtLint does not support absolute path in globs
@@ -236,6 +243,8 @@ class CodeGeneratorTests(unittest.TestCase):
 
                 if expect_failure:
                     raise AssertionError(f"{case}{ext} passed unexpectedly")
+            elif settings.linter:
+                raise unittest.SkipTest(f"linter {settings.linter[0]} not invoked")
 
         finally:
             if not self.KEEP_GENERATED:
@@ -243,6 +252,8 @@ class CodeGeneratorTests(unittest.TestCase):
                 exe.unlink(missing_ok=True)
         if settings.ext == ".rs":
             assert in_cargo_toml(case)
+        if not formatter_available:
+            raise unittest.SkipTest(f"{settings.formatter[0]} not available")
 
     @foreach(sorted(TEST_CASES))
     # This test name must be alpha before `test_generated` otherwise
@@ -257,13 +268,13 @@ class CodeGeneratorTests(unittest.TestCase):
         env["CXX"] = "g++-11" if sys.platform == "darwin" else "g++"
         env["CXXFLAGS"] = "-std=c++14 -Wall -Werror"
 
-        if not spawn.find_executable(env["CXX"]):
+        if not which(env["CXX"]):
             raise unittest.SkipTest(f"{env['CXX']} not available")
 
         settings = _get_all_settings(Mock(indent=4), env=env)[lang]
         assert settings.linter[0].startswith("g++")
 
-        if not spawn.find_executable("astyle"):
+        if not which("astyle"):
             raise unittest.SkipTest("astyle not available")
 
         settings.formatter = ["astyle"]
