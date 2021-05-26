@@ -58,6 +58,7 @@ jobs:
               ls .
               export PATH="$PATH:kscript-3.1.0/bin/"
               which kscript
+              echo $PATHEXT
           fi
 
       - name: Run tox
