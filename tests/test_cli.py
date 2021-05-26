@@ -186,9 +186,9 @@ class CodeGeneratorTests(unittest.TestCase):
 
             if INVOKER.get(lang):
                 invoker = INVOKER.get(lang)
-                if not which(invoker[0]):
-                    assert False, f"{invoker[0]} not available"
                 cmd = _create_cmd(invoker, filename=case_output, exe=exe)
+                if not which(cmd[0]):
+                    assert False, f"{cmd[0]} not available"
                 cmd += main_args
                 proc = run(
                     cmd,
