@@ -40,17 +40,15 @@ jobs:
               (cd /usr/local/bin && ln -s $(find ~/.julia -name format.jl))
               (cd /usr/local/bin && ln -s $HOME/go/bin/golint)
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install zip curl astyle llvm
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
-              java -jar ./ktlint tests/expected/print.kt
-              git diff --exit-code tests/expected/print.kt
-              exit 1
-              mv ktlint tests/
           fi
-          dart pub global activate stagehand
-          curl -s "https://get.sdkman.io" | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install kscript
+
+      - name: Use ktlint
+        shell: bash
+        run: |
+          java -jar ./ktlint tests/expected/print.kt
+          git diff --exit-code tests/expected/print.kt
+          exit 12
 
       - name: Install dart dependencies
         shell: bash
