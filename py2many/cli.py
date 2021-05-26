@@ -315,7 +315,9 @@ def _process_once(settings, filename, outdir, env=None):
         cmd = _create_cmd(settings.formatter, output_path)
         if not spawn.find_executable(cmd[0]):
             print(f"Error: {cmd} not found")
+        print(f"Running {cmd} ...")
         proc = run(cmd, env=env)
+        print(f"Ran {cmd} ... {proc.returncode}")
         if proc.returncode:
             # format.jl exit code is unreliable
             if settings.ext == ".jl":
