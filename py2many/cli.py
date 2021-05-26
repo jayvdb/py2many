@@ -126,6 +126,7 @@ def transpile(filename, source, transpiler, rewriters, transformers, post_rewrit
         out.append(transpiler.extension_module(tree))
     return "\n".join(out)
 
+
 @lru_cache(maxsize=100)
 def process_once_data(source_data, filename, settings):
     return transpile(
@@ -220,6 +221,10 @@ def julia_settings(args, env=os.environ):
 
 
 def kotlin_settings(args, env=os.environ):
+    linter = ["ktlint"]
+    if not spawn.find_executable("ktlint") and os.path.exists("ktlint"):
+        # c.f. https://github.com/pinterest/ktlint/issues/400
+        linter = ["java", "-jar", "ktlint"]
     return LanguageSettings(
         KotlinTranspiler(),
         ".kt",
@@ -227,7 +232,7 @@ def kotlin_settings(args, env=os.environ):
         rewriters=[KotlinBitOpRewriter()],
         transformers=[infer_kotlin_types],
         post_rewriters=[KotlinPrintRewriter()],
-        linter=["ktlint"],
+        linter=linter,
     )
 
 
@@ -307,6 +312,8 @@ def _process_once(settings, filename, outdir, env=None):
 
     if settings.formatter:
         cmd = _create_cmd(settings.formatter, output_path)
+        if not spawn.find_executable(cmd[0]):
+            print(f"Error: {cmd} not found")
         proc = run(cmd, env=env)
         if proc.returncode:
             # format.jl exit code is unreliable
