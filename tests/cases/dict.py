@@ -22,6 +22,15 @@ def return_dict_index_int(key: int):
     CODES = {1: "one"}
     return CODES[key]
 
+def dict_get():
+    CODES = {"KEY": 1}
+    assert CODES.get("KEY") == 1
+
+
+def dict_get_default():
+    CODES = {"KEY": 1}
+    assert CODES.get("MISSING", 2) == 2
+
 
 if __name__ == "__main__":
     assert implicit_keys()
@@ -29,4 +38,6 @@ if __name__ == "__main__":
     assert dict_values()
     assert return_dict_index_str("KEY") == 1
     assert return_dict_index_int(1) == "one"
+    dict_get()
+    dict_get_default()
     print("OK")
