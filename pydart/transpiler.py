@@ -41,6 +41,7 @@ class DartTranspiler(CLikeTranspiler):
         self._container_type_map = self.CONTAINER_TYPE_MAP
         self._default_type = "var"
         self._temp = 0
+        self._in_assign_node = False
 
     def _get_temp(self):
         self._temp += 1
@@ -448,7 +449,9 @@ class DartTranspiler(CLikeTranspiler):
             if value == "Tuple":
                 return "({0})".format(index)
             return "{0}<{1}>".format(value, index)
-        return "{0}[{1}]".format(value, index)
+        if self._in_assign_node:
+            return "{0}[{1}]".format(value, index)
+        return '({0}[{1}] ?? (throw Exception("key not found")))'.format(value, index)
 
     def visit_Index(self, node):
         return self.visit(node.value)
@@ -518,13 +521,26 @@ class DartTranspiler(CLikeTranspiler):
         target, type_str, val = super().visit_AnnAssign(node)
         return f"{type_str} {target} = {val};"
 
+    def visit_AugAssign(self, node):
+        self._in_assign_node = True
+        target = self.visit(node.target)
+        self._in_assign_node = False
+        op = self.visit(node.op)
+        val = self.visit(node.value)
+        return "{0} {1}= {2};".format(target, op, val)
+
     def _visit_AssignOne(self, node, target):
         kw = "var" if is_mutable(node.scopes, get_id(target)) else "final"
 
+        self._in_assign_node = True
+        value = self.visit(node.value)
+        self._in_assign_node = False
+
         if isinstance(target, ast.Tuple):
             self._usings.add("package:tuple/tuple.dart")
+            self._in_assign_node = True
             elts = [self.visit(e) for e in target.elts]
-            value = self.visit(node.value)
+            self._in_assign_node = False
             value_types = "int, int"
             count = len(elts)
             tmp_var = self._get_temp()
@@ -538,18 +554,15 @@ class DartTranspiler(CLikeTranspiler):
             outer_if = node.scopes[-1]
             target_id = self.visit(target)
             if target_id in outer_if.common_vars:
-                value = self.visit(node.value)
                 return f"{kw} {target_id} = {value};"
 
         if isinstance(target, ast.Subscript) or isinstance(target, ast.Attribute):
             target = self.visit(target)
-            value = self.visit(node.value)
             return f"{target} = {value};"
 
         definition = node.scopes.find(target.id)
         if isinstance(target, ast.Name) and defined_before(definition, node):
             target = self.visit(target)
-            value = self.visit(node.value)
             return f"{target} = {value};"
         elif isinstance(node.value, ast.List):
             elements = [self.visit(e) for e in node.value.elts]
@@ -560,7 +573,6 @@ class DartTranspiler(CLikeTranspiler):
         else:
             typename = self._typename_from_annotation(target)
             target = self.visit(target)
-            value = self.visit(node.value)
 
             if typename != self._default_type:
                 if kw == self._default_type:
