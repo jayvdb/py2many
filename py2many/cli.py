@@ -300,6 +300,7 @@ def dart_settings(args, env=os.environ):
 class JavascriptTranspiler(CLikeTranspiler):
     NAME = "JavaScript"
     BASE = DartTranspiler
+    cmd = ["dart2js", "{filename}", "-o", "{output}"]
 
     def __init__(self, settings):
         self.settings = settings
@@ -317,15 +318,16 @@ class JavascriptTranspiler(CLikeTranspiler):
         with open(intermediate_path, "w") as f:
             f.write(intermediate_source)
         js_file = intermediate_path.with_suffix(".js")
-        proc = run(["dart2js", str(intermediate_path), "-o", str(js_file)])
+        cmd = _create_cmd(self.cmd, str(intermediate_path), output=str(js_file))
+        proc = run(cmd)
         if proc.returncode:
             print(proc.stdout)
             print(proc.stderr)
-            raise NotImplementedError(f"dart2js exit {proc.returncode}")
+            raise NotImplementedError(f"cmd[0]} exit {proc.returncode}")
         with open(js_file) as f:
             generated_by = f.readline()
             if not generated_by:
-                raise NotImplementedError("dart2js did not generate output")
+                raise NotImplementedError(f"cmd[0]} did not generate output")
             version_start = generated_by.find(" version")
             assert version_start != -1
             generated_by = generated_by[:version_start] + "\n"
