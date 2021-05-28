@@ -46,6 +46,7 @@ from pygo.transpiler import (
 
 from py2many.rewriters import (
     ComplexDestructuringRewriter,
+    ExplicitAssertRewriter,
     FStringJoinRewriter,
     PythonMainRewriter,
     DocStringToCommentRewriter,
@@ -278,7 +279,7 @@ def dart_settings(args, env=os.environ):
 
 class JavascriptTranspiler(CLikeTranspiler):
     NAME = "JavaScript"
-    cmd = ["rapydscript", "{filename}", "-o", "{output}"]
+    cmd = ["rapydscript", "--bare", "--prettify", "{filename}", "-o", "{output}"]
 
     def __init__(self, settings):
         self.settings = settings
@@ -305,6 +306,7 @@ def javascript_settings(args, env=os.environ):
         JavascriptTranspiler(dart_settings(args, env=env)),
         ".js",
         "JavaScript",
+        transformers=[ExplicitAssertRewriter],
     )
 
 

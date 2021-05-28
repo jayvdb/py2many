@@ -303,3 +303,13 @@ class StrStrRewriter(ast.NodeTransformer):
                 return ret
 
         return node
+
+
+class ExplicitAssertRewriter(ast.NodeTransformer):
+    def __init__(self, language):
+        super().__init__()
+
+    def visit_Assert(self, node):
+        condition = self.visit(node.test)
+        ret = ast.parse(f"if not {condition}: raise AssertionError").body[0].value
+        return ret
