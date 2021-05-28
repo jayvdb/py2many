@@ -53,6 +53,8 @@ from py2many.rewriters import (
     PrintBoolRewriter,
     StrStrRewriter,
     WithToBlockTransformer,
+    RemoveEllipsisRewriter,
+    RapydScriptTypeAnnotationRewriter,
 )
 
 PY2MANY_DIR = pathlib.Path(__file__).parent
@@ -102,6 +104,7 @@ def transpile(filename, source, transpiler, rewriters, transformers, post_rewrit
     tree, infer_meta = core_transformers(tree)
     # Language specific transformers
     for tx in transformers:
+        print("tx", tx)
         tx(tree)
     # Language independent rewriters that run after type inference
     generic_post_rewriters = [PrintBoolRewriter(language), StrStrRewriter(language)]
@@ -278,7 +281,7 @@ def dart_settings(args, env=os.environ):
 
 
 class JavascriptTranspiler(CLikeTranspiler):
-    NAME = "JavaScript"
+    NAME = "javascript"
     cmd = ["rapydscript", "--bare", "--prettify", "{filename}", "-o", "{output}"]
 
     def __init__(self, settings):
@@ -288,7 +291,16 @@ class JavascriptTranspiler(CLikeTranspiler):
 
     def visit(self, tree):
         js_file = tree.__file__.with_suffix(".js")
-        cmd = _create_cmd(self.cmd, str(tree.__file__), output=str(js_file))
+        py_file = "/tmp/unparse.py"
+        new_py = ast.unparse(tree)
+        with open(py_file, "w") as f:
+            f.write(new_py)
+        proc = run(["strip-hints", py_file], capture_output=True)
+        with open(py_file, "w") as f:
+            f.write(proc.stdout.decode("utf-8"))
+        proc = run(["autoflake", "--remove-all-unused-imports", "-i", py_file])
+
+        cmd = _create_cmd(self.cmd, py_file, output=str(js_file))
         proc = run(cmd)
         if proc.returncode:
             print(proc.stdout)
@@ -298,7 +310,7 @@ class JavascriptTranspiler(CLikeTranspiler):
             lines = f.readlines()
             assert lines
             result = "\n".join(line.rstrip() for line in lines)
-            return result
+            return result + "\nmain()"
 
 
 def javascript_settings(args, env=os.environ):
@@ -306,7 +318,8 @@ def javascript_settings(args, env=os.environ):
         JavascriptTranspiler(dart_settings(args, env=env)),
         ".js",
         "JavaScript",
-        transformers=[ExplicitAssertRewriter],
+        rewriters=[ExplicitAssertRewriter(), RemoveEllipsisRewriter()],
+    #, RapydScriptTypeAnnotationRewriter()],
     )
 
 

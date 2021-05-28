@@ -252,7 +252,8 @@ class InferTypesTransformer(ast.NodeTransformer):
     def visit_AnnAssign(self, node: ast.AnnAssign) -> ast.AST:
         self.generic_visit(node)
 
-        node.target.annotation = node.annotation
+        annotation = getattr(node, "annotation", None)
+        node.target.annotation = annotation
         target = node.target
         target_typename = self._clike._typename_from_annotation(target)
         if target_typename in self.FIXED_WIDTH_INTS_NAME:

@@ -236,7 +236,7 @@ class PrintBoolRewriter(ast.NodeTransformer):
         return node
 
     # Go can't handle IfExpr in print. Handle it differently here
-    def _do_go_rewrite(self, node) -> ast.AST:
+    def _do_verbose_rewrite(self, node) -> ast.AST:
         if_stmt = ast.parse(
             textwrap.dedent(
                 """\
@@ -258,11 +258,23 @@ class PrintBoolRewriter(ast.NodeTransformer):
             if len(node.args) == 1:
                 anno = getattr(node.args[0], "annotation", None)
                 if get_id(anno) == "bool":
-                    if self._language == "go":
-                        return self._do_go_rewrite(node)
+                    if self._language in ["go", "javascript"]:
+                        return self._do_verbose_rewrite(node)
                     else:
                         return self._do_other_rewrite(node)
         return node
+
+
+class ExpandIfElseRewriter(ast.NodeTransformer):
+    def __init__(self, language):
+        super().__init__()
+        self._language = language
+
+    def visit_IfElse(self, node) -> ast.AST:
+        body = ast.unparse(self.visit(node.body))
+        orelse = ast.unparse(self.visit(node.orelse))
+        test = ast.unparse(self.visit(node.test))
+        return f"{test}: {{ {body} }} else {{ {orelse} }}"
 
 
 class StrStrRewriter(ast.NodeTransformer):
@@ -271,7 +283,7 @@ class StrStrRewriter(ast.NodeTransformer):
         self._language = language
 
     def visit_Compare(self, node):
-        if self._language in {"dart", "kotlin", "nim"}:
+        if self._language in {"dart", "kotlin", "nim", "javascript"}:
             return node
 
         if isinstance(node.ops[0], ast.In):
@@ -306,10 +318,29 @@ class StrStrRewriter(ast.NodeTransformer):
 
 
 class ExplicitAssertRewriter(ast.NodeTransformer):
-    def __init__(self, language):
-        super().__init__()
-
     def visit_Assert(self, node):
-        condition = self.visit(node.test)
-        ret = ast.parse(f"if not {condition}: raise AssertionError").body[0].value
+        print("rewriting assert")
+        condition = ast.unparse(self.visit(node.test))
+        ret = ast.parse(f"if not {condition}: raise AssertionError").body[0]
         return ret
+
+
+class RemoveEllipsisRewriter(ast.NodeTransformer):
+    def visit_Ellipsis(self, node):
+        return ast.parse("pass")
+
+
+class RapydScriptTypeAnnotationRewriter(ast.NodeTransformer):
+    def visit(self, node):
+        annotation = getattr(node, "annotation", None)
+        if isinstance(annotation, ast.Name):
+            if annotation.id == "float":
+                if isinstance(node, ast.AnnAssign):
+                    delattr(node, "annotation")
+            if annotation.id == "str":
+                annotation.id = "String"
+                if isinstance(node, ast.AnnAssign):
+                    delattr(node, "annotation")
+        print("visit")
+        print(ast.dump(node))
+        return super().visit(node)
