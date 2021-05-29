@@ -282,9 +282,7 @@ def dart_settings(args, env=os.environ):
 
 class JavascriptTranspiler(CLikeTranspiler):
     NAME = "javascript"
-    #cmd = ["rapydscript", "--bare", "--prettify", "{filename}", "-o", "{output}"]
-    # ng command
-    cmd = ["rapydscript", "compile", "--bare", "{filename}", "-o", "{output}"]
+    cmd = ["pj", "--disable-es6", "{filename}", "-o", "{output}"]
 
     def __init__(self, settings):
         self.settings = settings
