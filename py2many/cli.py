@@ -282,7 +282,9 @@ def dart_settings(args, env=os.environ):
 
 class JavascriptTranspiler(CLikeTranspiler):
     NAME = "javascript"
-    cmd = ["rapydscript", "--bare", "--prettify", "{filename}", "-o", "{output}"]
+    #cmd = ["rapydscript", "--bare", "--prettify", "{filename}", "-o", "{output}"]
+    # ng command
+    cmd = ["rapydscript", "compile", "--bare", "{filename}", "-o", "{output}"]
 
     def __init__(self, settings):
         self.settings = settings
@@ -318,7 +320,8 @@ def javascript_settings(args, env=os.environ):
         JavascriptTranspiler(dart_settings(args, env=env)),
         ".js",
         "JavaScript",
-        rewriters=[ExplicitAssertRewriter(), RemoveEllipsisRewriter()],
+        rewriters=[RemoveEllipsisRewriter()],
+    # ExplicitAssertRewriter(), RemoveEllipsisRewriter()],
     #, RapydScriptTypeAnnotationRewriter()],
     )
 
