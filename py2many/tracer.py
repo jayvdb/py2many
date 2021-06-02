@@ -157,7 +157,7 @@ class ValueTypeVisitor(ast.NodeVisitor):
         if any(t is None for t in params):
             raise NotImplementedError(f"Call({params}) not implemented")
         params = ",".join(params)
-        return "{0}({1})".format(node.func.id, params)
+        return "{0}({1})".format(get_id(node.func), params)
 
     def visit_Assign(self, node):
         if isinstance(node.value, ast.List):

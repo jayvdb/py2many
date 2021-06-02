@@ -292,25 +292,22 @@ class JavascriptTranspiler(CLikeTranspiler):
     def visit(self, tree):
         js_file = tree.__file__.with_suffix(".js")
         py_file = "/tmp/unparse.py"
-        new_py = ast.unparse(tree)
+        try:
+            new_py = ast.unparse(tree)
+        except AttributeError:
+            import astor
+            new_py = astor.to_source(tree)
         with open(py_file, "w") as f:
             f.write(new_py)
-        proc = run(["strip-hints", py_file], capture_output=True)
-        with open(py_file, "w") as f:
-            f.write(proc.stdout.decode("utf-8"))
-        proc = run(["autoflake", "--remove-all-unused-imports", "-i", py_file])
-
-        cmd = _create_cmd(self.cmd, py_file, output=str(js_file))
-        proc = run(cmd)
-        if proc.returncode:
-            print(proc.stdout)
-            print(proc.stderr)
-            raise NotImplementedError(f"{cmd[0]} exit {proc.returncode}")
-        with open(js_file) as f:
-            lines = f.readlines()
-            assert lines
-            result = "\n".join(line.rstrip() for line in lines)
-            return result + "\nmain()"
+        #proc = run(["strip-hints", py_file], capture_output=True)
+        #with open(py_file, "w") as f:
+        #    f.write(proc.stdout.decode("utf-8"))
+        #proc = run(["autoflake", "--remove-all-unused-imports", "-i", py_file])
+        with open(py_file, "r") as f:
+            source = f.read()
+        from pscript import py2js
+        result = py2js(source)
+        return result + "\nmain()"
 
 
 def javascript_settings(args, env=os.environ):
