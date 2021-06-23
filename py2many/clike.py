@@ -1,11 +1,11 @@
 import ast
 import importlib
 import logging
-import math
-import os
-import random
+#import math
+#import os
+#import random
 import sys
-import time
+#import time
 
 from enum import IntEnum
 from pathlib import Path
@@ -41,11 +41,11 @@ from py2many.analysis import get_id, IGNORED_MODULE_SET
 from py2many.result import Result
 from typing import List, Optional, Tuple, Union
 
-os.path  # silence pyflakes
-math.pi  # silence pyflakes
-time.time  # silence pyflakes
-random.random  # silence pyflakes
-Result  # silence pyflakes
+#os.path  # silence pyflakes
+#math.pi  # silence pyflakes
+#time.time  # silence pyflakes
+#random.random  # silence pyflakes
+#Result  # silence pyflakes
 
 symbols = {
     ast.Eq: "==",
