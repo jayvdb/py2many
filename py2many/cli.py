@@ -11,6 +11,9 @@ from functools import lru_cache
 from subprocess import run
 from typing import Callable, List, Optional
 
+from box import Box
+from monkeytype import apply_stub_using_libcst, get_stub
+
 from .analysis import add_imports
 from .clike import CLikeTranspiler
 from .scope import add_scope_context
@@ -295,6 +298,21 @@ def _get_all_settings(args, env=os.environ):
     }
 
 
+def add_monkey_types(source):
+    args = Box(module_path="")
+    stub = get_stub(args, sys.stdout, sys.stderr)
+    if stub is None:
+        complain_about_no_traces(args, sys.stderr)
+        return source
+    module = args.module_path[0]
+    mod = importlib.import_module(module)
+    source_path = Path(inspect.getfile(mod))
+    source_with_types = apply_stub_using_libcst(
+        stub=stub.render(),
+        source=source_path.read_text(),
+        overwrite_existing_annotations=args.existing_annotation_strategy == ExistingAnnotationStrategy.IGNORE,
+    )
+
 def _process_once(settings, filename, outdir, env=None):
     """Transpile and reformat.
 
@@ -307,6 +325,9 @@ def _process_once(settings, filename, outdir, env=None):
     print(f"{filename}...{output_path}")
     with open(filename) as f:
         source_data = f.read()
+    source_data = apply_stub_using_libcst(
+            stub: str, source: str, overwrite_existing_annotations: bool
+    ) -> str:
     with open(output_path, "w") as f:
         f.write(
             transpile(
