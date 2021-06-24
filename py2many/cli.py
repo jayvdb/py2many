@@ -320,17 +320,27 @@ def _process_once(settings, filename, outdir, env=None):
     print(f"{filename} ... {output_path}")
     with open(filename) as f:
         source_data = f.read()
+    dunder_init = filename.stem == "__init__"
+    if not source_data:
+        if dunder_init:
+            return True
+
+        with open(output_path, "w") as f:
+            f.write("")
+            return True
+
+    transpiled = transpile(
+        filename,
+        source_data,
+        settings.transpiler,
+        settings.rewriters,
+        settings.transformers,
+        settings.post_rewriters,
+    )
+    if not transpiled.strip():
+        raise TypeError("transpiler emitted empty string")
     with open(output_path, "w") as f:
-        f.write(
-            transpile(
-                filename,
-                source_data,
-                settings.transpiler,
-                settings.rewriters,
-                settings.transformers,
-                settings.post_rewriters,
-            )
-        )
+        f.write(transpiled)
 
     if settings.formatter:
         restore_cwd = False
@@ -356,6 +366,15 @@ def _process_once(settings, filename, outdir, env=None):
             if restore_cwd:
                 os.chdir(restore_cwd)
             return False
+        with open(output_path) as f:
+            formatted = f.readlines()
+        empty = all(not line.strip() for line in formatted)
+        if empty:
+            print(f"Error: {cmd} destroyed the input file; restoring ..")
+            with open(output_path, "w") as f:
+                f.write(transpiled)
+                return False
+
         if settings.ext == ".kt":
             # ktlint formatter needs to be invoked twice before output is lint free
             if run(cmd, env=env).returncode:
@@ -394,7 +413,10 @@ def _process_dir(settings, source, outdir, env=None, _suppress_exceptions=True):
                 format_errors.append(path)
         except Exception as e:
             print(f"Error: Could not transpile: {path}")
-            print(f"Due to: {e.__class__.__name__} {e}")
+            if hasattr(e, "lineno"):
+                print(f"Due to {e.lineno}:{e.col_offset}: {e.__class__.__name__} {e}")
+            else:
+                print(f"Due to: {e.__class__.__name__} {e}")
             failures.append(path)
             if _suppress_exceptions:
                 if _suppress_exceptions is not True:

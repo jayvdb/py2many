@@ -78,6 +78,13 @@ _AUTO = "auto"
 _AUTO_INVOKED = "auto()"
 
 
+class AstNotImplementedError(NotImplementedError):
+    def __init__(self, msg, node):
+        self.lineno = node.lineno
+        self.col_offset = node.col_offset
+        super().__init__(msg)
+
+
 class LifeTime(IntEnum):
     UNKNOWN = 0
     STATIC = 1
@@ -159,7 +166,7 @@ class CLikeTranspiler(ast.NodeVisitor):
         # 3.9 compatibility shim
         if sys.version_info < (3, 9, 0):
             if not isinstance(node.slice, ast.Index):
-                raise NotImplementedError("Advanced Slicing not supported")
+                raise AstNotImplementedError("Advanced Slicing not supported", node)
             slice_value = node.slice.value
         else:
             slice_value = node.slice
@@ -245,7 +252,7 @@ class CLikeTranspiler(ast.NodeVisitor):
                 node.container_type = type_node.container_type
                 return self._visit_container_type(type_node.container_type)
             if typename is None:
-                raise NotImplementedError(f"Could not infer: {type_node}")
+                raise AstNotImplementedError(f"Could not infer: {type_node}", node)
         return typename
 
     def _generic_typename_from_annotation(
@@ -505,7 +512,7 @@ class CLikeTranspiler(ast.NodeVisitor):
         return (target, type_str, val)
 
     def visit_Delete(self, node):
-        raise NotImplementedError("del not implemented")
+        raise AstNotImplementedError("del not implemented", node)
 
     def visit_ClassDef(self, node):
         bases = [get_id(base) for base in node.bases]
