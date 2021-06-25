@@ -97,6 +97,7 @@ def class_for_typename(typename, default_type, locals=None) -> Union[str, object
         # TODO: take into account any imports happening in the file being parsed
         # and pass them into eval
         typeclass = eval(typename, globals(), locals)
+        print(type(typeclass), typeclass)
         return typeclass
     except (NameError, SyntaxError, AttributeError, TypeError):
         logger.info(f"could not evaluate {typename}")
@@ -246,7 +247,10 @@ class CLikeTranspiler(ast.NodeVisitor):
                 node.container_type = type_node.container_type
                 return self._visit_container_type(type_node.container_type)
             if isinstance(type_node, ast.Attribute):
-                typename = "{}.{}".format(get_id(type_node.value), type_node.attr)
+                if get_id(type_node.value) in ("typing", "ctypes"):
+                    typename = type_node.attr
+                else:
+                    typename = "{}.{}".format(get_id(type_node.value), type_node.attr)
             if typename is None:
                 raise AstNotImplementedError(f"Could not infer: {type_node}", node)
         return typename
