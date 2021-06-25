@@ -1,4 +1,4 @@
-from typing import List
+import typing
 
 
 def inline_pass():
@@ -11,7 +11,7 @@ def inline_ellipsis():
 
 def indexing():
     sum = 0
-    a: List[int] = []
+    a: typing.List[int] = []
     for i in range(10):
         a.append(i)
         sum += a[i]
@@ -55,7 +55,7 @@ def show():
     # lists, sets and dict
     a5 = [1, 2, 3]
     print(len(a5))
-    a9: List[str] = ["a", "b", "c", "d"]
+    a9: typing.typing.List[str] = ["a", "b", "c", "d"]
     print(len(a9))
     a6 = {1, 2, 3, 4}
     print(len(a6))
