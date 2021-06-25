@@ -202,7 +202,10 @@ class SelfTranspileTests(unittest.TestCase):
         assert set(successful) == {
             PY2MANY_MODULE / "__init__.py",
             PY2MANY_MODULE / "__main__.py",
+            PY2MANY_MODULE / "analysis.py",
             PY2MANY_MODULE / "annotation_transformer.py",
+            PY2MANY_MODULE / "context.py",
+            PY2MANY_MODULE / "mutability_transformer.py",
             PY2MANY_MODULE / "nesting_transformer.py",
             PY2MANY_MODULE / "result.py",
         }
