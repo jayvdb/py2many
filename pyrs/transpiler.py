@@ -208,6 +208,7 @@ class RustTranspiler(CLikeTranspiler):
             if is_python_main and arg in ["argc", "argv"]:
                 continue
 
+            typename = typename.replace(".", "::")
             if typename == "T":
                 typename = "T{0}".format(index)
                 typedecls.append(typename)
@@ -226,6 +227,7 @@ class RustTranspiler(CLikeTranspiler):
                     typename = self._generic_typename_from_type_node(node.returns)
                 typename = map_type(typename, extension=True, return_type=True)
             if typename != "_":
+                typename = typename.replace(".", "::")
                 return_type = f"-> {typename}"
         else:
             if not is_void_function(node):

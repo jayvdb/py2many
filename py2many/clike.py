@@ -245,6 +245,8 @@ class CLikeTranspiler(ast.NodeVisitor):
             if isinstance(type_node, ast.Subscript):
                 node.container_type = type_node.container_type
                 return self._visit_container_type(type_node.container_type)
+            if isinstance(type_node, ast.Attribute):
+                typename = "{}.{}".format(get_id(type_node.value), type_node.attr)
             if typename is None:
                 raise AstNotImplementedError(f"Could not infer: {type_node}", node)
         return typename
