@@ -43,6 +43,8 @@ if sys.version_info[0] >= 3:
             return var.name
         elif isinstance(var, ast.ClassDef):
             return var.name
+        elif isinstance(var, ast.Attribute):
+            return "{}.{}".format(get_id(var.value), var.attr)
         else:
             # print(f"warning: {var}"")
             return None
