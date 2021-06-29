@@ -1,12 +1,8 @@
 import argparse
 import ast
-import functools
 import os
 import pathlib
-import sys
 
-
-from distutils import spawn
 from functools import lru_cache
 from subprocess import run
 from typing import List, Set, Tuple
@@ -22,38 +18,14 @@ from .inference import infer_types
 from .language import LanguageSettings
 from .mutability_transformer import detect_mutable_vars
 from .nesting_transformer import detect_nesting_levels
-from .python_transformer import PythonTranspiler, RestoreMainRewriter
+from .registry import _get_all_settings, ALL_SETTINGS
 from .scope import add_scope_context
 from .toposort_modules import toposort
 
-from pycpp.transpiler import CppTranspiler, CppListComparisonRewriter
-from pyrs.inference import infer_rust_types
-from pyrs.transpiler import (
-    RustTranspiler,
-    RustLoopIndexRewriter,
-    RustNoneCompareRewriter,
-    RustStringJoinRewriter,
-)
-from pyjl.transpiler import JuliaTranspiler, JuliaMethodCallRewriter
-from pykt.inference import infer_kotlin_types
-from pykt.transpiler import KotlinTranspiler, KotlinPrintRewriter, KotlinBitOpRewriter
-from pynim.inference import infer_nim_types
-from pynim.transpiler import NimTranspiler, NimNoneCompareRewriter
-from pydart.transpiler import DartTranspiler, DartIntegerDivRewriter
-from pygo.inference import infer_go_types
-from pygo.transpiler import (
-    GoTranspiler,
-    GoMethodCallRewriter,
-    GoNoneCompareRewriter,
-    GoPropagateTypeAnnotation,
-    GoVisibilityRewriter,
-    GoIfExpRewriter,
-)
 
 from py2many.rewriters import (
     ComplexDestructuringRewriter,
     FStringJoinRewriter,
-    InferredAnnAssignRewriter,
     PythonMainRewriter,
     DocStringToCommentRewriter,
     PrintBoolRewriter,
@@ -63,8 +35,6 @@ from py2many.rewriters import (
     UnpackScopeRewriter,
 )
 
-PY2MANY_DIR = pathlib.Path(__file__).parent
-ROOT_DIR = PY2MANY_DIR.parent
 CWD = pathlib.Path.cwd()
 
 
@@ -184,164 +154,6 @@ def _create_cmd(parts, filename, **kw):
     if cmd != parts:
         return cmd
     return [*parts, str(filename)]
-
-
-def python_settings(args, env=os.environ):
-    return LanguageSettings(
-        PythonTranspiler(),
-        ".py",
-        "Python",
-        formatter=["black"],
-        rewriters=[RestoreMainRewriter()],
-        post_rewriters=[InferredAnnAssignRewriter()],
-    )
-
-
-def cpp_settings(args, env=os.environ):
-    clang_format_style = env.get("CLANG_FORMAT_STYLE")
-    cxx = env.get("CXX")
-    default_cxx = ["clang++", "g++-11", "g++"]
-    if cxx:
-        if not spawn.find_executable(cxx):
-            print(f"Warning: CXX({cxx}) not found")
-            cxx = None
-    if not cxx:
-        for exe in default_cxx:
-            if spawn.find_executable(exe):
-                cxx = exe
-                break
-        else:
-            cxx = default_cxx[0]
-    cxx_flags = env.get("CXXFLAGS")
-    if cxx_flags:
-        cxx_flags = cxx_flags.split()
-    else:
-        cxx_flags = ["-std=c++14", "-Wall", "-Werror"]
-    cxx_flags = ["-I", str(ROOT_DIR)] + cxx_flags
-    if cxx.startswith("clang++") and not sys.platform == "win32":
-        cxx_flags += ["-stdlib=libc++"]
-
-    if clang_format_style:
-        clang_format_cmd = ["clang-format", f"-style={clang_format_style}", "-i"]
-    else:
-        clang_format_cmd = ["clang-format", "-i"]
-
-    return LanguageSettings(
-        CppTranspiler(args.extension, args.no_prologue),
-        ".cpp",
-        "C++",
-        clang_format_cmd,
-        None,
-        [CppListComparisonRewriter()],
-        linter=[cxx, *cxx_flags],
-    )
-
-
-def rust_settings(args, env=os.environ):
-    return LanguageSettings(
-        RustTranspiler(args.extension, args.no_prologue),
-        ".rs",
-        "Rust",
-        ["rustfmt", "--edition=2018"],
-        None,
-        [RustNoneCompareRewriter()],
-        [functools.partial(infer_rust_types, extension=args.extension)],
-        [RustLoopIndexRewriter(), RustStringJoinRewriter()],
-    )
-
-
-def julia_settings(args, env=os.environ):
-    format_jl = spawn.find_executable("format.jl")
-    if format_jl:
-        format_jl = ["julia", "-O0", "--compile=min", "--startup=no", format_jl, "-v"]
-    else:
-        format_jl = ["format.jl", "-v"]
-    return LanguageSettings(
-        JuliaTranspiler(),
-        ".jl",
-        "Julia",
-        format_jl,
-        None,
-        [],
-        [],
-        [JuliaMethodCallRewriter()],
-    )
-
-
-def kotlin_settings(args, env=os.environ):
-    return LanguageSettings(
-        KotlinTranspiler(),
-        ".kt",
-        "Kotlin",
-        ["ktlint", "-F"],
-        rewriters=[KotlinBitOpRewriter()],
-        transformers=[infer_kotlin_types],
-        post_rewriters=[KotlinPrintRewriter()],
-        linter=["ktlint"],
-    )
-
-
-def nim_settings(args, env=os.environ):
-    nim_args = {}
-    nimpretty_args = []
-    if args.indent is not None:
-        nim_args["indent"] = args.indent
-        nimpretty_args.append(f"--indent:{args.indent}")
-    return LanguageSettings(
-        NimTranspiler(**nim_args),
-        ".nim",
-        "Nim",
-        ["nimpretty", *nimpretty_args],
-        None,
-        [NimNoneCompareRewriter()],
-        [infer_nim_types],
-    )
-
-
-def dart_settings(args, env=os.environ):
-    return LanguageSettings(
-        DartTranspiler(),
-        ".dart",
-        "Dart",
-        ["dart", "format"],
-        post_rewriters=[DartIntegerDivRewriter()],
-    )
-
-
-def go_settings(args, env=os.environ):
-    config_filename = "revive.toml"
-    if os.path.exists(CWD / config_filename):
-        revive_config = CWD / config_filename
-    elif os.path.exists(PY2MANY_DIR / config_filename):
-        revive_config = PY2MANY_DIR / config_filename
-    else:
-        revive_config = None
-    return LanguageSettings(
-        GoTranspiler(),
-        ".go",
-        "Go",
-        ["gofmt", "-w"],
-        None,
-        [GoNoneCompareRewriter(), GoVisibilityRewriter(), GoIfExpRewriter()],
-        [infer_go_types],
-        [GoMethodCallRewriter(), GoPropagateTypeAnnotation()],
-        linter=(
-            ["revive", "--config", str(revive_config)] if revive_config else ["revive"]
-        ),
-    )
-
-
-def _get_all_settings(args, env=os.environ):
-    return {
-        "python": python_settings(args, env=env),
-        "cpp": cpp_settings(args, env=env),
-        "rust": rust_settings(args, env=env),
-        "julia": julia_settings(args, env=env),
-        "kotlin": kotlin_settings(args, env=env),
-        "nim": nim_settings(args, env=env),
-        "dart": dart_settings(args, env=env),
-        "go": go_settings(args, env=env),
-    }
 
 
 def _relative_to_cwd(absolute_path):
@@ -530,24 +342,16 @@ def main(args=None, env=os.environ):
         print("extension supported only with rust via pyo3")
         return -1
 
+    settings_func = ALL_SETTINGS["cpp"]
+    for lang, func in ALL_SETTINGS.items():
+        arg = getattr(args, lang)
+        if arg:
+            print(f"{lang} enabled")
+            settings_func = func
+            break
+    settings = settings_func(args, env=env)
+
     for filename in rest:
-        settings = cpp_settings(args, env=env)
-        if args.cpp:
-            pass
-        if args.rust:
-            settings = rust_settings(args, env=env)
-        elif args.python:
-            settings = python_settings(args, env=env)
-        elif args.julia:
-            settings = julia_settings(args, env=env)
-        elif args.kotlin:
-            settings = kotlin_settings(args, env=env)
-        elif args.nim:
-            settings = nim_settings(args, env=env)
-        elif args.dart:
-            settings = dart_settings(args, env=env)
-        elif args.go:
-            settings = go_settings(args, env=env)
         source = pathlib.Path(filename)
         if args.outdir is None:
             outdir = source.parent
