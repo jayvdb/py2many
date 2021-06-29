@@ -160,6 +160,7 @@ class SelfTranspileTests(unittest.TestCase):
                 "analysis.py",
                 "annotation_transformer.py",
                 "ast_helpers.py",
+                "cli.py",
                 "clike.py",
                 "declaration_extractor.py",
                 "exceptions.py",
