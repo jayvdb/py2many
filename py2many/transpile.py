@@ -58,7 +58,8 @@ def language_tree_processors(settings: LanguageSettings):
     return rewriters, transformers, post_rewriters
 
 
-def _transpile_one(trees, tree, transpiler, rewriters, transformers, post_rewriters):
+def transpile_one(trees, tree, transpiler, settings):
+    rewriters, transformers, post_rewriters = language_tree_processors(settings)
     # This is very basic and needs to be run before and after
     # rewrites. Revisit if running it twice becomes a perf issue
     add_scope_context(tree)

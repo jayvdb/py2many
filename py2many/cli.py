@@ -11,7 +11,7 @@ from .exceptions import AstErrorBase
 from .language import LanguageSettings
 from .registry import _get_all_settings, ALL_SETTINGS, FAKE_ARGS
 from .toposort_modules import toposort
-from .transpile import _transpile_one, language_tree_processors
+from .transpile import transpile_one
 
 CWD = pathlib.Path.cwd()
 
@@ -31,14 +31,11 @@ def _transpile(
         tree_list.append(tree)
     trees = toposort(tree_list)
     topo_filenames = [t.__file__ for t in trees]
-    rewriters, transformers, post_rewriters = language_tree_processors(settings)
     outputs = {}
     successful = []
     for filename, tree in zip(topo_filenames, trees):
         try:
-            output = _transpile_one(
-                trees, tree, transpiler, rewriters, transformers, post_rewriters
-            )
+            output = transpile_one(trees, tree, settings)
             successful.append(filename)
             outputs[filename] = output
         except Exception as e:
