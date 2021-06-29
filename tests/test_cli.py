@@ -40,7 +40,7 @@ COMPILERS = {
     "rust": ["cargo", "script", "--build-only", "--debug"],
 }
 INVOKER = {
-    "dart": ["dart", "--enable-asserts"],
+    "dart": [["dart2js"], ["dart", "--enable-asserts"]],
     "go": ["go", "run"],
     "julia": ["julia", "--compiled-modules=yes"],
     "kotlin": ["kscript"],
@@ -227,6 +227,20 @@ class CodeGeneratorTests(unittest.TestCase):
 
             if INVOKER.get(lang):
                 invoker = INVOKER.get(lang)
+                if isinstance(invoker[0], list):
+                    first_step = invoker[0]
+                    cmd = _create_cmd(first_step, filename=case_output, exe=exe)
+                    proc = run(
+                        cmd,
+                        env=env,
+                    )
+                    if expect_failure and proc.returncode:
+                        raise unittest.SkipTest(f"Execution of {case}{ext} failed")
+                    assert (
+                        not proc.returncode
+                    ), f"Execution of {first_step} failed:\n{proc.stdout}{proc.stderr}"
+                    invoker = invoker[1]
+
                 if not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 cmd = _create_cmd(invoker, filename=case_output, exe=exe)
