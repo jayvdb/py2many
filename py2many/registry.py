@@ -4,6 +4,7 @@ import pathlib
 import sys
 
 from distutils import spawn
+from unittest.mock import Mock
 
 from .language import LanguageSettings
 
@@ -37,6 +38,7 @@ from pygo.transpiler import (
 
 PY2MANY_DIR = pathlib.Path(__file__).parent
 ROOT_DIR = PY2MANY_DIR.parent
+FAKE_ARGS = Mock(indent=4)
 
 
 def python_settings(args, env=os.environ):

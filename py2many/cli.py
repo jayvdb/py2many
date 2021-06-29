@@ -6,12 +6,10 @@ import pathlib
 from functools import lru_cache
 from subprocess import run
 from typing import List, Set, Tuple
-from unittest.mock import Mock
-
 
 from .exceptions import AstErrorBase
 from .language import LanguageSettings
-from .registry import _get_all_settings, ALL_SETTINGS
+from .registry import _get_all_settings, ALL_SETTINGS, FAKE_ARGS
 from .toposort_modules import toposort
 from .transpile import _transpile_one, language_tree_processors
 
@@ -230,7 +228,7 @@ def _process_dir(settings, source, outdir, env=None, _suppress_exceptions=True):
 
 def main(args=None, env=os.environ):
     parser = argparse.ArgumentParser()
-    LANGS = _get_all_settings(Mock(indent=4))
+    LANGS = _get_all_settings(FAKE_ARGS)
     for lang, settings in LANGS.items():
         parser.add_argument(
             f"--{lang}",
