@@ -10,6 +10,8 @@ from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler, RestoreMainRewriter
 
+from .external_transpilers import HaxeTranspiler
+
 from .rewriters import InferredAnnAssignRewriter
 
 from pycpp.transpiler import CppTranspiler, CppListComparisonRewriter
@@ -187,6 +189,14 @@ def go_settings(args, env=os.environ):
     )
 
 
+def haxe_settings(args, env=os.environ):
+    return LanguageSettings(
+        HaxeTranspiler(go_settings(args, env=env)),
+        ".hx",
+        "Haxe",
+    )
+
+
 ALL_SETTINGS = {
     "python": python_settings,
     "cpp": cpp_settings,
@@ -196,6 +206,7 @@ ALL_SETTINGS = {
     "nim": nim_settings,
     "dart": dart_settings,
     "go": go_settings,
+    "haxe": haxe_settings,
 }
 
 

@@ -1,7 +1,5 @@
-import ast
-
-from .ast_helpers import create_ast_node, unparse
 from .clike import CLikeTranspiler
+from .transpile import transpile_one
 
 from pygo.transpiler import GoTranspiler
 
@@ -9,24 +7,26 @@ from pygo.transpiler import GoTranspiler
 class HaxeTranspiler(CLikeTranspiler):
     NAME = "haxe"
     BASE = GoTranspiler
+    _target_extension = ".hx"
+    _cmd = ["lix", "run", "go2hx"]
 
-    def __init__(self, settings):
-        self.settings = settings
+    def __init__(self, intermediate_settings):
+        self._intermediate_settings = intermediate_settings
         self._extension = False
         self._temp = 0
 
     def visit(self, tree):
-        intermediate_path = tree.__file__.with_suffix(".go")
-        intermediate_source = process_once_data(
+        intermediate_path = tree.__file__.with_suffix(self._intermediate_settings)
+        intermediate_source = transpile_one(
+            [tree],
             tree,
-            tree.__file__,
-            self.settings,
-            temp_counter_start=self._temp,
+            self._intermediate_settings,
         )
         with open(intermediate_path, "w") as f:
             f.write(intermediate_source)
-        final_file = intermediate_path.with_suffix(".js")
-        proc = run(["go2hx", str(intermediate_path), "-o", str(final_file)])
+        final_file = intermediate_path.with_suffix(self._target_extension)
+        # Use _create_cmd
+        proc = run([*self._cmd])
         if proc.returncode:
             print(proc.stdout)
             print(proc.stderr)
@@ -42,4 +42,3 @@ class HaxeTranspiler(CLikeTranspiler):
             assert lines
             result = "\n".join(line.rstrip() for line in lines)
             return generated_by + result
-
