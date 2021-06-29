@@ -9,45 +9,13 @@ from typing import List, Set, Tuple
 from unittest.mock import Mock
 
 
-from .analysis import add_imports
-from .annotation_transformer import add_annotation_flags
-
-from .context import add_variable_context, add_list_calls
 from .exceptions import AstErrorBase
-from .inference import infer_types
 from .language import LanguageSettings
-from .mutability_transformer import detect_mutable_vars
-from .nesting_transformer import detect_nesting_levels
 from .registry import _get_all_settings, ALL_SETTINGS
-from .scope import add_scope_context
 from .toposort_modules import toposort
-
-
-from py2many.rewriters import (
-    ComplexDestructuringRewriter,
-    FStringJoinRewriter,
-    PythonMainRewriter,
-    DocStringToCommentRewriter,
-    PrintBoolRewriter,
-    StrStrRewriter,
-    WithToBlockTransformer,
-    IgnoredAssignRewriter,
-    UnpackScopeRewriter,
-)
+from .transpile import _transpile_one, language_tree_processors
 
 CWD = pathlib.Path.cwd()
-
-
-def core_transformers(tree, trees):
-    add_variable_context(tree, trees)
-    add_scope_context(tree)
-    add_list_calls(tree)
-    detect_mutable_vars(tree)
-    detect_nesting_levels(tree)
-    add_annotation_flags(tree)
-    infer_meta = infer_types(tree)
-    add_imports(tree)
-    return tree, infer_meta
 
 
 def _transpile(
@@ -58,9 +26,6 @@ def _transpile(
     target language
     """
     transpiler = settings.transpiler
-    rewriters = settings.rewriters
-    transformers = settings.transformers
-    post_rewriters = settings.post_rewriters
     tree_list = []
     for filename, source in zip(filenames, sources):
         tree = ast.parse(source)
@@ -68,23 +33,7 @@ def _transpile(
         tree_list.append(tree)
     trees = toposort(tree_list)
     topo_filenames = [t.__file__ for t in trees]
-    language = transpiler.NAME
-    generic_rewriters = [
-        ComplexDestructuringRewriter(language),
-        PythonMainRewriter(settings.transpiler._main_signature_arg_names),
-        FStringJoinRewriter(language),
-        DocStringToCommentRewriter(language),
-        WithToBlockTransformer(language),
-        IgnoredAssignRewriter(language),
-    ]
-    # Language independent rewriters that run after type inference
-    generic_post_rewriters = [
-        PrintBoolRewriter(language),
-        StrStrRewriter(language),
-        UnpackScopeRewriter(language),
-    ]
-    rewriters = generic_rewriters + rewriters
-    post_rewriters = generic_post_rewriters + post_rewriters
+    rewriters, transformers, post_rewriters = language_tree_processors(settings)
     outputs = {}
     successful = []
     for filename, tree in zip(topo_filenames, trees):
@@ -106,40 +55,6 @@ def _transpile(
     # return output in the same order as input
     output_list = [outputs[f] for f in filenames]
     return output_list, successful
-
-
-def _transpile_one(trees, tree, transpiler, rewriters, transformers, post_rewriters):
-    # This is very basic and needs to be run before and after
-    # rewrites. Revisit if running it twice becomes a perf issue
-    add_scope_context(tree)
-    # Language specific rewriters
-    for rewriter in rewriters:
-        tree = rewriter.visit(tree)
-    # Language independent core transformers
-    tree, infer_meta = core_transformers(tree, trees)
-    # Language specific transformers
-    for tx in transformers:
-        tx(tree)
-    # Language specific rewriters that depend on previous steps
-    for rewriter in post_rewriters:
-        tree = rewriter.visit(tree)
-    # Rerun core transformers
-    tree, infer_meta = core_transformers(tree, trees)
-    out = []
-    code = transpiler.visit(tree) + "\n"
-    headers = transpiler.headers(infer_meta)
-    features = transpiler.features()
-    if features:
-        out.append(features)
-    if headers:
-        out.append(headers)
-    usings = transpiler.usings()
-    if usings:
-        out.append(usings)
-    out.append(code)
-    if transpiler.extension:
-        out.append(transpiler.extension_module(tree))
-    return "\n".join(out)
 
 
 @lru_cache(maxsize=100)
