@@ -35,7 +35,7 @@ def _transpile(
     successful = []
     for filename, tree in zip(topo_filenames, trees):
         try:
-            output = transpile_one(trees, tree, settings)
+            output = transpile_one(trees, tree, settings.transpiler, settings)
             successful.append(filename)
             outputs[filename] = output
         except Exception as e:
