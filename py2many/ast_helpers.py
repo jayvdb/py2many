@@ -28,3 +28,7 @@ def create_ast_block(body, at_node=None):
         block.lineno = at_node.lineno
     ast.fix_missing_locations(block)
     return block
+
+
+def create_noop_node(at_node=None):
+    return create_ast_node("pass", at_node=None)

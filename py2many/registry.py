@@ -9,7 +9,7 @@ from unittest.mock import Mock
 from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler, RestoreMainRewriter
-from .external_transpilers import RubyTranspiler
+from .external_transpilers import RubyTranspiler, DowngradeAnnAssignRewriter
 
 from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter
 
@@ -194,7 +194,7 @@ def ruby_settings(args, env=os.environ):
         ".rb",
         "Ruby",
         formatter=None,
-        post_rewriters=[DedentMainRewriter()],
+        post_rewriters=[DedentMainRewriter(), DowngradeAnnAssignRewriter()],
     )
 
 
