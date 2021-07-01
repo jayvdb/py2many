@@ -45,6 +45,11 @@ INVOKER = {
     "julia": ["julia", "--compiled-modules=yes"],
     "kotlin": ["kscript"],
     "python": [sys.executable],
+    "ruby": [
+        "ruby",
+        "-I",
+        "/Users/john.vandenberg/transpilers/py2rb/py2rb/builtins/module.rb",
+    ],
     "rust": ["cargo", "script"],
 }
 
@@ -231,6 +236,7 @@ class CodeGeneratorTests(unittest.TestCase):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 cmd = _create_cmd(invoker, filename=case_output, exe=exe)
                 cmd += main_args
+                print(cmd)
                 proc = run(
                     cmd,
                     env=env,

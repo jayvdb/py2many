@@ -153,6 +153,15 @@ def rename(scope, old_name, new_name):
     tx.visit(scope)
 
 
+class DedentMainRewriter(ast.NodeTransformer):
+    def visit_FunctionDef(self, node):
+        is_python_main = getattr(node, "python_main", False)
+
+        if is_python_main:
+            return create_ast_block(node.body, at_node=node)
+        return node
+
+
 class PythonMainRewriter(ast.NodeTransformer):
     def __init__(self, main_signature_arg_names):
         self.main_signature_arg_names = set(main_signature_arg_names)

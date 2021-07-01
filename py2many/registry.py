@@ -9,8 +9,9 @@ from unittest.mock import Mock
 from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler, RestoreMainRewriter
+from .external_transpilers import RubyTranspiler
 
-from .rewriters import InferredAnnAssignRewriter
+from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter
 
 from pycpp.transpiler import CppTranspiler, CppListComparisonRewriter
 from pyrs.inference import infer_rust_types
@@ -187,6 +188,16 @@ def go_settings(args, env=os.environ):
     )
 
 
+def ruby_settings(args, env=os.environ):
+    return LanguageSettings(
+        RubyTranspiler(),
+        ".rb",
+        "Ruby",
+        formatter=None,
+        post_rewriters=[DedentMainRewriter()],
+    )
+
+
 ALL_SETTINGS = {
     "python": python_settings,
     "cpp": cpp_settings,
@@ -196,6 +207,7 @@ ALL_SETTINGS = {
     "nim": nim_settings,
     "dart": dart_settings,
     "go": go_settings,
+    "ruby": ruby_settings,
 }
 
 
