@@ -2,8 +2,8 @@
 
 
 def nested_containers():
-    CODES = {"KEY": [1, 3]}
-    return 1 in CODES["KEY"]
+    codes = {"KEY": [1, 3]}
+    return 1 in codes["KEY"]
 
 
 if __name__ == "__main__":

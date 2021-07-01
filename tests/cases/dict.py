@@ -1,26 +1,26 @@
 def implicit_keys():
-    CODES = {"KEY": 1}
-    return "KEY" in CODES
+    codes = {"KEY": 1}
+    return "KEY" in codes
 
 
 def explicit_keys():
-    CODES = {"KEY": 1}
-    return "KEY" in CODES.keys()
+    codes = {"KEY": 1}
+    return "KEY" in codes.keys()
 
 
 def dict_values():
-    CODES = {"KEY": 1}
-    return 1 in CODES.values()
+    codes = {"KEY": 1}
+    return 1 in codes.values()
 
 
 def return_dict_index_str(key: str):
-    CODES = {"KEY": 1}
-    return CODES[key]
+    codes = {"KEY": 1}
+    return codes[key]
 
 
 def return_dict_index_int(key: int):
-    CODES = {1: "one"}
-    return CODES[key]
+    codes = {1: "one"}
+    return codes[key]
 
 
 if __name__ == "__main__":
