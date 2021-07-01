@@ -36,10 +36,13 @@ def show():
     a2: float = 2.1
     print(a2)
     # for loop
+    print("range(0, 10")
     for i in range(0, 10):
         print(i)
+    print("range(0, 10, 2")
     for i in range(0, 10, 2):
         print(i)
+    print("range end")
     # for i in range(1, 10):
     #     print(i)
     # unary op
@@ -87,8 +90,6 @@ def show():
     # assert 1 != 2 != 3
     # Escape quotes
     _escape_quotes = """ foo "bar" baz """
-    assert "bbc" in "aaabbccc"
-    assert bool(1)
     (_c1, _, _c2) = (1, 2, 3)
 
 
