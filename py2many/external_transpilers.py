@@ -32,8 +32,6 @@ class DowngradeAnnAssignRewriter(ast.NodeTransformer):
 
     def visit_AnnAssign(self, node):
         col_offset = getattr(node, "col_offset", None)
-        assert node.target
-        #assert node.value
 
         node = ast.Assign(
             targets=[node.target],
@@ -49,11 +47,9 @@ class RubyTranspiler(CLikeTranspiler):
 
     def visit(self, node):
         source_data = unparse(node)
-        print(source_data)
-        dir_path = node.__file__.parent
 
+        dir_path = node.__file__.parent
         _, header, data = convert_py2rb(unparse(node), dir_path)
-        print(header, data)
         return f"{header}\n{data}"
 
     def usings(self):
