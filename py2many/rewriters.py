@@ -23,8 +23,6 @@ class InferredAnnAssignRewriter(ast.NodeTransformer):
 
         assigns = []
         for assign_target in node.targets:
-            print(assign_target.__class__)
-            # assert False
             new_node = ast.AnnAssign(
                 target=assign_target,
                 value=node.value,
