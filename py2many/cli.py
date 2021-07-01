@@ -39,6 +39,7 @@ def _transpile(
             successful.append(filename)
             outputs[filename] = output
         except Exception as e:
+            raise
             import traceback
 
             formatted_lines = traceback.format_exc().splitlines()
@@ -273,6 +274,7 @@ def main(args=None, env=os.environ):
             try:
                 rv = _process_one(settings, source, outdir, env=env)
             except Exception as e:
+                raise
                 import traceback
 
                 formatted_lines = traceback.format_exc().splitlines()
