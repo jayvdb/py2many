@@ -13,7 +13,8 @@ import astpretty
 
 from unittest_expander import foreach, expand
 
-from py2many.cli import _get_all_settings, _relative_to_cwd, _transpile, _transpile_one
+from py2many.cli import _get_all_settings, _relative_to_cwd, _transpile
+from py2many.transpile import transpile_one
 from py2many.exceptions import AstIncompatibleAssign
 
 import py2many.cli
@@ -304,13 +305,11 @@ class CodeGeneratorTests(unittest.TestCase):
         tree = get_tree(source_data, ext)
 
         try:
-            _transpile_one(
+            transpile_one(
                 [tree],
                 tree,
                 settings.transpiler,
-                settings.rewriters,
-                settings.transformers,
-                settings.post_rewriters,
+                settings,
             )
         except Exception as e:
             assert type(e) == expected_error
