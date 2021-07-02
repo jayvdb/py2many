@@ -9,7 +9,7 @@ from unittest.mock import Mock
 from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler
-from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter
+from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter, ShellTranspiler
 
 from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter, RestoreMainRewriter
 
@@ -229,6 +229,18 @@ def c_settings(args, env=os.environ):
         #, DowngradeAnnAssignRewriter()],
     )
 
+
+def shell_settings(args, env=os.environ):
+    return LanguageSettings(
+        ShellTranspiler(),
+        ".sh",
+        "Shell",
+        formatter=None,
+        post_rewriters=[RestoreMainRewriter()],
+        #, DowngradeAnnAssignRewriter()],
+    )
+
+
 ALL_SETTINGS = {
     "python": python_settings,
     "cpp": cpp_settings,
@@ -242,6 +254,7 @@ ALL_SETTINGS = {
     "java": java_settings,
     "fortran": fortran_settings,
     "clang": c_settings,
+    "shell": shell_settings,
 }
 
 

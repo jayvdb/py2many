@@ -8,6 +8,7 @@ from .clike import CLikeTranspiler
 from py2rb import convert_py2rb
 from voc.transpiler import Transpiler as VOCTranspiler
 import transpyle
+from sherlock.codelib.generator import CodeGenerator
 
 TYPING_IMPORTS = ["ctypes", "typing"]
 
@@ -116,3 +117,14 @@ class CTranspiler(CLikeTranspiler):
         translator = transpyle.AutoTranslator(from_language, to_language)
         # Python to C is not supported
         return translator.translate(code)
+
+
+
+class ShellTranspiler(CLikeTranspiler):
+    NAME = "shell"
+
+    def visit(self, node):
+        code = unparse(node)
+
+        generator = CodeGenerator(code)
+        return generator.generate()
