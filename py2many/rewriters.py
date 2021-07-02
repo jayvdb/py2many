@@ -2,7 +2,7 @@ import ast
 import textwrap
 
 from py2many.analysis import get_id
-from py2many.ast_helpers import create_ast_block
+from py2many.ast_helpers import create_ast_block, create_ast_node
 from py2many.clike import CLikeTranspiler
 from py2many.inference import get_inferred_type
 
@@ -157,6 +157,18 @@ class DedentMainRewriter(ast.NodeTransformer):
 
         if is_python_main:
             return create_ast_block(node.body, at_node=node)
+        return node
+
+
+class RestoreMainRewriter(ast.NodeTransformer):
+    def visit_FunctionDef(self, node):
+        is_python_main = getattr(node, "python_main", False)
+
+        if is_python_main:
+            if_block = create_ast_node("if __name__ == '__main__': True", node)
+            if_block.body = node.body
+            ast.fix_missing_locations(if_block)
+            return if_block
         return node
 
 

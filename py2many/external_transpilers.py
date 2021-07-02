@@ -7,6 +7,7 @@ from .clike import CLikeTranspiler
 
 from py2rb import convert_py2rb
 from voc.transpiler import Transpiler as VOCTranspiler
+import transpyle
 
 TYPING_IMPORTS = ["ctypes", "typing"]
 
@@ -87,3 +88,31 @@ class JavaTranspiler(CLikeTranspiler):
         # python https://github.com/Storyyeller/Krakatau/pull/157
         # https://github.com/drstrng/Krakatau-noff
         return out
+
+
+class FortranTranspiler(CLikeTranspiler):
+    NAME = "fortran"
+
+    def visit(self, node):
+        code = unparse(node)
+
+        from_language = transpyle.Language.find('Python 3.6')
+        to_language = transpyle.Language.find('Fortran 95')
+        assert to_language
+        translator = transpyle.AutoTranslator(from_language, to_language)
+        return translator.translate(code)
+
+
+
+class CTranspiler(CLikeTranspiler):
+    NAME = "clang"
+
+    def visit(self, node):
+        code = unparse(node)
+
+        from_language = transpyle.Language.find('Python 3.6')
+        to_language = transpyle.Language.find('C99')
+        assert to_language
+        translator = transpyle.AutoTranslator(from_language, to_language)
+        # Python to C is not supported
+        return translator.translate(code)

@@ -38,6 +38,7 @@ COMPILERS = {
     "kotlin": ["kotlinc"],
     "nim": ["nim", "compile", "--nimcache:."],
     "rust": ["cargo", "script", "--build-only", "--debug"],
+    "fortran": ["gfortran"],
 }
 INVOKER = {
     "dart": ["dart", "--enable-asserts"],

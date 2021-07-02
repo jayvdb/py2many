@@ -8,10 +8,10 @@ from unittest.mock import Mock
 
 from .language import LanguageSettings
 
-from .python_transformer import PythonTranspiler, RestoreMainRewriter
-from .external_transpilers import JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter
+from .python_transformer import PythonTranspiler
+from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter
 
-from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter
+from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter, RestoreMainRewriter
 
 from pycpp.transpiler import CppTranspiler, CppListComparisonRewriter
 from pyrs.inference import infer_rust_types
@@ -208,6 +208,27 @@ def java_settings(args, env=os.environ):
     )
 
 
+def fortran_settings(args, env=os.environ):
+    return LanguageSettings(
+        FortranTranspiler(),
+        ".f95",
+        "Fortran 95",
+        formatter=None,
+        post_rewriters=[RestoreMainRewriter()],
+        #, DowngradeAnnAssignRewriter()],
+    )
+
+
+def c_settings(args, env=os.environ):
+    return LanguageSettings(
+        CTranspiler(),
+        ".c",
+        "C",
+        formatter=None,
+        post_rewriters=[RestoreMainRewriter()],
+        #, DowngradeAnnAssignRewriter()],
+    )
+
 ALL_SETTINGS = {
     "python": python_settings,
     "cpp": cpp_settings,
@@ -219,6 +240,8 @@ ALL_SETTINGS = {
     "go": go_settings,
     "ruby": ruby_settings,
     "java": java_settings,
+    "fortran": fortran_settings,
+    "clang": c_settings,
 }
 
 
