@@ -11,6 +11,7 @@ from voc.transpiler import Transpiler as VOCTranspiler
 TYPING_IMPORTS = ["ctypes", "typing"]
 
 
+# https://github.com/Escape-Technologies/pyuntype
 class DowngradeAnnAssignRewriter(ast.NodeTransformer):
 
     def visit_Import(self, node):
