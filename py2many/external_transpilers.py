@@ -14,7 +14,7 @@ TYPING_IMPORTS = ["ctypes", "typing"]
 
 
 # https://github.com/Escape-Technologies/pyuntype
-class DowngradeAnnAssignRewriter(ast.NodeTransformer):
+class RemoveTypingImportRewriter(ast.NodeTransformer):
 
     def visit_Import(self, node):
         names = [self.visit(n) for n in node.names]
@@ -34,6 +34,8 @@ class DowngradeAnnAssignRewriter(ast.NodeTransformer):
         if node.module in TYPING_IMPORTS:
             return create_noop_node(at_node=node)
         return node
+
+class DowngradeAnnAssignRewriter(ast.NodeTransformer):
 
     def visit_AnnAssign(self, node):
         col_offset = getattr(node, "col_offset", None)
@@ -128,3 +130,17 @@ class ShellTranspiler(CLikeTranspiler):
 
         generator = CodeGenerator(code)
         return generator.generate()
+
+
+
+class SchemeTranspiler(CLikeTranspiler):
+    NAME = "scheme"
+
+    def visit(self, node):
+        from PySchemeTranspiler.converter import Converter
+        code = unparse(node)
+        buf = io.StringIO(code)
+        buf.name = str(node.__file__)
+
+        out = Converter.transpile(buf)
+        return out

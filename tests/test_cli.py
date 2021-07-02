@@ -53,6 +53,7 @@ INVOKER = {
         "/Users/john.vandenberg/transpilers/py2rb/py2rb/builtins/module.rb",
     ],
     "rust": ["cargo", "script"],
+    "racket": ["racket"],
 }
 
 TEST_CASES = [

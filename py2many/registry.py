@@ -9,7 +9,7 @@ from unittest.mock import Mock
 from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler
-from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter, ShellTranspiler
+from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter, ShellTranspiler, SchemeTranspiler, RemoveTypingImportRewriter
 
 from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter, RestoreMainRewriter
 
@@ -194,7 +194,7 @@ def ruby_settings(args, env=os.environ):
         ".rb",
         "Ruby",
         formatter=None,
-        post_rewriters=[DedentMainRewriter(), DowngradeAnnAssignRewriter()],
+        post_rewriters=[DedentMainRewriter(), DowngradeAnnAssignRewriter(), RemoveTypingImportRewriter()],
     )
 
 
@@ -241,6 +241,16 @@ def shell_settings(args, env=os.environ):
     )
 
 
+def scheme_settings(args, env=os.environ):
+    return LanguageSettings(
+        SchemeTranspiler(),
+        ".rkt",
+        "Racket",
+        formatter=None,
+        post_rewriters=[DedentMainRewriter(), RemoveTypingImportRewriter()],
+        #, DowngradeAnnAssignRewriter()],
+    )
+
 ALL_SETTINGS = {
     "python": python_settings,
     "cpp": cpp_settings,
@@ -255,6 +265,7 @@ ALL_SETTINGS = {
     "fortran": fortran_settings,
     "clang": c_settings,
     "shell": shell_settings,
+    "racket": scheme_settings,
 }
 
 
