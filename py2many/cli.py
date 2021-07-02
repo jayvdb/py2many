@@ -125,7 +125,10 @@ def _transpile_one(trees, tree, transpiler, rewriters, transformers, post_rewrit
     # Rerun core transformers
     tree, infer_meta = core_transformers(tree, trees)
     out = []
-    code = transpiler.visit(tree) + "\n"
+    code = transpiler.visit(tree)
+    if isinstance(code, bytes):
+        return code
+    code += "\n"
     headers = transpiler.headers(infer_meta)
     features = transpiler.features()
     if features:
@@ -182,12 +185,12 @@ def _process_one(
     if dunder_init and not source_data:
         print("Detected empty __init__; skipping")
         return True
-    with open(output_path, "w") as f:
-        f.write(
-            _transpile([filename], [source_data], settings,)[
+    output = _transpile([filename], [source_data], settings,)[
                 0
             ][0]
-        )
+    mode = "wb" if isinstance(output, bytes) else "w"
+    with open(output_path, mode) as f:
+        f.write(output)
 
     if settings.formatter:
         return _format_one(settings, output_path, env)

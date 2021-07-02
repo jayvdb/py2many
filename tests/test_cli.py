@@ -183,19 +183,25 @@ class CodeGeneratorTests(unittest.TestCase):
 
         try:
             rv = main(args=args, env=env)
-            with open(case_output) as actual:
-                generated = actual.read()
-                if os.path.exists(expected_filename) and not self.UPDATE_EXPECTED:
-                    with open(expected_filename) as f2:
-                        expected_case_contents = f2.read()
-                        generated_cleaned = generated
-                        if ext == ".py":
-                            expected_case_contents = standardise_python(
-                                expected_case_contents
-                            )
-                            generated_cleaned = standardise_python(generated)
-                        self.assertEqual(expected_case_contents, generated_cleaned)
-                        print("expected = generated")
+            mode = "r"
+            try:
+                with open(case_output, mode) as actual:
+                    generated = actual.read()
+            except UnicodeDecodeError:
+                mode = "rb"
+                with open(case_output, mode) as actual:
+                    generated = actual.read()
+            if os.path.exists(expected_filename) and not self.UPDATE_EXPECTED:
+                with open(expected_filename, mode) as f2:
+                    expected_case_contents = f2.read()
+                    generated_cleaned = generated
+                    if ext == ".py":
+                        expected_case_contents = standardise_python(
+                            expected_case_contents
+                        )
+                        generated_cleaned = standardise_python(generated)
+                    self.assertEqual(expected_case_contents, generated_cleaned)
+                    print("expected = generated")
 
             expect_failure = (
                 not self.SHOW_ERRORS and f"{case}{ext}" in EXPECTED_LINT_FAILURES
