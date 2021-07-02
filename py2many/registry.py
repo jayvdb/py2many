@@ -9,7 +9,7 @@ from unittest.mock import Mock
 from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler, RestoreMainRewriter
-from .external_transpilers import RubyTranspiler, DowngradeAnnAssignRewriter
+from .external_transpilers import JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter
 
 from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter
 
@@ -198,6 +198,16 @@ def ruby_settings(args, env=os.environ):
     )
 
 
+def java_settings(args, env=os.environ):
+    return LanguageSettings(
+        JavaTranspiler(),
+        ".class",
+        "Java",
+        formatter=None,
+        #post_rewriters=[DedentMainRewriter(), DowngradeAnnAssignRewriter()],
+    )
+
+
 ALL_SETTINGS = {
     "python": python_settings,
     "cpp": cpp_settings,
@@ -208,6 +218,7 @@ ALL_SETTINGS = {
     "dart": dart_settings,
     "go": go_settings,
     "ruby": ruby_settings,
+    "java": java_settings,
 }
 
 

@@ -1,10 +1,12 @@
 import ast
+import io
 
 from .analysis import get_id
 from .ast_helpers import create_ast_node, create_noop_node, unparse
 from .clike import CLikeTranspiler
 
 from py2rb import convert_py2rb
+from voc.transpiler import Transpiler as VOCTranspiler
 
 TYPING_IMPORTS = ["ctypes", "typing"]
 
@@ -54,3 +56,33 @@ class RubyTranspiler(CLikeTranspiler):
 
     def usings(self):
         return ""
+
+
+class JavaClassTranspiler(CLikeTranspiler):
+    NAME = "javaclass"
+
+    def visit(self, node):
+        source_data = unparse(node)
+        t = VOCTranspiler(namespace="build")  # to match the tests
+        dir_path = node.__file__.parent
+        t.transpile_string(node.__file__.stem, node)
+        assert t.classfiles
+        print(t.classfiles)
+        _, _, out = t.classfiles[0]
+        print(out.__class__, out.__class__.__module__)
+        buf = io.BytesIO()
+        writer = io.BufferedWriter(buf)
+        out.write(buf)
+        #raise Exception
+        return buf.getvalue()
+
+
+class JavaTranspiler(CLikeTranspiler):
+    NAME = "java"
+
+    def visit(self, node):
+        out = JavaClassTranspiler().visit(node)
+        # use javap -c? nope
+        # python https://github.com/Storyyeller/Krakatau/pull/157
+        # https://github.com/drstrng/Krakatau-noff
+        return out

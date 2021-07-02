@@ -42,6 +42,7 @@ COMPILERS = {
 INVOKER = {
     "dart": ["dart", "--enable-asserts"],
     "go": ["go", "run"],
+    "java": ["java", "-cp", "/Users/john.vandenberg/transpilers/voc/dist/Python-3.8-Java-support.b7.jar:" + str(GENERATED_DIR.parent), "build.{case}"],
     "julia": ["julia", "--compiled-modules=yes"],
     "kotlin": ["kscript"],
     "python": [sys.executable],
@@ -240,7 +241,7 @@ class CodeGeneratorTests(unittest.TestCase):
                 invoker = INVOKER.get(lang)
                 if not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
-                cmd = _create_cmd(invoker, filename=case_output, exe=exe)
+                cmd = _create_cmd(invoker, filename=case_output, exe=exe, case=case)
                 cmd += main_args
                 print(cmd)
                 proc = run(
