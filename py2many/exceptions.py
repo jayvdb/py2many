@@ -1,5 +1,7 @@
 import ast
 
+from .ast_helpers import get_id
+
 
 class AstErrorBase:
     def __init__(self, msg: str, node: ast.AST):
@@ -14,3 +16,13 @@ class AstNotImplementedError(AstErrorBase, NotImplementedError):
 
 class AstIncompatibleAssign(AstErrorBase, TypeError):
     """Assignment target has type annotation that is incompatible with expression"""
+
+
+def print_exception(filename, e):
+    import traceback
+
+    formatted_lines = traceback.format_exc().splitlines()
+    if isinstance(e, AstErrorBase):
+        print(f"{filename}:{e.lineno}:{e.col_offset}: {formatted_lines[-1]}")
+    else:
+        print(f"{filename}: {formatted_lines[-1]}")

@@ -17,7 +17,7 @@ from .analysis import add_imports
 from .annotation_transformer import add_annotation_flags
 
 from .context import add_variable_context, add_list_calls
-from .exceptions import AstErrorBase
+from .exceptions import AstErrorBase, print_exception
 from .inference import infer_types
 from .language import LanguageSettings
 from .mutability_transformer import detect_mutable_vars
@@ -130,13 +130,7 @@ def _transpile(
         except Exception as e:
             if not _suppress_exceptions or not isinstance(e, _suppress_exceptions):
                 raise
-            import traceback
-
-            formatted_lines = traceback.format_exc().splitlines()
-            if isinstance(e, AstErrorBase):
-                print(f"{filename}:{e.lineno}:{e.col_offset}: {formatted_lines[-1]}")
-            else:
-                print(f"{filename}: {formatted_lines[-1]}")
+            print_exception(filename, e)
             outputs[filename] = "FAILED"
     # return output in the same order as input
     output_list = [outputs[f] for f in filenames]
@@ -570,13 +564,7 @@ def main(args=None, env=os.environ):
             try:
                 rv = _process_one(settings, source, outdir, env=env)
             except Exception as e:
-                import traceback
-
-                formatted_lines = traceback.format_exc().splitlines()
-                if isinstance(e, AstErrorBase):
-                    print(f"{source}:{e.lineno}:{e.col_offset}: {formatted_lines[-1]}")
-                else:
-                    print(f"{source}: {formatted_lines[-1]}")
+                print_exception(source, e)
                 rv = False
         else:
             if args.outdir is None:
