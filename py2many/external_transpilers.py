@@ -16,10 +16,12 @@ TYPING_IMPORTS = ["ctypes", "typing"]
 # https://github.com/Escape-Technologies/pyuntype
 class RemoveTypingImportRewriter(ast.NodeTransformer):
 
+    def __init__(self, noop_type=None):
+        self.noop_type = noop_type
+        super().__init__()
+
     def visit_Import(self, node):
         names = [self.visit(n) for n in node.names]
-        print(names)
-        print(names[0].__dict__)
         names = [
             i
             for i in names
@@ -32,7 +34,7 @@ class RemoveTypingImportRewriter(ast.NodeTransformer):
 
     def visit_ImportFrom(self, node):
         if node.module in TYPING_IMPORTS:
-            return create_noop_node(at_node=node)
+            return create_noop_node(at_node=node, noop_type=self.noop_type)
         return node
 
 class DowngradeAnnAssignRewriter(ast.NodeTransformer):
@@ -139,8 +141,14 @@ class SchemeTranspiler(CLikeTranspiler):
     def visit(self, node):
         from PySchemeTranspiler.converter import Converter
         code = unparse(node)
+        print(code)
         buf = io.StringIO(code)
         buf.name = str(node.__file__)
 
-        out = Converter.transpile(buf)
+        try:
+            out = Converter.transpile(buf)
+        except SystemExit as e:
+            if "Set" in str(e):
+                raise
+            return ""
         return out

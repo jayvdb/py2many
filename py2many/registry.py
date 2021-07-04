@@ -247,7 +247,7 @@ def scheme_settings(args, env=os.environ):
         ".rkt",
         "Racket",
         formatter=None,
-        post_rewriters=[DedentMainRewriter(), RemoveTypingImportRewriter()],
+        post_rewriters=[DedentMainRewriter(), RemoveTypingImportRewriter("if False: None"), InferredAnnAssignRewriter()],
         #, DowngradeAnnAssignRewriter()],
     )
 

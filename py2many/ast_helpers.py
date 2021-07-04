@@ -30,5 +30,5 @@ def create_ast_block(body, at_node=None):
     return block
 
 
-def create_noop_node(at_node=None):
-    return create_ast_node("pass", at_node=None)
+def create_noop_node(at_node=None, noop_type="pass"):
+    return create_ast_node(noop_type or "pass", at_node=None)

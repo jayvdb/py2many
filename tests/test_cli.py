@@ -69,6 +69,11 @@ CASE_EXPECTED_EXITCODE = {
     "sys_exit": 1,
 }
 
+# https://github.com/Coronon/PySchemeTranspiler/issues/7
+STRIP_OUTPUT_LANGS = {
+    "racket",
+}
+
 EXTENSION_TEST_CASES = [
     item.stem
     for item in (TESTS_DIR / "ext_cases").glob("*.py")
@@ -275,6 +280,9 @@ class CodeGeneratorTests(unittest.TestCase):
 
             self.assertTrue(stdout, "Invoked code produced no stdout")
             stdout = stdout.splitlines()
+            if lang in STRIP_OUTPUT_LANGS:
+                expected_output = [i.strip() for i in expected_output]
+                stdout = [i.strip() for i in stdout]
             self.assertEqual(expected_output, stdout)
 
             if settings.linter and self.LINT:
