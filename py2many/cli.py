@@ -95,10 +95,16 @@ def _transpile(
     transformers = settings.transformers
     post_rewriters = settings.post_rewriters
     tree_list = []
+    failures = []
     for filename, source in zip(filenames, sources):
-        tree = ast.parse(source)
+        try:
+            tree = ast.parse(source)
+        except SyntaxError:
+            failures.append(filename)
+            continue
         tree.__file__ = filename
         tree_list.append(tree)
+    filenames = [f for f in filenames if f not in failures]
     trees = toposort(tree_list)
     topo_filenames = [t.__file__ for t in trees]
     language = transpiler.NAME
@@ -138,8 +144,10 @@ def _transpile(
             else:
                 print(f"{filename}: {formatted_lines[-1]}")
             outputs[filename] = "FAILED"
+        # if len(outputs) == 140:
+        #    break
     # return output in the same order as input
-    output_list = [outputs[f] for f in filenames]
+    output_list = [outputs[f] for f in filenames if f in outputs]
     return output_list, successful
 
 
@@ -446,12 +454,20 @@ def _process_many(
     settings.transpiler.set_continue_on_unimplemented()
 
     source_data = []
+    failures = []
     for filename in filenames:
-        with open(basedir / filename) as f:
-            source_data.append(f.read())
+        print(f"reading {filename}")
+        try:
+            with open(basedir / filename) as f:
+                source_data.append(f.read())
+        except UnicodeDecodeError:
+            failures.append(filename)
+        except Exception as e:
+            print(filename, e)
+            raise
 
     outputs, successful = _transpile(
-        filenames,
+        [f for f in filenames if f not in failures],
         source_data,
         settings,
         _suppress_exceptions=_suppress_exceptions,
