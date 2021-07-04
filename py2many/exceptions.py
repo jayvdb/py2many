@@ -14,6 +14,15 @@ class AstNotImplementedError(AstErrorBase, NotImplementedError):
     """Node is not supported by the transpiler"""
 
 
+class AstUnrecognisedBinOp(AstNotImplementedError):
+    """BinOp using unrecognised combination"""
+
+    def __init__(self, left_id: str, right_id: str, node: ast.AST):
+        self.lineno = node.lineno
+        self.col_offset = node.col_offset
+        super().__init__(f"{left_id} {type(node.op)} {right_id}", node)
+
+
 class AstMissingChild(AstNotImplementedError):
     """Node contains missing child"""
 
