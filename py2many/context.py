@@ -21,6 +21,8 @@ class ListCallTransformer(ast.NodeTransformer):
     def visit_Call(self, node):
         if self.is_list_addition(node):
             var = node.scopes.find(node.func.value.id)
+            if not hasattr(var, "assigned_from"):
+                return node
             if var is not None and self.is_list_assignment(var.assigned_from):
                 if not hasattr(var, "calls"):
                     var.calls = []
