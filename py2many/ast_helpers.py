@@ -1,4 +1,5 @@
 import ast
+import sys
 
 try:
     from ast import unparse

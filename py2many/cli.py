@@ -68,6 +68,16 @@ ROOT_DIR = PY2MANY_DIR.parent
 CWD = pathlib.Path.cwd()
 
 
+def _print_exception(filename, e):
+    import traceback
+
+    formatted_lines = traceback.format_exc().splitlines()
+    if isinstance(e, AstErrorBase):
+        print(f"{filename}:{e.lineno}:{e.col_offset}: {formatted_lines[-1]}")
+    else:
+        print(f"{filename}: {formatted_lines[-1]}")
+
+
 def core_transformers(tree, trees):
     add_variable_context(tree, trees)
     add_scope_context(tree)
@@ -125,13 +135,7 @@ def _transpile(
             successful.append(filename)
             outputs[filename] = output
         except Exception as e:
-            import traceback
-
-            formatted_lines = traceback.format_exc().splitlines()
-            if isinstance(e, AstErrorBase):
-                print(f"{filename}:{e.lineno}:{e.col_offset}: {formatted_lines[-1]}")
-            else:
-                print(f"{filename}: {formatted_lines[-1]}")
+            _print_exception(filename, e)
             outputs[filename] = "FAILED"
     # return output in the same order as input
     output_list = [outputs[f] for f in filenames]
@@ -559,13 +563,7 @@ def main(args=None, env=os.environ):
             try:
                 rv = _process_one(settings, source, outdir, env=env)
             except Exception as e:
-                import traceback
-
-                formatted_lines = traceback.format_exc().splitlines()
-                if isinstance(e, AstErrorBase):
-                    print(f"{source}:{e.lineno}:{e.col_offset}: {formatted_lines[-1]}")
-                else:
-                    print(f"{source}: {formatted_lines[-1]}")
+                _print_exception(source, e)
                 rv = False
         else:
             if args.outdir is None:
