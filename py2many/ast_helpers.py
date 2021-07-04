@@ -1,6 +1,8 @@
 import ast
-from py2many.astx import ASTxIf
+
 from typing import cast
+
+from py2many.astx import ASTxIf
 
 try:
     from ast import unparse  # noqa: introduced in py3.9
