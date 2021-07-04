@@ -412,6 +412,16 @@ class InferTypesTransformer(ast.NodeTransformer):
                 node.annotation = ast.Name(id="float")
             return node
 
+        # Container multiplication
+        if isinstance(node.op, ast.Mult) and {left_id, right_id} in [
+            {"bytes", "int"},
+            {"str", "int"},
+            {"tuple", "int"},
+            {"List", "int"},
+        ]:
+            node.annotation = ast.Name(id=left_id)
+            return node
+
         # Does this hold across all languages?
         if left_id == "int":
             left_id = "c_int32"
@@ -433,26 +443,32 @@ class InferTypesTransformer(ast.NodeTransformer):
                     return node
             node.annotation = left
             return node
-        else:
-            if left_id in self.FIXED_WIDTH_INTS_NAME:
-                left_id = "int"
-            if right_id in self.FIXED_WIDTH_INTS_NAME:
-                right_id = "int"
-            if (left_id, right_id) in {("int", "float"), ("float", "int")}:
-                node.annotation = ast.Name(id="float")
-                return node
 
-            LEGAL_COMBINATIONS = {
-                ("str", ast.Mult),
-                ("str", ast.Mod),
-                ("List", ast.Add),
-            }
+        if left_id in self.FIXED_WIDTH_INTS_NAME:
+            left_id = "int"
+        if right_id in self.FIXED_WIDTH_INTS_NAME:
+            right_id = "int"
+        if (left_id, right_id) in {("int", "float"), ("float", "int")}:
+            node.annotation = ast.Name(id="float")
+            return node
 
-            if (
-                left_id is not None
-                and (left_id, type(node.op)) not in LEGAL_COMBINATIONS
-            ):
-                raise AstUnrecognisedBinOp(left_id, right_id, node)
+        # Container multiplication
+        if isinstance(node.op, ast.Mult) and {left_id, right_id} in [
+            {"bytes", "int"},
+            {"str", "int"},
+            {"tuple", "int"},
+            {"List", "int"},
+        ]:
+            node.annotation = ast.Name(id=left_id)
+            return node
+
+        LEGAL_COMBINATIONS = {
+            ("str", ast.Mod),
+            ("List", ast.Add),
+        }
+
+        if left_id is not None and (left_id, type(node.op)) not in LEGAL_COMBINATIONS:
+            raise AstUnrecognisedBinOp(left_id, right_id, node)
 
         return node
 
