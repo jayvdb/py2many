@@ -98,7 +98,7 @@ def class_for_typename(typename, default_type, locals=None) -> Union[str, object
         # and pass them into eval
         typeclass = eval(typename, globals(), locals)
         return typeclass
-    except (NameError, SyntaxError, AttributeError, TypeError):
+    except (NameError, SyntaxError, AttributeError, TypeError, UnicodeEncodeError, ValueError):
         logger.info(f"could not evaluate {typename}")
         return default_type
 
