@@ -412,6 +412,16 @@ class InferTypesTransformer(ast.NodeTransformer):
                 node.annotation = ast.Name(id="float")
             return node
 
+        # Container multiplication
+        if isinstance(node.op, ast.Mult) and {left_id, right_id} in [
+            {"bytes", "int"},
+            {"str", "int"},
+            {"tuple", "int"},
+            {"List", "int"},
+        ]:
+            node.annotation = ast.Name(id=left_id)
+            return node
+
         # Does this hold across all languages?
         if left_id == "int":
             left_id = "c_int32"

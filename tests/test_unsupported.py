@@ -67,6 +67,7 @@ TEST_CASES = {
     "fstring": "assert f'{1+1}'",  # https://github.com/adsharma/py2many/issues/74
     "str_format": "ab = '{}{}'.format('a', 'b')",  # https://github.com/adsharma/py2many/issues/73
     "percent_formatting": "a = '~ %s ~' % 'a'",  # https://github.com/adsharma/py2many/issues/176
+    "str_mult": "'a' * 4",
     "nested_func": dedent(
         """
         def foo():
@@ -156,6 +157,7 @@ EXPECTED_SUCCESSES = [
     "simple_dict.nim",
     "simple_dict.rs",
     "str_format.kt",
+    "str_mult.dart",
     "tuple_destruct.jl",
 ]
 
