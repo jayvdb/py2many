@@ -24,7 +24,7 @@ from py2many.analysis import (
 )
 from py2many.clike import class_for_typename
 from py2many.declaration_extractor import DeclarationExtractor
-from py2many.exceptions import AstClassUsedBeforeDeclaration
+from py2many.exceptions import AstClassUsedBeforeDeclaration, AstMissingChild
 from py2many.inference import is_reference
 from py2many.tracer import is_list, defined_before, is_class_or_module
 
@@ -194,6 +194,10 @@ class RustTranspiler(CLikeTranspiler):
         return super().visit_Expr(node)
 
     def visit_FunctionDef(self, node, async_prefix=""):
+        stmts = [self.visit(n) for n in node.body]
+        if any(i is None for i in stmts):
+            # Occurs for `async for`
+            raise AstMissingChild(node)
         body = "\n".join([self.visit(n) for n in node.body])
         typenames, args = self.visit(node.args)
 
@@ -395,6 +399,8 @@ class RustTranspiler(CLikeTranspiler):
         else:
             ref_args = vargs
 
+        if any(i is None for i in ref_args):
+            raise AstMissingChild(node)
         args = ", ".join(ref_args)
         unwrap = "?" if node_result_type or node_func_result_type else ""
         return f"{fname}({args}){unwrap}"
@@ -720,6 +726,8 @@ class RustTranspiler(CLikeTranspiler):
 
     def visit_Tuple(self, node):
         elts = [self.visit(e) for e in node.elts]
+        if any(i is None for i in elts):
+            raise AstMissingChild(node)
         elts = ", ".join(elts)
         if hasattr(node, "is_annotation"):
             return elts

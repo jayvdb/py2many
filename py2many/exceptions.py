@@ -41,6 +41,15 @@ class AstIncompatibleAssign(AstErrorBase, TypeError):
     """Assignment target has type annotation that is incompatible with expression"""
 
 
+class AstMissingChild(AstNotImplementedError):
+    """Node contains missing child"""
+
+    def __init__(self, node: ast.AST):
+        self.lineno = node.lineno
+        self.col_offset = node.col_offset
+        super().__init__(f"{get_id(node) or 'function'} has an empty child", node)
+
+
 class AstEmptyNodeFound(TypeError):
     def __init__(self):
         super().__init__("node can not be None")
