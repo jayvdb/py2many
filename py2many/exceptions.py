@@ -14,6 +14,15 @@ class AstNotImplementedError(AstErrorBase, NotImplementedError):
     """Node is not supported by the transpiler"""
 
 
+class AstMissingChild(AstNotImplementedError):
+    """Node contains missing child"""
+
+    def __init__(self, node: ast.AST):
+        self.lineno = node.lineno
+        self.col_offset = node.col_offset
+        super().__init__(f"{get_id(node) or 'function'} has an empty child", node)
+
+
 class AstIncompatibleAssign(AstErrorBase, TypeError):
     """Assignment target has type annotation that is incompatible with expression"""
 
