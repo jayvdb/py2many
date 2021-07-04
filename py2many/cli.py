@@ -81,7 +81,10 @@ def core_transformers(tree, trees):
 
 
 def _transpile(
-    filenames: List[pathlib.Path], sources: List[str], settings: LanguageSettings
+    filenames: List[pathlib.Path],
+    sources: List[str],
+    settings: LanguageSettings,
+    _suppress_exceptions=Exception,
 ):
     """
     Transpile a single python translation unit (a python script) into
@@ -125,6 +128,8 @@ def _transpile(
             successful.append(filename)
             outputs[filename] = output
         except Exception as e:
+            if not _suppress_exceptions or not isinstance(e, _suppress_exceptions):
+                raise
             import traceback
 
             formatted_lines = traceback.format_exc().splitlines()
@@ -433,7 +438,7 @@ FileSet = Set[pathlib.Path]
 
 
 def _process_many(
-    settings, basedir, filenames, outdir, env=None
+    settings, basedir, filenames, outdir, env=None, _suppress_exceptions=Exception
 ) -> Tuple[FileSet, FileSet]:
     """Transpile and reformat many files."""
 
@@ -449,6 +454,7 @@ def _process_many(
         filenames,
         source_data,
         settings,
+        _suppress_exceptions=_suppress_exceptions,
     )
 
     output_paths = [
@@ -470,7 +476,7 @@ def _process_many(
     return (successful, format_errors)
 
 
-def _process_dir(settings, source, outdir, env=None, _suppress_exceptions=True):
+def _process_dir(settings, source, outdir, env=None, _suppress_exceptions=Exception):
     print(f"Transpiling whole directory to {outdir}:")
     successful = []
     failures = []
@@ -488,7 +494,12 @@ def _process_dir(settings, source, outdir, env=None, _suppress_exceptions=True):
         input_paths.append(relative_path)
 
     successful, format_errors = _process_many(
-        settings, source, input_paths, outdir, env=env
+        settings,
+        source,
+        input_paths,
+        outdir,
+        env=env,
+        _suppress_exceptions=_suppress_exceptions,
     )
     failures = set(input_paths) - set(successful)
 
