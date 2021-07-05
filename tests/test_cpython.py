@@ -15,7 +15,7 @@ from py2many.cli import _get_all_settings, _transpile, _print_exception
 from py2many.exceptions import (
     AstNotImplementedError,
     AstMissingChild,
-    AstEmptyNodeFound,
+    AstIncompatibleLifetime,
     AstUnrecognisedBinOp,
 )
 
@@ -35,7 +35,7 @@ CYTHON_TEST_FILES = [
 class CPythonTests(unittest.TestCase):
     SETTINGS = _get_all_settings(Mock(indent=4, extension=False))
 
-    @foreach(LANGS)
+    @foreach(list(set(LANGS) - {"python"}))
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
         if SHOW_ERRORS and lang in ["rust", "python"]:
@@ -66,12 +66,13 @@ class CPythonTests(unittest.TestCase):
             AstUnrecognisedBinOp,
             AstMissingChild,
             SyntaxError,
+            AstIncompatibleLifetime,
             AssertionError,
         ) as e:
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         except AstNotImplementedError as e:
             _print_exception(filename, e)
-            if "Missing decla" in str(e) or "should start with &" in str(e) or "node can not be None" in str(e):
+            if "Missing decla" in str(e):  # or "node can not be None" in str(e):
                 raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
             if SHOW_ERRORS:
                 raise

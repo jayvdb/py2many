@@ -131,6 +131,7 @@ def _transpile(
     outputs = {}
     successful = []
     for filename, tree in zip(topo_filenames, trees):
+        print("processing", filename)
         try:
             output = _transpile_one(
                 trees, tree, transpiler, rewriters, transformers, post_rewriters

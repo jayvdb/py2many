@@ -305,6 +305,8 @@ class CLikeTranspiler(ast.NodeVisitor):
             except Exception as e:
                 if isinstance(e, _InternalErrorBase):
                     raise AstNotImplementedError(e, node) from e
+                if hasattr(node, "lineno"):
+                    print(node.lineno)
                 raise
 
     def visit_Pass(self, node):
