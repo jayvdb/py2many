@@ -18,7 +18,7 @@ from py2many.exceptions import (
     AstUnrecognisedBinOp,
 )
 
-from tests.test_cli import SHOW_ERRORS
+from tests.test_cli import LANGS, SHOW_ERRORS
 
 TESTS_DIR = Path(__file__).parent
 OUT_DIR = TESTS_DIR / "output"
@@ -34,7 +34,7 @@ CYTHON_TEST_FILES = [
 class CPythonTests(unittest.TestCase):
     SETTINGS = _get_all_settings(Mock(indent=4, extension=False))
 
-    @foreach(["python", "rust"])
+    @foreach(LANGS)
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
         if filename == "datetimetester":
