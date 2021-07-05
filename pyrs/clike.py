@@ -43,7 +43,7 @@ class CLikeTranspiler(CommonCLikeTranspiler):
     def _map_type(self, typename, lifetime=LifeTime.UNKNOWN) -> str:
         ret = super()._map_type(typename, lifetime)
         if lifetime == LifeTime.STATIC:
-            assert ret[0] == "&", f"{ret[0]} should be &"
+            assert ret[0] == "&", f"{ret} should start with &"
             return f"&'static {ret[1:]}"
         return ret
 
