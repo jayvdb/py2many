@@ -102,7 +102,7 @@ def class_for_typename(typename, default_type, locals=None) -> Union[str, object
         logger.info(f"could not evaluate {typename}")
         return default_type
     except (ValueError, UnicodeEncodeError) as e:
-        ctx = list(_globals.keys()) + list(locals.keys())
+        ctx = sorted(list(_globals.keys()) + list(locals.keys()))
         print(f"could not evaluate {typename} within {ctx}")
         raise e
 
