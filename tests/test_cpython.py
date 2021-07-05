@@ -60,7 +60,7 @@ class CPythonTests(unittest.TestCase):
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         except AstNotImplementedError as e:
             print_exception(filename, e)
-            if "Missing decla" in str(e):
+            if "Missing decla" in str(e) or "U should be &" in str(e):
                 raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
             if SHOW_ERRORS:
                 raise
