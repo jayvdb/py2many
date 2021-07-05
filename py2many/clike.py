@@ -92,14 +92,19 @@ def class_for_typename(typename, default_type, locals=None) -> Union[str, object
     if typename == "super" or typename.startswith("super()"):
         # Cant eval super; causes RuntimeError
         return None
+    _globals = globals()
     try:
         # TODO: take into account any imports happening in the file being parsed
         # and pass them into eval
-        typeclass = eval(typename, globals(), locals)
+        typeclass = eval(typename, _globals, locals)
         return typeclass
     except (NameError, SyntaxError, AttributeError, TypeError):
         logger.info(f"could not evaluate {typename}")
         return default_type
+    except (ValueError, UnicodeEncodeError) as e:
+        ctx = list(_globals.keys()) + list(locals.keys())
+        print(f"could not evaluate {typename} within {ctx}")
+        raise e
 
 
 def c_symbol(node):
