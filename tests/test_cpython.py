@@ -15,6 +15,7 @@ from py2many.cli import _get_all_settings, _transpile, _print_exception
 from py2many.exceptions import (
     AstNotImplementedError,
     AstMissingChild,
+    AstClassUsedBeforeDeclaration,
     AstIncompatibleLifetime,
     AstUnrecognisedBinOp,
 )
@@ -67,13 +68,14 @@ class CPythonTests(unittest.TestCase):
             AstMissingChild,
             SyntaxError,
             AstIncompatibleLifetime,
+            AstClassUsedBeforeDeclaration,
             AssertionError,
         ) as e:
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         except AstNotImplementedError as e:
             _print_exception(filename, e)
-            if "Missing decla" in str(e):  # or "node can not be None" in str(e):
-                raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
+            #if "Missing decla" in str(e):  # or "node can not be None" in str(e):
+            #    raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
             if SHOW_ERRORS:
                 raise
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")

@@ -16,7 +16,7 @@ from .plugins import (
 from py2many.analysis import get_id, is_mutable, is_void_function
 from py2many.clike import class_for_typename
 from py2many.declaration_extractor import DeclarationExtractor
-from py2many.exceptions import AstClassUsedBeforeDeclaration
+from py2many.exceptions import AstClassUsedBeforeDeclaration, AstMissingChild
 from py2many.tracer import is_list, defined_before
 
 from typing import List
@@ -77,7 +77,10 @@ class NimTranspiler(CLikeTranspiler):
         return f"# {text}\n"
 
     def visit_FunctionDef(self, node):
-        body = "\n".join([self.indent(self.visit(n)) for n in node.body])
+        stmts = [self.visit(n) for n in node.body]
+        if any(i is None for i in stmts):
+            raise AstMissingChild(node)
+        body = "\n".join(stmts)
         typenames, args = self.visit(node.args)
 
         is_python_main = getattr(node, "python_main", False)
@@ -197,8 +200,13 @@ class NimTranspiler(CLikeTranspiler):
 
         if node.args:
             vargs += [self.visit(a) for a in node.args]
+            if any(i is None for i in vargs):
+                raise AstMissingChild(node)
+
         if node.keywords:
             vargs += [self.visit(kw.value) for kw in node.keywords]
+            if any(i is None for i in vargs):
+                raise AstMissingChild(node)
 
         ret = self._dispatch(node, fname, vargs)
         if ret is not None:
