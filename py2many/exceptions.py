@@ -29,6 +29,8 @@ class AstUnrecognisedBinOp(AstNotImplementedError):
 
 class AstClassUsedBeforeDeclaration(AstNotImplementedError):
     """Class usage found before prior to its declaration"""
+    def __init__(self, fndef, node: ast.AST):
+        super().__init__(f"Declaration of {get_id(fndef)} not yet parsed", node)
 
     def __init__(self, fndef, node: ast.AST):
         super().__init__(f"Declaration of {get_id(fndef)} not yet parsed", node)

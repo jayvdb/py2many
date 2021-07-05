@@ -24,7 +24,7 @@ from py2many.analysis import (
 )
 from py2many.clike import class_for_typename
 from py2many.declaration_extractor import DeclarationExtractor
-from py2many.exceptions import AstClassUsedBeforeDeclaration, AstMissingChild
+from py2many.exceptions import AstClassUsedBeforeDeclaration, AstMissingChild, AstMissingChild
 from py2many.inference import is_reference
 from py2many.tracer import is_list, defined_before, is_class_or_module
 
