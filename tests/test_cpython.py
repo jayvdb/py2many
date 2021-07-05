@@ -13,15 +13,18 @@ except ImportError:
     raise unittest.SkipTest("CPython 'test' not installed")
 
 from py2many.cli import _get_all_settings, _transpile
-from py2many.exceptions import AstNotImplementedError
+from py2many.exceptions import (
+    AstNotImplementedError,
+    AstMissingChild,
+    AstUnrecognisedBinOp,
+    print_exception,
+)
 
-SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
+from tests.test_cli import SHOW_ERRORS
 
 TESTS_DIR = Path(__file__).parent
-ROOT_DIR = TESTS_DIR.parent
 OUT_DIR = TESTS_DIR / "output"
 CYTHON_TEST_DIR = Path(test.__file__).parent
-dunder_init_dot_py = "__init__.py"
 
 CYTHON_TEST_FILES = [
     str(Path(f).relative_to(CYTHON_TEST_DIR))[:-3]
@@ -33,11 +36,11 @@ CYTHON_TEST_FILES = [
 class CPythonTests(unittest.TestCase):
     SETTINGS = _get_all_settings(Mock(indent=4, extension=False))
 
+    @foreach(["python", "rust"])
     @foreach(CYTHON_TEST_FILES)
-    def test_cpython_test(self, filename):
-
-        settings = self.SETTINGS["python"]
+    def test_cpython_test(self, filename, lang):
         filename += ".py"
+        settings = self.SETTINGS[lang]
         filename = CYTHON_TEST_DIR.joinpath(filename)
         with open(filename) as f:
             try:
@@ -48,7 +51,19 @@ class CPythonTests(unittest.TestCase):
             output_list, successful = _transpile(
                 [filename], [source_data], settings, _suppress_exceptions=None
             )
-        except (AstNotImplementedError, SyntaxError) as e:
+        except (
+            AstUnrecognisedBinOp,
+            AstMissingChild,
+            SyntaxError,
+            AssertionError,
+        ) as e:
+            raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
+        except AstNotImplementedError as e:
+            print_exception(filename, e)
+            if "Missing decla" in str(e):
+                raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
+            if SHOW_ERRORS:
+                raise
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         assert output_list
         assert successful
