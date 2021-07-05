@@ -707,7 +707,7 @@ class RustTranspiler(CLikeTranspiler):
             if is_dict:
                 value_type = getattr(node.value.annotation, "container_type", None)
                 index_typename = get_inferred_rust_type(self._slice_value(node))
-                if index_typename == value_type[1][0]:
+                if value_type and index_typename == value_type[1][0]:
                     index = "&" + index
         return "{0}[{1}]".format(value, index)
 
