@@ -830,7 +830,8 @@ class RustTranspiler(CLikeTranspiler):
                 value = "None"
             return "{0} = {1};".format(target, value)
 
-        definition = node.scopes.find(target.id)
+        # could be Starred
+        definition = node.scopes.find(get_id(target))
         if isinstance(target, ast.Name) and defined_before(definition, node):
             needs_cast = self._needs_cast(target, node.value)
             target_str = self.visit(target)
