@@ -108,6 +108,8 @@ class DeclarationExtractor(ast.NodeVisitor):
         if self.is_member(target):
             if target.attr not in self.member_assignments:
                 self.member_assignments[target.attr] = node.value
+        elif isinstance(node, ast.Subscript):
+            pass
         else:
             node.class_assignment = True
             target = get_id(target)
@@ -116,6 +118,10 @@ class DeclarationExtractor(ast.NodeVisitor):
 
     def is_member(self, node):
         if hasattr(node, "value"):
+            if isinstance(node, ast.Subscript):
+                # Avoid `self[x] = y` being a member
+                return False
+            print(node.value, node.value.__dict__)
             if self.transpiler.visit(node.value) == "self":
                 return True
         return False
