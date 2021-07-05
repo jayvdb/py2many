@@ -13,8 +13,9 @@ from .plugins import (
 )
 
 from py2many.analysis import get_id, is_void_function
-from py2many.declaration_extractor import DeclarationExtractor
 from py2many.clike import _AUTO_INVOKED, class_for_typename
+from py2many.declaration_extractor import DeclarationExtractor
+from py2many.exceptions import AstNotImplementedError
 from py2many.tracer import is_list, defined_before, is_class_or_module, is_enum
 
 from typing import List, Tuple
@@ -24,7 +25,11 @@ class JuliaMethodCallRewriter(ast.NodeTransformer):
     def visit_Call(self, node):
         fname = node.func
         if isinstance(fname, ast.Attribute):
-            if is_list(node.func.value) and fname.attr == "append":
+            try:
+                rv = is_list(node.func.value)
+            except RecursionError as e:
+                raise AstNotImplementedError(e, node) from e
+            if rv and fname.attr == "append":
                 new_func_name = "push!"
             else:
                 new_func_name = fname.attr
