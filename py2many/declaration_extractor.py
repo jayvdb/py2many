@@ -107,7 +107,7 @@ class DeclarationExtractor(ast.NodeVisitor):
 
     def visit_Assign(self, node):
         target = node.targets[0]
-        if self.is_member(target):
+        if self.is_member(target) and hasattr(target, "attr"):  # ast.Subscript has no .attr
             if target.attr not in self.member_assignments:
                 self.member_assignments[target.attr] = node.value
         else:
