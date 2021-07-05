@@ -1,6 +1,7 @@
 import ast
 
 from py2many.clike import CLikeTranspiler as CommonCLikeTranspiler, LifeTime
+from py2many.exceptions import IncompatibleLifetime
 
 from .inference import (
     RUST_RANK_TO_TYPE,
@@ -43,7 +44,8 @@ class CLikeTranspiler(CommonCLikeTranspiler):
     def _map_type(self, typename, lifetime=LifeTime.UNKNOWN) -> str:
         ret = super()._map_type(typename, lifetime)
         if lifetime == LifeTime.STATIC:
-            assert ret[0] == "&", f"{ret} should start with &"
+            if ret[0] != "&":
+                raise IncompatibleLifetime(f"{ret} does not have a static lifetime")
             return f"&'static {ret[1:]}"
         return ret
 

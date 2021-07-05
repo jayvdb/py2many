@@ -8,7 +8,7 @@ import sys
 import time
 
 from pathlib import Path
-from typing import Any, Dict, OrderedDict
+from typing import Any, Dict, List, Optional, OrderedDict, Tuple, Union
 
 # Fixed width ints and aliases
 from ctypes import (
@@ -42,9 +42,10 @@ from py2many.exceptions import (
     AstCouldNotInfer,
     AstEmptyNodeFound,
     AstNotImplementedError,
-)
+    IncompatibleLifetime,
+    AstIncompatibleLifetime,
+    _InternalErrorBase,
 from py2many.result import Result
-from typing import List, Optional, Tuple, Union
 
 os.path  # silence pyflakes
 math.pi  # silence pyflakes
@@ -206,9 +207,15 @@ class CLikeTranspiler(ast.NodeVisitor):
 
     def _typename_from_type_node(self, node) -> Union[List, str, None]:
         if isinstance(node, ast.Name):
-            return self._map_type(
-                get_id(node), getattr(node, "lifetime", LifeTime.UNKNOWN)
-            )
+            try:
+                return self._map_type(
+                    get_id(node), getattr(node, "lifetime", LifeTime.UNKNOWN)
+                )
+            except IncompatibleLifetime as e:
+                if hasattr(node, "lineno"):
+                    raise AstIncompatibleLifetime(e, node)
+                else:
+                    raise
         elif isinstance(node, ast.ClassDef):
             return get_id(node)
         elif isinstance(node, ast.Tuple):
@@ -259,7 +266,10 @@ class CLikeTranspiler(ast.NodeVisitor):
         typename = default_type
         if hasattr(node, attr):
             type_node = getattr(node, attr)
-            typename = self._typename_from_type_node(type_node)
+            try:
+                typename = self._typename_from_type_node(type_node)
+            except IncompatibleLifetime as e:
+                raise AstIncompatibleLifetime(e, node)
             if isinstance(type_node, ast.Subscript):
                 node.container_type = type_node.container_type
                 return self._visit_container_type(type_node.container_type)
@@ -290,8 +300,12 @@ class CLikeTranspiler(ast.NodeVisitor):
                 return super().visit(node)
             except AstNotImplementedError:
                 raise
-            except Exception as e:
+            except NotImplementedError as e:
                 raise AstNotImplementedError(e, node) from e
+            except Exception as e:
+                if isinstance(e, _InternalErrorBase):
+                    raise AstNotImplementedError(e, node) from e
+                raise
 
     def visit_Pass(self, node):
         return self.comment("pass")

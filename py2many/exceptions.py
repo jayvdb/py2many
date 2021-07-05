@@ -3,6 +3,10 @@ import ast
 from .ast_helpers import get_id
 
 
+class _InternalErrorBase:
+    """Errors occurring when a node with lineno is not available"""
+
+
 class AstErrorBase:
     def __init__(self, msg: str, node: ast.AST):
         self.lineno = node.lineno
@@ -41,6 +45,14 @@ class AstIncompatibleAssign(AstErrorBase, TypeError):
     """Assignment target has type annotation that is incompatible with expression"""
 
 
+class IncompatibleLifetime(_InternalErrorBase, AssertionError):
+    """Type is not supported in this context due to incompatible lifetime"""
+
+
+class AstIncompatibleLifetime(AstNotImplementedError, IncompatibleLifetime):
+    """Type is not supported in this context due to incompatible lifetime"""
+
+
 class AstMissingChild(AstNotImplementedError):
     """Node contains missing child"""
 
@@ -50,6 +62,6 @@ class AstMissingChild(AstNotImplementedError):
         super().__init__(f"{get_id(node) or 'function'} has an empty child", node)
 
 
-class AstEmptyNodeFound(TypeError):
+class AstEmptyNodeFound(_InternalErrorBase, TypeError):
     def __init__(self):
         super().__init__("node can not be None")
