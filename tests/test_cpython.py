@@ -38,14 +38,16 @@ class CPythonTests(unittest.TestCase):
     @foreach(LANGS)
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
-        if filename == "datetimetester":
-            return  # Fails with ValueError
-        elif filename == "test_array":
-            return  # the assigned_from isnt being set, which is odd
-        elif filename == "test_bisect":
-            return  # list() fails
-        elif filename == "test_pathlib":
-            return  # '\udfff' causes UnicodeEncodeError
+        if SHOW_ERRORS and lang in ["rust", "python"]:
+            if filename == "test_array":
+                return  # the assigned_from isnt being set, which is odd
+        if SHOW_ERRORS and lang in ["rust"]:
+            if filename == "datetimetester":
+                return  # Fails with ValueError
+            elif filename == "test_bisect":
+                return  # list() fails
+            elif filename == "test_pathlib":
+                return  # '\udfff' causes UnicodeEncodeError
 
         filename += ".py"
 
