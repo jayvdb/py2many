@@ -59,6 +59,8 @@ class CPythonTests(unittest.TestCase):
             raise unittest.SkipTest("causes UnicodeEncodeError")
         if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_io":
             raise unittest.SkipTest("causes RecursionError")  # https://github.com/adsharma/py2many/issues/376
+        if SHOW_ERRORS and lang in ["kotlin"] and filename == "test_print":
+            raise unittest.SkipTest("AttributeError: 'If' object has no attribute 'body_vars'")
 
         filename += ".py"
 
