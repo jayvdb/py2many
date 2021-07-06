@@ -55,8 +55,10 @@ class CPythonTests(unittest.TestCase):
         #    return  # list() fails; plugin args IndexError
         if SHOW_ERRORS and lang in ["cpp", "go"] and filename in ["ann_module", "ann_module2", "ann_module3"]:
             return
-        if SHOW_ERRORS and lang in ["dart"] and filename == "test_codecs":
+        if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_codecs":
             raise unittest.SkipTest("causes UnicodeEncodeError")
+        if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_io":
+            raise unittest.SkipTest("causes RecursionError")  # https://github.com/adsharma/py2many/issues/376
 
         filename += ".py"
 
