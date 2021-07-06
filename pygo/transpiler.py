@@ -18,7 +18,7 @@ from .plugins import (
 from py2many.analysis import IGNORED_MODULE_SET, get_id, is_global, is_void_function
 from py2many.clike import _AUTO_INVOKED, class_for_typename
 from py2many.declaration_extractor import DeclarationExtractor
-from py2many.exceptions import AstClassUsedBeforeDeclaration, AstCouldNotInfer
+from py2many.exceptions import AstClassUsedBeforeDeclaration, AstCouldNotInfer, AstMissingChild
 from py2many.rewriters import capitalize_first, rename, camel_case
 from py2many.tracer import is_list, defined_before, is_class_or_module, is_enum
 
@@ -161,7 +161,10 @@ class GoTranspiler(CLikeTranspiler):
         return f"// {text}\n"
 
     def visit_FunctionDef(self, node):
-        body = "\n".join([self.visit(n) for n in node.body])
+        stmts = [self.visit(n) for n in node.body]
+        if any(i is None for i in stmts):
+            raise AstMissingChild(node)
+        body = "\n".join(stmts)
         typenames, args = self.visit(node.args)
 
         if len(typenames) and typenames[0] == None and hasattr(node, "self_type"):
