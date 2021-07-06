@@ -9,7 +9,7 @@ from unittest.mock import Mock
 from .language import LanguageSettings
 
 from .python_transformer import PythonTranspiler
-from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter, ShellTranspiler, SchemeTranspiler, RemoveTypingImportRewriter
+from .external_transpilers import CTranspiler, FortranTranspiler, JavaTranspiler, RubyTranspiler, DowngradeAnnAssignRewriter, ShellTranspiler, RacketTranspiler, RemoveTypingImportRewriter
 
 from .rewriters import InferredAnnAssignRewriter, DedentMainRewriter, RestoreMainRewriter
 
@@ -241,9 +241,9 @@ def shell_settings(args, env=os.environ):
     )
 
 
-def scheme_settings(args, env=os.environ):
+def racket_settings(args, env=os.environ):
     return LanguageSettings(
-        SchemeTranspiler(),
+        RacketTranspiler(),
         ".rkt",
         "Racket",
         formatter=None,
@@ -265,7 +265,7 @@ ALL_SETTINGS = {
     "fortran": fortran_settings,
     "clang": c_settings,
     "shell": shell_settings,
-    "racket": scheme_settings,
+    "racket": racket_settings,
 }
 
 

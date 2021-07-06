@@ -171,6 +171,29 @@ class CodeGeneratorTests(unittest.TestCase):
         if lang != "rust" and case in RUST_ONLY_CASES:
             assert not os.path.exists(expected_filename)
             raise unittest.SkipTest(f"{case} is rust only")
+        if lang == "ruby" and case in ["int_enum", "str_enum", "rect", "comb_sort", "byte_literals", "exceptions"]:
+            # rect: dataclasses
+            # enum: multi inheritance
+            # exceptions https://github.com/naitoh/py2rb/issues/10
+            # comb_sort https://github.com/naitoh/py2rb/issues/15
+            # byte_literals: https://github.com/naitoh/py2rb/issues/14
+            assert not os.path.exists(expected_filename)
+            raise unittest.SkipTest(f"{case} not supported on {lang}")
+        if lang == "racket" and case in ["bitops", "byte_literals", "bubble_sort", "comb_sort", "coverage", "int_enum", "str_enum", "sys_exit", "sys_argv", "rect", "set", "dict", "nested_dict", "langcomp_bench", "lambda", "infer_ops", "global2", "fstring", "fib", "exceptions"]:
+            # byte_literals: https://github.com/Coronon/PySchemeTranspiler/issues/11
+            # bubble_sort: https://github.com/Coronon/PySchemeTranspiler/issues/12
+            # bitops: https://github.com/Coronon/PySchemeTranspiler/issues/13
+            # langcomp_bench: no listcomp
+            # infer_ops: c_int16 -> int translation
+            # global2: set
+            # dict: https://github.com/Coronon/PySchemeTranspiler/issues/4
+            # coverage: pass and ...
+            # comb_sort: math.floor
+            # fstring: strange error
+            # fib: multiple returns: https://github.com/Coronon/PySchemeTranspiler/issues/3
+            # exceptions: try/except not supported
+            assert not os.path.exists(expected_filename)
+            raise unittest.SkipTest(f"{case} not supported on {lang}")
 
         if (
             not self.UPDATE_EXPECTED
