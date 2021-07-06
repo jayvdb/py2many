@@ -324,7 +324,7 @@ class StrStrRewriter(ast.NodeTransformer):
         self._language = language
 
     def visit_Compare(self, node):
-        if self._language in {"dart", "kotlin", "nim", "python"}:
+        if self._language in {"dart", "kotlin", "nim", "python", "ruby", "racket", "javascript"}:
             return node
 
         if isinstance(node.ops[0], ast.In):
