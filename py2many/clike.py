@@ -44,6 +44,7 @@ from py2many.exceptions import (
     AstNotImplementedError,
     IncompatibleLifetime,
     AstIncompatibleLifetime,
+    AstMissingChild,
     _InternalErrorBase,
 from py2many.result import Result
 
@@ -302,6 +303,8 @@ class CLikeTranspiler(ast.NodeVisitor):
                 raise
             except NotImplementedError as e:
                 raise AstNotImplementedError(e, node) from e
+            except AstEmptyNodeFound as e:
+                raise AstMissingChild(node) from e
             except Exception as e:
                 if isinstance(e, _InternalErrorBase):
                     raise AstNotImplementedError(e, node) from e
