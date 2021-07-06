@@ -531,6 +531,35 @@ class CLikeTranspiler(ast.NodeVisitor):
         body = [self.visit(t) for t in node.targets]
         return self.visit_unsupported_body(node, "del", body)
 
+    def visit_Await(self, node):
+        return self.visit_unsupported_body(node, "await", body.value)
+
+    def visit_AsyncFor(self, node):
+        target = self.visit(node.target)
+        iter = self.visit(node.iter)
+        return self.visit_unsupported_body(
+            node, f"async for {target} in {iter}", node.body
+        )
+
+    def visit_AsyncWith(self, node):
+        items = self.visit(node.items)
+        return self.visit_unsupported_body(node, f"async with {items}", node.body)
+
+    def visit_YieldFrom(self, node):
+        return self.visit_unsupported_body(node, f"yield from", node.value)
+
+    def visit_AsyncFunctionDef(self, node):
+        return self.visit_unsupported_body(node, "async def", node.body)
+
+    def visit_Nonlocal(self, node):
+        return self.visit_unsupported_body(node, f"nonlocal", node.names)
+
+    def visit_ListComp(self, node):
+        return self.visit_GeneratorExp(node)  # by default, they are the same
+
+    def visit_SetComp(self, node):
+        return self.visit_GeneratorExp(node)  # by default, they are the same
+
     def visit_ClassDef(self, node):
         bases = [get_id(base) for base in node.bases]
         if set(bases) == {"Enum", "str"}:
