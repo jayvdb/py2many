@@ -64,6 +64,13 @@ TEST_CASES = [
     if not item.stem.startswith("test_") and not item.stem in ["generator"]
 ]
 
+RUST_ONLY_CASES = [
+    "asyncio_test",
+    "fib_with_argparse",
+    "sealed",
+    "with_open",
+]
+
 CASE_ARGS = {
     "sys_argv": ("arg1",),
 }
@@ -160,6 +167,10 @@ class CodeGeneratorTests(unittest.TestCase):
         settings = _get_all_settings(Mock(indent=4), env=env)[lang]
         ext = settings.ext
         expected_filename = TESTS_DIR / "expected" / f"{case}{ext}"
+
+        if lang != "rust" and case in RUST_ONLY_CASES:
+            assert not os.path.exists(expected_filename)
+            raise unittest.SkipTest(f"{case} is rust only")
 
         if (
             not self.UPDATE_EXPECTED
