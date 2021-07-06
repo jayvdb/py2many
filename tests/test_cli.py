@@ -40,6 +40,8 @@ COMPILERS = {
     "rust": ["cargo", "script", "--build-only", "--debug"],
     "fortran": ["gfortran"],
 }
+import py2rb
+PY2RB_DIR = Path(py2rb.__file__).parent
 INVOKER = {
     "dart": ["dart", "--enable-asserts"],
     "go": ["go", "run"],
@@ -50,7 +52,7 @@ INVOKER = {
     "ruby": [
         "ruby",
         "-r",
-        "/Users/john.vandenberg/transpilers/py2rb/py2rb/builtins/module.rb",
+        str(PY2RB_DIR) + "/builtins/module.rb",
     ],
     "rust": ["cargo", "script"],
     "racket": ["racket"],
