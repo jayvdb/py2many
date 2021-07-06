@@ -620,6 +620,12 @@ class CLikeTranspiler(ast.NodeVisitor):
     def visit_SetComp(self, node):
         return self.visit_GeneratorExp(node)  # by default, they are the same
 
+    def visit_ListComp(self, node):
+        return self.visit_GeneratorExp(node)  # by default, they are the same
+
+    def visit_SetComp(self, node):
+        return self.visit_GeneratorExp(node)  # by default, they are the same
+
     def visit_ClassDef(self, node):
         bases = [get_id(base) for base in node.bases]
         if set(bases) == {"Enum", "str"}:
