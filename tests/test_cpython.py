@@ -49,10 +49,10 @@ class CPythonTests(unittest.TestCase):
         if SHOW_ERRORS and lang in ["cpp"]:
             if filename == "test_asyncgen":
                 return  # notimpl... due to async func
-        if SHOW_ERRORS and lang in ["julia","dart"] and filename in ["test_bool", "test_bytes", "test_inspect"]:
-            return  # plugin args IndexError
-        if SHOW_ERRORS and lang in ["rust"] and filename in ["test_bisect", "test_inspect"]:
-            return  # list() fails; plugin args IndexError
+        #if SHOW_ERRORS and lang in ["julia","dart"] and filename in ["test_bool", "test_bytes", "test_inspect"]:
+        #    return  # plugin args IndexError
+        #if SHOW_ERRORS and lang in ["rust"] and filename in ["test_bisect", "test_inspect"]:
+        #    return  # list() fails; plugin args IndexError
         if SHOW_ERRORS and lang in ["cpp", "go"] and filename in ["ann_module", "ann_module2", "ann_module3"]:
             return
         if SHOW_ERRORS and lang in ["dart"] and filename == "test_codecs":
