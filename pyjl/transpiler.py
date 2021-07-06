@@ -15,7 +15,7 @@ from .plugins import (
 from py2many.analysis import get_id, is_void_function
 from py2many.clike import _AUTO_INVOKED, class_for_typename
 from py2many.declaration_extractor import DeclarationExtractor
-from py2many.exceptions import AstNotImplementedError
+from py2many.exceptions import AstNotImplementedError, AstMissingChild
 from py2many.tracer import is_list, defined_before, is_class_or_module, is_enum
 
 from typing import List, Tuple
@@ -90,7 +90,10 @@ class JuliaTranspiler(CLikeTranspiler):
             return super().visit_Constant(node)
 
     def visit_FunctionDef(self, node):
-        body = "\n".join([self.visit(n) for n in node.body])
+        stmts = [self.visit(n) for n in node.body]
+        if any(i is None for i in stmts):
+            raise AstMissingChild(node)
+        body = "\n".join(stmts)
         typenames, args = self.visit(node.args)
 
         args_list = []
