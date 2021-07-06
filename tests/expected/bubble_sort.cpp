@@ -8,9 +8,9 @@
 #include "pycpp/runtime/sys.h"       // NOLINT(build/include_order)
 
 inline std::vector<int> bubble_sort(std::vector<int> seq) {
-  auto L = seq.size();
-  for (auto _ : rangepp::xrange(L)) {
-    for (auto n : rangepp::xrange(1, L)) {
+  auto l = seq.size();
+  for (auto _ : rangepp::xrange(l)) {
+    for (auto n : rangepp::xrange(1, l)) {
       if (seq[n] < seq[n - 1]) {
         std::tie(seq[n - 1], seq[n]) = std::make_tuple(seq[n], seq[n - 1]);
       }

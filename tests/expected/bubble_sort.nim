@@ -1,8 +1,8 @@
 
 proc bubble_sort(seq: var seq[int]): seq[int] =
-  let L = len(seq)
-  for _ in (0..L - 1):
-    for n in (1..L - 1):
+  let l = len(seq)
+  for _ in (0..l - 1):
+    for n in (1..l - 1):
       if seq[n] < seq[(n - 1)]:
         if true:
           let (tmp1, tmp2) = (seq[n], seq[(n - 1)])

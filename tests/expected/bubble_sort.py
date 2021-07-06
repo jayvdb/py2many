@@ -6,12 +6,12 @@ from typing import List
 
 
 def bubble_sort(seq: List[int]) -> List[int]:
-    L = len(seq)
-    for _ in range(L):
-        for n in range(1, L):
+    l = len(seq)
+    for _ in range(l):
+        for n in range(1, l):
             if seq[n] < seq[n - 1]:
                 if True:
-                    (__tmp1, __tmp2) = (seq[n], seq[n - 1])
+                    __tmp1, __tmp2 = seq[n], seq[n - 1]
                     seq[n - 1]: int = __tmp1
                     seq[n]: int = __tmp2
     return seq

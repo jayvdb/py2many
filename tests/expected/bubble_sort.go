@@ -7,9 +7,9 @@ import (
 )
 
 func BubbleSort(seq []int) []int {
-	L := len(seq)
-	for range iter.NewIntSeq(iter.Start(0), iter.Stop(L)).All() {
-		for _, n := range iter.NewIntSeq(iter.Start(1), iter.Stop(L)).All() {
+	l := len(seq)
+	for range iter.NewIntSeq(iter.Start(0), iter.Stop(l)).All() {
+		for _, n := range iter.NewIntSeq(iter.Start(1), iter.Stop(l)).All() {
 			if seq[n] < seq[(n-1)] {
 				{
 					var __tmp1, __tmp2 = seq[n], seq[(n - 1)]

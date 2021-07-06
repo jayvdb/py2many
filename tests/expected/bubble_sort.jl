@@ -1,8 +1,8 @@
 
 function bubble_sort(seq::Array{Int64})::Array{Int64}
-    L = length(seq)
-    for _ in (0:L-1)
-        for n in (1:L-1)
+    l = length(seq)
+    for _ in (0:l-1)
+        for n in (1:l-1)
             if seq[n+1] < seq[(n-1)+1]
                 seq[(n-1)+1], seq[n+1] = (seq[n+1], seq[(n-1)+1])
             end
