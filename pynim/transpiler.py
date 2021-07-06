@@ -513,7 +513,7 @@ class NimTranspiler(CLikeTranspiler):
 
     def visit_Delete(self, node):
         target = node.targets[0]
-        return "{0}.drop()".format(self.visit(target))
+        return "dealloc({0})".format(self.visit(target))
 
     def visit_Raise(self, node):
         if node.exc is not None:

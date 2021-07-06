@@ -514,10 +514,6 @@ class KotlinTranspiler(CLikeTranspiler):
 
             return f"{kw} {target} = {value}"
 
-    def visit_Delete(self, node):
-        target = node.targets[0]
-        return "{0}.drop()".format(self.visit(target))
-
     def visit_Raise(self, node):
         if node.exc is not None:
             exc = self.visit(node.exc)

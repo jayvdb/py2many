@@ -661,7 +661,7 @@ class GoTranspiler(CLikeTranspiler):
                 return f"var {target_str} = {value}"
             return f"{target_str} := {value}"
 
-    def visit_Delete(self, node):
+    def dfgvisit_Delete(self, node):
         target = node.targets[0]
         return "{0}.drop()".format(self.visit(target))
 

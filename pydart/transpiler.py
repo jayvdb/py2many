@@ -537,10 +537,6 @@ class DartTranspiler(CLikeTranspiler):
 
             return f"{kw} {typename} {target} = {value};"
 
-    def visit_Delete(self, node):
-        target = node.targets[0]
-        return "{0}.drop()".format(self.visit(target))
-
     def visit_Await(self, node):
         return "await!({0})".format(self.visit(node.value))
 
