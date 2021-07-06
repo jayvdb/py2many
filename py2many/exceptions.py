@@ -65,5 +65,5 @@ class AstMissingChild(AstNotImplementedError):
 
 
 class AstEmptyNodeFound(_InternalErrorBase, TypeError):
-    def __init__(self):
-        super().__init__("node can not be None")
+    def __init__(self, msg=None):
+        super().__init__(msg)
