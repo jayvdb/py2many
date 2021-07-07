@@ -80,6 +80,8 @@ def _print_exception(filename, e):
 
 def core_transformers(tree, trees):
     add_variable_context(tree, trees)
+    from .ast_helpers import unparse
+    print(unparse(tree))
     add_scope_context(tree)
     add_list_calls(tree)
     detect_mutable_vars(tree)

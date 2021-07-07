@@ -68,8 +68,8 @@ class CPythonTests(unittest.TestCase):
             raise unittest.SkipTest("causes UnicodeEncodeError")
         if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_io":
             raise unittest.SkipTest("causes RecursionError")  # https://github.com/adsharma/py2many/issues/376
-        if SHOW_ERRORS and lang in ["kotlin"] and filename == "test_print":
-            raise unittest.SkipTest("AttributeError: 'If' object has no attribute 'body_vars'")
+        #if SHOW_ERRORS and lang in ["kotlin"] and filename == "test_print":
+        #    raise unittest.SkipTest("AttributeError: 'If' object has no attribute 'body_vars'")
         if SHOW_ERRORS and lang in ["julia"] and filename == "test_codeccallbacks":  # other langs fail earlier with bytes <class 'ast.Mult'> int
             raise unittest.SkipTest("ValueError: source code string cannot contain null bytes")
         if SHOW_ERRORS and lang in ["dart", "julia", "kotlin", "nim"] and filename == "test_named_expressions":
