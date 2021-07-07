@@ -109,8 +109,8 @@ class CPythonTests(unittest.TestCase):
                 raise
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         except TypeError as e:
-            if 'Dict(keys=[None' in str(e):
-                raise unittest.SkipTest(e)
+            #if 'Dict(keys=[None' in str(e):
+            #    raise unittest.SkipTest(e)
             raise
         assert output_list
         assert successful
