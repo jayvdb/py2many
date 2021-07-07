@@ -48,8 +48,8 @@ class CPythonTests(unittest.TestCase):
     @foreach(list(set(LANGS) - {"python", "cpp"})) #, "go"}))  # go and cpp fail too much
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
-        if filename in ["support/socket_helper", "test_asyncio/test_runners"]:
-            raise unittest.SkipTest()
+        #if filename in ["test_asyncio/test_runners"]:
+        #    raise unittest.SkipTest()
 
         if SHOW_ERRORS:
             if filename == "test_array":
