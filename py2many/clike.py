@@ -104,6 +104,9 @@ def class_for_typename(typename, default_type, locals=None) -> Union[str, object
         logger.info(f"could not evaluate {typename}")
         return default_type
     except (ValueError, UnicodeEncodeError) as e:
+        if str(e) == "source code string cannot contain null bytes":
+            logger.info(f"could not evaluate {typename} as it need escaping")  # julia and test_codeccallbacks, py39+
+            return default_type
         ctx = sorted(list(_globals.keys()) + list(locals.keys()))
         print(f"could not evaluate {typename} within {ctx}")
         raise e
