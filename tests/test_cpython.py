@@ -26,19 +26,31 @@ TESTS_DIR = Path(__file__).parent
 OUT_DIR = TESTS_DIR / "output"
 CYTHON_TEST_DIR = Path(test.__file__).parent
 
-CYTHON_TEST_FILES = [
-    str(Path(f).relative_to(CYTHON_TEST_DIR))[:-3]
-    for f in glob.iglob(str(CYTHON_TEST_DIR) + "**/*.py")
+#raise RuntimeError(str(CYTHON_TEST_DIR) + "/**/*.py")
+
+CYTHON_TEST_FILES_ALL = [
+    Path(f).relative_to(CYTHON_TEST_DIR)
+    for f in glob.glob(str(CYTHON_TEST_DIR) + "/**", recursive=True)
 ]
 
+#raise RuntimeError(str([i for i in CYTHON_TEST_FILES_ALL if "/" in str(i)]))
+
+CYTHON_TEST_FILES = [
+    str(f)[:-3] for f in CYTHON_TEST_FILES_ALL if f.suffix == ".py" and f.stem != "__init__"
+]
+
+#raise RuntimeError(str(CYTHON_TEST_FILES))
 
 @expand
 class CPythonTests(unittest.TestCase):
     SETTINGS = _get_all_settings(Mock(indent=4, extension=False))
 
-    @foreach(list(set(LANGS) - {"python", "cpp", "go"}))  # go and cpp fail too much
+    @foreach(list(set(LANGS) - {"python", "cpp"})) #, "go"}))  # go and cpp fail too much
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
+        if filename in ["support/socket_helper", "test_asyncio/test_runners"]:
+            raise unittest.SkipTest()
+
         if SHOW_ERRORS:
             if filename == "test_array":
                 raise unittest.SkipTest("the assigned_from isnt being set, which is odd")
