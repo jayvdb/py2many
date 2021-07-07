@@ -65,6 +65,8 @@ class CPythonTests(unittest.TestCase):
             raise unittest.SkipTest("ValueError: source code string cannot contain null bytes")
         if SHOW_ERRORS and lang in ["dart", "julia", "kotlin", "nim"] and filename == "test_named_expressions":
             raise unittest.SkipTest("TypeError: sequence item 0: expected str instance, NoneType found")
+        # test_embed
+        # Dict(keys=[None, Constant(value='PYTHONSTARTUP')], values=[Call(func=Name(id='remove_python_envvars', ctx=Load()), args=[], keywords=[]), Name(id='startup', ctx=Load())])
 
         filename += ".py"
 
@@ -82,7 +84,7 @@ class CPythonTests(unittest.TestCase):
             )
         except (
             AstUnrecognisedBinOp,
-            AstMissingChild,
+            #AstMissingChild,
             SyntaxError,
             AstIncompatibleLifetime,
             AstClassUsedBeforeDeclaration,
@@ -96,6 +98,10 @@ class CPythonTests(unittest.TestCase):
             if SHOW_ERRORS:
                 raise
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
+        except TypeError as e:
+            if 'Dict(keys=[None' in str(e):
+                raise unittest.SkipTest(e)
+            raise
         assert output_list
         assert successful
         assert len(output_list) == 1

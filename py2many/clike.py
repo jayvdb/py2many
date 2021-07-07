@@ -312,6 +312,10 @@ class CLikeTranspiler(ast.NodeVisitor):
             except NotImplementedError as e:
                 raise AstNotImplementedError(e, node) from e
             except AstEmptyNodeFound as e:
+                assert node
+                print("node with missing", node)
+                print(ast.dump(node))
+                raise TypeError(ast.dump(node)) from e
                 raise AstMissingChild(node) from e
             except Exception as e:
                 if isinstance(e, _InternalErrorBase):
