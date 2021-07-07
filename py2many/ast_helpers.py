@@ -42,6 +42,8 @@ def create_ast_node(code, at_node=None):
     if at_node:
         new_node.lineno = at_node.lineno
         new_node.col_offset = at_node.col_offset
+    new_code.body_vars = []  # https://github.com/adsharma/py2many/issues/393
+    new_code.orelse_vars = []
     return new_node
 
 
@@ -51,4 +53,6 @@ def create_ast_block(body, at_node=None) -> ASTxIf:
     if at_node:
         block.lineno = at_node.lineno
     ast.fix_missing_locations(block)
+    block.body_vars = []
+    block.orelse_vars = []
     return block
