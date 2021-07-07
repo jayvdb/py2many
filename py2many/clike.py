@@ -297,14 +297,11 @@ class CLikeTranspiler(ast.NodeVisitor):
         if not isinstance(node, ast.AST):
             if isinstance(node, str):
                 raise AstEmptyNodeFound(f"Can not visit string '{node}")
-            try:
-                raise AstEmptyNodeFound(
-                    f"Incorrect node type {node.__class__.__name__}: '{node}"
-                )
-            except Exception:
-                raise AstEmptyNodeFound(
-                    f"Incorrect node type {node.__class__.__name__}"
-                )
+            if isinstance(node, list):
+                raise AstEmptyNodeFound(f"Can not visit list '{node}")
+            raise AstEmptyNodeFound(
+                    f"Incorrect node type {node.__class__.__name__}: {ast.dump(node)}"
+            )
         if type(node) in symbols:
             return c_symbol(node)
         else:
