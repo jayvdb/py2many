@@ -46,6 +46,9 @@ from py2many.exceptions import (
     AstIncompatibleLifetime,
     AstMissingChild,
     _InternalErrorBase,
+    TypeNotSupported,
+    AstTypeNotSupported,
+)
 from py2many.result import Result
 
 os.path  # silence pyflakes
@@ -200,7 +203,7 @@ class CLikeTranspiler(ast.NodeVisitor):
             index_contains_default = "Any" in index_type
             if not index_contains_default:
                 if any(t is None for t in index_type):
-                    raise NotImplementedError(f"{typename} not supported")
+                    raise TypeNotSupported(typename)
                 index_type = ", ".join(index_type)
         else:
             index_contains_default = index_type == "Any"
@@ -276,7 +279,10 @@ class CLikeTranspiler(ast.NodeVisitor):
                 raise AstIncompatibleLifetime(e, node)
             if isinstance(type_node, ast.Subscript):
                 node.container_type = type_node.container_type
-                return self._visit_container_type(type_node.container_type)
+                try:
+                    return self._visit_container_type(type_node.container_type)
+                except TypeNotSupported as e:
+                    raise AstTypeNotSupported(str(e), node)
             if typename is None:
                 raise AstCouldNotInfer(type_node, node)
         return typename
