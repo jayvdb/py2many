@@ -18,6 +18,8 @@ from py2many.exceptions import (
     AstClassUsedBeforeDeclaration,
     AstIncompatibleLifetime,
     AstUnrecognisedBinOp,
+    AstTypeNotSupported,  # go only
+    AstCouldNotInfer,
 )
 
 from tests.test_cli import LANGS, SHOW_ERRORS
@@ -59,6 +61,9 @@ class CPythonTests(unittest.TestCase):
         if SHOW_ERRORS and lang in ["cpp"]:
             if filename == "test_asyncgen":
                 return  # notimpl... due to async func
+        if SHOW_ERRORS and lang in ["go"]:
+            if filename == "test_grammar":
+                return  # lots of unusual stuff
         #if SHOW_ERRORS and lang in ["julia","dart"] and filename in ["test_bool", "test_bytes", "test_inspect"]:
         #    return  # plugin args IndexError
         #if SHOW_ERRORS and lang in ["rust"] and filename in ["test_bisect", "test_inspect"]:
@@ -99,8 +104,16 @@ class CPythonTests(unittest.TestCase):
             AstIncompatibleLifetime,
             AstClassUsedBeforeDeclaration,
             AssertionError,
+            AstTypeNotSupported,  # go only
+            AstCouldNotInfer,
         ) as e:
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
+        except (
+            AstTypeNotSupported,  # go only
+        ) as e:
+            if lang == "go":
+                raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
+            raise
         except AstNotImplementedError as e:
             _print_exception(filename, e)
             #if "no assigned_from" in str(e):  # or "node can not be None" in str(e):
@@ -109,8 +122,8 @@ class CPythonTests(unittest.TestCase):
                 raise
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         except TypeError as e:
-            #if 'Dict(keys=[None' in str(e):
-            #    raise unittest.SkipTest(e)
+            if 'Dict(keys=[None' in str(e):
+                raise unittest.SkipTest(e)
             raise
         assert output_list
         assert successful
