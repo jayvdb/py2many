@@ -141,6 +141,7 @@ def _transpile(
             successful.append(filename)
             outputs[filename] = output
         except Exception as e:
+            raise
             if not _suppress_exceptions or not isinstance(e, _suppress_exceptions):
                 raise
             _print_exception(filename, e)
@@ -604,6 +605,7 @@ def main(args=None, env=os.environ):
             try:
                 rv = _process_one(settings, source, outdir, args, env)
             except Exception as e:
+                raise
                 _print_exception(source, e)
                 rv = False
         else:
