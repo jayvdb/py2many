@@ -46,7 +46,7 @@ CYTHON_TEST_FILES = [
 class CPythonTests(unittest.TestCase):
     SETTINGS = _get_all_settings(Mock(indent=4, extension=False))
 
-    @foreach(list(set(LANGS) - {"python", "cpp", "go"}))  # go and cpp fail too much
+    @foreach(list(set(LANGS) - {"python", "cpp"})) #$, "go"}))  # go and cpp fail too much
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
         if SHOW_ERRORS:

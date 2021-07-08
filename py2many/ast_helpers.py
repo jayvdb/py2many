@@ -42,8 +42,8 @@ def create_ast_node(code, at_node=None):
     if at_node:
         new_node.lineno = at_node.lineno
         new_node.col_offset = at_node.col_offset
-    new_code.body_vars = []  # https://github.com/adsharma/py2many/issues/393
-    new_code.orelse_vars = []
+    new_node.body_vars = []  # https://github.com/adsharma/py2many/issues/393
+    new_node.orelse_vars = []
     return new_node
 
 
