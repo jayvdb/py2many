@@ -1,7 +1,8 @@
 import ast
 from typing import Any, Dict, Tuple
 
-from py2many.ast_helpers import get_id
+from .ast_helpers import get_id
+from .exceptions import AstCouldNotInfer
 
 
 class DeclarationExtractor(ast.NodeVisitor):
@@ -89,7 +90,10 @@ class DeclarationExtractor(ast.NodeVisitor):
         if target_id is None:
             return
 
-        type_str = self.transpiler._typename_from_annotation(node)
+        try:
+            type_str = self.transpiler._typename_from_annotation(node)
+        except AstCouldNotInfer:
+            type_str = "_"
         if target_id not in self.annotated_members:
             self.annotated_members[target_id] = (type_str, node.value)
 
