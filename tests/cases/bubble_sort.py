@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from typing import List
+import typing
 
 
-def bubble_sort(seq: List[int]) -> List[int]:
+def bubble_sort(seq: typing.List[int]) -> typing.List[int]:
     L = len(seq)
     for _ in range(L):
         for n in range(1, L):

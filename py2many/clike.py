@@ -92,6 +92,7 @@ logger = logging.Logger("py2many")
 
 
 def class_for_typename(typename, default_type, locals=None) -> Union[str, object]:
+    #print(typename)
     if typename is None:
         return None
     if typename == "super" or typename.startswith("super()"):
@@ -213,10 +214,15 @@ class CLikeTranspiler(ast.NodeVisitor):
         return self._combine_value_index(value_type, index_type)
 
     def _typename_from_type_node(self, node) -> Union[List, str, None]:
+        #print("_typename_from_type_node", node, node.__dict__)
         if isinstance(node, ast.Name):
+            node_id = get_id(node)
+            #print("name id", node_id)
+            if node_id.startswith("typing."):
+                node_id = node_id[7:]
             try:
                 return self._map_type(
-                    get_id(node), getattr(node, "lifetime", LifeTime.UNKNOWN)
+                    node_id, getattr(node, "lifetime", LifeTime.UNKNOWN)
                 )
             except IncompatibleLifetime as e:
                 if hasattr(node, "lineno"):
@@ -237,17 +243,26 @@ class CLikeTranspiler(ast.NodeVisitor):
             # in node.container_type
             # And return a target specific type
             slice_value = self._slice_value(node)
+            #print("slice_value", slice_value, get_id(slice_value))
+            #node_value = get_id(node.value)
+            #print("node_value", node_value)
             (value_type, index_type) = tuple(
                 map(self._typename_from_type_node, (node.value, slice_value))
             )
+            #print("rv", value_type, index_type)
+
             value_type = self._map_container_type(value_type)
             node.container_type = (value_type, index_type)
             return self._combine_value_index(value_type, index_type)
         return self._default_type
 
     def _generic_typename_from_type_node(self, node) -> Union[List, str, None]:
+        #print(node.__dict__)
         if isinstance(node, ast.Name):
-            return get_id(node)
+            rv = get_id(node)
+            if rv and rv.startswith("typing."):
+                return rv[7:]
+            return rv
         elif isinstance(node, ast.Constant):
             return node.value
         elif isinstance(node, ast.ClassDef):
@@ -271,6 +286,7 @@ class CLikeTranspiler(ast.NodeVisitor):
     def _typename_from_annotation(self, node, attr="annotation") -> str:
         default_type = self._default_type
         typename = default_type
+        #print("_typename_from_annotation", node.__dict__)
         if hasattr(node, attr):
             type_node = getattr(node, attr)
             try:

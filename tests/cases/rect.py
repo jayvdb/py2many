@@ -3,6 +3,7 @@
 """This file implements a rectangle class """
 
 from dataclasses import dataclass
+import typing
 
 
 @dataclass
@@ -11,6 +12,7 @@ class Rectangle:
 
     height: int
     length: int
+    foo: typing.ClassVar[int]
 
     def is_square(self) -> bool:
         """Go likes this to be camel case"""

@@ -199,7 +199,9 @@ class RustTranspiler(CLikeTranspiler):
             # Occurs for `async for`
             raise AstMissingChild(node)
         body = "\n".join([self.visit(n) for n in node.body])
+        #print("node.args", node.args, node.args.__dict__)
         typenames, args = self.visit(node.args)
+        print(typenames, args)
 
         args_list = []
         if args and args[0] == "self":
