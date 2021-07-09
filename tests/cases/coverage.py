@@ -1,14 +1,6 @@
 from typing import List
 
 
-def inline_pass():
-    pass
-
-
-def inline_ellipsis():
-    ...
-
-
 def indexing():
     sum = 0
     a: List[int] = []
@@ -60,8 +52,6 @@ def show():
     print(len(a5))
     a9: List[str] = ["a", "b", "c", "d"]
     print(len(a9))
-    a6 = {1, 2, 3, 4}
-    print(len(a6))
     a7 = {"a": 1, "b": 2}
     print(len(a7))
     a8 = True
@@ -82,7 +72,6 @@ def show():
     assert a1 == 11
     if True:
         print("true")
-    inline_pass()
     s = "1\
     2"
     print(s)

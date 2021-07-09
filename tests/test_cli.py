@@ -179,7 +179,7 @@ class CodeGeneratorTests(unittest.TestCase):
             # byte_literals: https://github.com/naitoh/py2rb/issues/14
             assert not os.path.exists(expected_filename)
             raise unittest.SkipTest(f"{case} not supported on {lang}")
-        if lang == "racket" and case in ["bitops", "byte_literals", "bubble_sort", "comb_sort", "coverage", "int_enum", "str_enum", "sys_exit", "sys_argv", "rect", "set", "dict", "nested_dict", "langcomp_bench", "lambda", "infer_ops", "global2", "fstring", "fib", "exceptions"]:
+        if lang == "racket" and case in ["bitops", "byte_literals", "comb_sort", "coverage", "int_enum", "str_enum", "sys_exit", "sys_argv", "rect", "set", "dict", "nested_dict", "langcomp_bench", "lambda", "infer_ops", "global2", "fstring", "fib", "exceptions"]:
             # byte_literals: https://github.com/Coronon/PySchemeTranspiler/issues/11
             # bubble_sort: https://github.com/Coronon/PySchemeTranspiler/issues/12
             # bitops: https://github.com/Coronon/PySchemeTranspiler/issues/13
@@ -187,7 +187,8 @@ class CodeGeneratorTests(unittest.TestCase):
             # infer_ops: c_int16 -> int translation
             # global2: set
             # dict: https://github.com/Coronon/PySchemeTranspiler/issues/4
-            # coverage: pass and ...
+            # coverage: pass and ... and set and dict
+            # nested_dict: dict
             # comb_sort: math.floor
             # fstring: strange error
             # fib: multiple returns: https://github.com/Coronon/PySchemeTranspiler/issues/3
