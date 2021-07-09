@@ -93,7 +93,7 @@ class DeclarationExtractor(ast.NodeVisitor):
         try:
             type_str = self.transpiler._typename_from_annotation(node)
         except AstCouldNotInfer:
-            type_str = "_"
+            raise  # type_str = "_"
         if target_id not in self.annotated_members:
             self.annotated_members[target_id] = (type_str, node.value)
 

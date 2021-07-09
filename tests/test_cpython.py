@@ -39,7 +39,7 @@ CYTHON_TEST_FILES_ALL = [
 
 CYTHON_TEST_FILES = [
     str(f)[:-3] for f in CYTHON_TEST_FILES_ALL if f.suffix == ".py" and f.stem != "__init__"
-    # if f.stem == "test_named_expressions"
+    if f.stem.startswith("dataclass")
 ]
 
 #raise RuntimeError(str(CYTHON_TEST_FILES))
@@ -80,6 +80,10 @@ class CPythonTests(unittest.TestCase):
         #    raise unittest.SkipTest("TypeError: sequence item 0: expected str instance, NoneType found")
         if SHOW_ERRORS and filename in ["test_importlib/test_metadata_api", "test_importlib/test_zip"]:
             raise unittest.SkipTest("logic causes importerror in class_for_typename")
+        if lang == "go" and filename in ["dataclass_module_1_str", "dataclass_module_1"]:
+            # :20:4: py2many.exceptions.AstCouldNotInfer: Could not infer: <ast.Attribute object at 0x10702df10>
+            #return
+            pass
         # test_embed
         # Dict(keys=[None, Constant(value='PYTHONSTARTUP')], values=[Call(func=Name(id='remove_python_envvars', ctx=Load()), args=[], keywords=[]), Name(id='startup', ctx=Load())])
 
@@ -105,7 +109,7 @@ class CPythonTests(unittest.TestCase):
             AstClassUsedBeforeDeclaration,
             AssertionError,
             AstTypeNotSupported,  # go only
-            AstCouldNotInfer,
+            #AstCouldNotInfer,
         ) as e:
             raise unittest.SkipTest(f"{e.__class__.__name__}: {e}")
         except (
