@@ -34,7 +34,7 @@ class ScopeMixin(object):
             return None
 
     def _is_scopable_node(self, node):
-        scopes = [ast.Module, ast.ClassDef, ast.FunctionDef, ast.For, ast.If, ast.With]
+        scopes = [ast.Module, ast.ClassDef, ast.FunctionDef, ast.For, ast.If, ast.With, ast.Lambda]
         return len([s for s in scopes if isinstance(node, s)]) > 0
 
 
@@ -48,6 +48,10 @@ class ScopeList(list):
         """Find definition of variable lookup."""
 
         def find_definition(scope, var_attr="vars"):
+            if isinstance(scope, ast.Lambda) and var_attr == "body":
+                #print(scope.__dict__)
+                #raise RuntimeError
+                return
             for var in getattr(scope, var_attr):
                 if get_id(var) == lookup:
                     return var

@@ -63,6 +63,14 @@ class VariableTransformer(ast.NodeTransformer, ScopeMixin):
         else:
             self._trees = {t.__file__.stem: t for t in trees}
 
+    def visit_Lambda(self, node):
+        node.vars = []
+        for arg in node.args.args:
+            arg.assigned_from = node
+            node.vars.append(arg)
+        self.generic_visit(node)
+        return node
+
     def visit_FunctionDef(self, node):
         node.vars = []
         # So function signatures are accessible even after they're
