@@ -44,7 +44,7 @@ class ScopeList(list):
     the definition of a variable
     """
 
-    def find(self, lookup):
+    def find(self, lookup, reverse=False):
         """Find definition of variable lookup."""
 
         def find_definition(scope, var_attr="vars"):
@@ -52,7 +52,12 @@ class ScopeList(list):
                 if get_id(var) == lookup:
                     return var
 
-        for scope in self:
+        if reverse:
+            gen = reversed(self)
+        else:
+            gen = self
+
+        for scope in gen:
             defn = None
             if not defn and hasattr(scope, "vars"):
                 defn = find_definition(scope, "vars")
