@@ -39,7 +39,7 @@ CYTHON_TEST_FILES_ALL = [
 
 CYTHON_TEST_FILES = [
     str(f)[:-3] for f in CYTHON_TEST_FILES_ALL if f.suffix == ".py" and f.stem != "__init__"
-    if f.stem.startswith("dataclass")
+    #if "test_print" in f.stem
 ]
 
 #raise RuntimeError(str(CYTHON_TEST_FILES))
@@ -66,22 +66,18 @@ class CPythonTests(unittest.TestCase):
         #    return  # plugin args IndexError
         #if SHOW_ERRORS and lang in ["rust"] and filename in ["test_bisect", "test_inspect"]:
         #    return  # list() fails; plugin args IndexError
-        if SHOW_ERRORS and lang in ["cpp", "go"] and filename in ["ann_module", "ann_module2", "ann_module3"]:
-            return
+        #if SHOW_ERRORS and lang in ["cpp", "go"] and filename in ["ann_module", "ann_module2", "ann_module3"]:
+        #    return
         if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_codecs":
             raise unittest.SkipTest("causes UnicodeEncodeError")
         if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_io":
             raise unittest.SkipTest("causes RecursionError")  # https://github.com/adsharma/py2many/issues/376
-        if SHOW_ERRORS and lang in ["kotlin"] and filename == "test_print":
-            raise unittest.SkipTest("AttributeError: 'If' object has no attribute 'body_vars'")
+        #if SHOW_ERRORS and lang in ["kotlin"] and filename == "test_print":
+        #    raise unittest.SkipTest("AttributeError: 'If' object has no attribute 'body_vars'")
         #if SHOW_ERRORS and lang in ["dart", "julia", "kotlin", "nim"] and filename == "test_named_expressions":
         #    raise unittest.SkipTest("TypeError: sequence item 0: expected str instance, NoneType found")
         if SHOW_ERRORS and filename in ["test_importlib/test_metadata_api", "test_importlib/test_zip"]:
             raise unittest.SkipTest("logic causes importerror in class_for_typename")
-        if lang == "go" and filename in ["dataclass_module_1_str", "dataclass_module_1"]:
-            # :20:4: py2many.exceptions.AstCouldNotInfer: Could not infer: <ast.Attribute object at 0x10702df10>
-            #return
-            pass
         # test_embed
         # Dict(keys=[None, Constant(value='PYTHONSTARTUP')], values=[Call(func=Name(id='remove_python_envvars', ctx=Load()), args=[], keywords=[]), Name(id='startup', ctx=Load())])
 
