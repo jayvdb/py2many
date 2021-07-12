@@ -52,8 +52,6 @@ class CPythonTests(unittest.TestCase):
     @foreach(CYTHON_TEST_FILES)
     def test_cpython_test(self, filename, lang):
         if SHOW_ERRORS:
-            if filename == "test_array":
-                raise unittest.SkipTest("the assigned_from isnt being set, which is odd")
             if filename == "datetimetester":
                 raise unittest.SkipTest("Fails with ValueError")
             if filename == "test_pathlib":
