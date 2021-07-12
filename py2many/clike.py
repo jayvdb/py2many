@@ -285,6 +285,8 @@ class CLikeTranspiler(ast.NodeVisitor):
                 return super().visit(node)
             except AstNotImplementedError:
                 raise
+            except RecursionError:  # do not wrap RecursionError
+                raise
             except Exception as e:
                 raise AstNotImplementedError(e, node) from e
 
