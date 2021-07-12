@@ -39,7 +39,7 @@ CYTHON_TEST_FILES_ALL = [
 
 CYTHON_TEST_FILES = [
     str(f)[:-3] for f in CYTHON_TEST_FILES_ALL if f.suffix == ".py" and f.stem != "__init__"
-    #if "test_print" in f.stem
+    #if "test_ordered_dict" in f.stem
 ]
 
 #raise RuntimeError(str(CYTHON_TEST_FILES))
@@ -68,9 +68,9 @@ class CPythonTests(unittest.TestCase):
         #    return  # list() fails; plugin args IndexError
         #if SHOW_ERRORS and lang in ["cpp", "go"] and filename in ["ann_module", "ann_module2", "ann_module3"]:
         #    return
-        if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_codecs":
+        if SHOW_ERRORS and lang in ["dart", "julia"] and filename in ["test_codecs", "test_unicode"]:
             raise unittest.SkipTest("causes UnicodeEncodeError")
-        if SHOW_ERRORS and lang in ["dart", "julia"] and filename == "test_io":
+        if SHOW_ERRORS and lang in ["dart", "julia"] and filename in ["test_io", "test_socket"]:
             raise unittest.SkipTest("causes RecursionError")  # https://github.com/adsharma/py2many/issues/376
         #if SHOW_ERRORS and lang in ["kotlin"] and filename == "test_print":
         #    raise unittest.SkipTest("AttributeError: 'If' object has no attribute 'body_vars'")

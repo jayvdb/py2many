@@ -17,6 +17,8 @@ def decltype(node):
 # is it slow? is it correct?
 def _lookup_class_or_module(name, scopes) -> Optional[ast.ClassDef]:
     for scope in scopes:
+        if isinstance(scope, ast.Lambda):
+            continue
         for entry in scope.body:
             if isinstance(entry, ast.ClassDef):
                 if entry.name == name:
@@ -44,6 +46,8 @@ def is_enum(name, scopes):
 
 def is_self_arg(name, scopes):
     for scope in scopes:
+        if isinstance(scope, ast.Lambda):
+            continue
         for entry in scope.body:
             if isinstance(entry, ast.FunctionDef):
                 if len(entry.args.args):
@@ -63,8 +67,7 @@ def is_list(node):
         var = node.scopes.find(get_id(node))
         return (
             hasattr(var, "assigned_from")
-            and not isinstance(var.assigned_from, ast.FunctionDef)
-            and not isinstance(var.assigned_from, ast.For)
+            and hasattr(var.assigned_from, "value")
             and is_list(var.assigned_from.value)
         )
     else:
