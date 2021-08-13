@@ -359,6 +359,10 @@ class StrStrRewriter(ast.NodeTransformer):
                     ret = ast.parse("a.find(b) != string.npos").body[0].value
                     ret.left.func.value = right
                     ret.left.args[0] = left
+                elif self._language == "python":
+                    ret = ast.parse("a.find(b) != -1").body[0].value
+                    ret.left.func.value = right
+                    ret.left.args[0] = left
                 else:
                     # rust and c++23
                     ret = ast.parse("a.contains(b)").body[0].value
