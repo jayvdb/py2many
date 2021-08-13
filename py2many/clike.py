@@ -641,6 +641,9 @@ class CLikeTranspiler(ast.NodeVisitor):
             return ("", splits[0])
 
     def _dispatch(self, node, fname: str, vargs: List[str]) -> Optional[str]:
+        if not vargs:
+            return None
+
         if fname in self._dispatch_map:
             try:
                 return self._dispatch_map[fname](self, node, vargs)
