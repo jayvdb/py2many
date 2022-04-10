@@ -11,6 +11,7 @@ from pathlib import Path
 from subprocess import run
 from unittest.mock import Mock
 from unittest_expander import foreach, expand
+from environs import Env
 
 from py2many.cli import (
     _create_cmd,
@@ -27,11 +28,15 @@ ROOT_DIR = TESTS_DIR.parent
 BUILD_DIR = TESTS_DIR / "build"
 GENERATED_DIR = BUILD_DIR
 
-KEEP_GENERATED = os.environ.get("KEEP_GENERATED", False)
-SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
-UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
+env = Env()
+env.read_env()
 
-CXX = os.environ.get("CXX", "clang++")
+KEEP_GENERATED = env.bool("KEEP_GENERATED", False)
+SHOW_ERRORS = env.bool("SHOW_ERRORS", False)
+VERBOSE_SKIPS = env.bool("VERBOSE_SKIPS", True)
+UPDATE_EXPECTED = env.bool("UPDATE_EXPECTED", False)
+
+CXX = env.str("CXX", "clang++")
 LANGS = list(_get_all_settings(Mock(indent=4)).keys())
 ENV = {
     "cpp": {"CLANG_FORMAT_STYLE": "Google"},
@@ -55,7 +60,7 @@ INVOKER = {
     "julia": ["julia", "--compiled-modules=yes"],
     "kotlin": ["kscript"],
     "python": [sys.executable],
-    "rust": ["cargo", "script"],
+    "rust": ["cargo" "script"],
     "vlang": ["v", "-translated", "run"],
 }
 
@@ -149,7 +154,7 @@ class CodeGeneratorTests(unittest.TestCase):
     SHOW_ERRORS = SHOW_ERRORS
     KEEP_GENERATED = KEEP_GENERATED
     UPDATE_EXPECTED = UPDATE_EXPECTED
-    LINT = os.environ.get("LINT", True)
+    LINT = env.bool("LINT", True)
 
     def setUp(self):
         os.makedirs(BUILD_DIR, exist_ok=True)
@@ -448,6 +453,15 @@ class CodeGeneratorTests(unittest.TestCase):
     @foreach(sorted(LANGS))
     @foreach(["test1"])
     def test_directory(self, case, lang):
+        env = os.environ.copy()
+        if ENV.get(lang):
+            env.update(ENV.get(lang))
+
+        settings = _get_all_settings(Mock(indent=2))[lang]
+        if settings.formatter:
+            if not spawn.find_executable(settings.formatter[0]):
+                raise unittest.SkipTest(f"{settings.formatter[0]} not available")
+
         env = os.environ.copy()
         if ENV.get(lang):
             env.update(ENV.get(lang))

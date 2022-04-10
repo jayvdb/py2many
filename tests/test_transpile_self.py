@@ -9,7 +9,9 @@ from unittest.mock import Mock
 from py2many.cli import _get_all_settings, _process_dir
 from py2many.exceptions import AstTypeNotSupported
 
-SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
+from tests.test_cli import (
+    SHOW_ERRORS,
+)
 
 TESTS_DIR = Path(__file__).parent
 ROOT_DIR = TESTS_DIR.parent

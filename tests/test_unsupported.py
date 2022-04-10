@@ -27,6 +27,7 @@ from tests.test_cli import (
     KEEP_GENERATED,
     LANGS as _LANGS,
     SHOW_ERRORS,
+    VERBOSE_SKIPS,
     TESTS_DIR,
     get_exe_filename,
     has_main_lines,
@@ -196,6 +197,8 @@ def get_tree(source_data, ext):
     astpretty.pprint(tree)
     proc = run([sys.executable, "-c", source_data], capture_output=True)
     if proc.returncode:
+        if not VERBOSE_SKIPS:
+            raise RuntimeError(f"Invalid case {source_data}")
         raise RuntimeError(f"Invalid case {source_data}:\n{proc.stdout}{proc.stderr}")
     return tree
 
@@ -251,6 +254,8 @@ class CodeGeneratorTests(unittest.TestCase):
                 case_output = _relative_to_cwd(case_output)
             proc = run([*settings.formatter, case_output], env=env, capture_output=True)
             if proc.returncode and not self.SHOW_ERRORS:
+                if not VERBOSE_SKIPS:
+                    raise unittest.SkipTest(f"Error: Could not reformat using {settings.formatter}")
                 raise unittest.SkipTest(
                     f"Error: Could not reformat using {settings.formatter}:\n{proc.stdout}{proc.stderr}"
                 )
@@ -264,6 +269,8 @@ class CodeGeneratorTests(unittest.TestCase):
                 proc = run([*compiler, case_output], env=env, capture_output=True)
 
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:
+                    if not VERBOSE_SKIPS:
+                        raise unittest.SkipTest(f"{case}{ext} doesnt compile")
                     raise unittest.SkipTest(
                         f"{case}{ext} doesnt compile:\n{proc.stdout}{proc.stderr}"
                     )
@@ -276,6 +283,8 @@ class CodeGeneratorTests(unittest.TestCase):
                 proc = run([*invoker, case_output], env=env, capture_output=True)
 
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:
+                    if not VERBOSE_SKIPS:
+                        raise unittest.SkipTest(f"Execution of {case}{ext} failed")
                     raise unittest.SkipTest(
                         f"Execution of {case}{ext} failed:\n{proc.stdout}{proc.stderr}"
                     )
@@ -286,6 +295,8 @@ class CodeGeneratorTests(unittest.TestCase):
             elif exe.exists() and os.access(exe, os.X_OK):
                 proc = run([exe], env=env, capture_output=True)
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:
+                    if not VERBOSE_SKIPS:
+                        raise unittest.SkipTest(f"Invocation error {proc.returncode}")
                     raise unittest.SkipTest(
                         f"Invocation error {proc.returncode}:\n{proc.stdout}{proc.stderr}"
                     )

@@ -61,6 +61,21 @@ cargo install cargo-script
 MacOS will inform that it was downloaded from the Internet and ask for confirmation.
 Once confirmed, it will become usable.
 
+## MacOS dependencies
+
+The following commands will install most of the dependencies on MacOS
+
+```
+brew tap holgerbrandl/tap https://github.com/holgerbrandl/homebrew-tap
+brew tap sdkman/tap
+brew install astyle clang-format cljstyle flutter gcc go julia kscript ktlint nim sdkman-cli vlang z3
+cargo install cargo-script
+```
+
+`cljstyle` will refuse to run.  In a shell, type `open /usr/local/bin/`, locate `cljstyle`, and Open.
+MacOS will inform that it was downloaded from the Internet and ask for confirmation.
+Once confirmed, it will become usable.
+
 ## Running tests for C++ only
 
 ```
