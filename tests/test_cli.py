@@ -60,7 +60,7 @@ INVOKER = {
     "julia": ["julia", "--compiled-modules=yes"],
     "kotlin": ["kscript"],
     "python": [sys.executable],
-    "rust": ["cargo" "script"],
+    "rust": ["cargo", "script"],
     "vlang": ["v", "-translated", "run"],
 }
 
