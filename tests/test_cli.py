@@ -114,6 +114,18 @@ def get_exe_filename(case, ext):
     return exe
 
 
+def get_compiler(lang):
+    compiler = COMPILERS.get(lang)
+    if not compiler:
+        return
+    # On Windows, compiler kotlinc can be skipped and invoker kscript used
+    if compiler == ["kotlinc"] and sys.platform == "win32":
+        return
+    if not spawn.find_executable(compiler[0]):
+        raise unittest.SkipTest(f"{compiler[0]} not available")
+    return compiler
+
+
 @lru_cache()
 def get_python_case_output(case_filename, main_args, exit_code):
     proc = run([sys.executable, str(case_filename), *main_args], capture_output=True)
@@ -229,10 +241,8 @@ class CodeGeneratorTests(unittest.TestCase):
             elif rv:
                 raise unittest.SkipTest("formatting failed")
 
-            compiler = COMPILERS.get(lang)
+            compiler = get_compiler(lang)
             if compiler:
-                if not spawn.find_executable(compiler[0]):
-                    raise unittest.SkipTest(f"{compiler[0]} not available")
                 expect_compile_failure = (
                     not self.SHOW_ERRORS and f"{case}{ext}" in EXPECTED_COMPILE_FAILURES
                 )

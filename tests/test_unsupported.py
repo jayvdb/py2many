@@ -32,7 +32,6 @@ import py2many.cli
 
 from tests.test_cli import (
     BUILD_DIR,
-    COMPILERS,
     ENV,
     GENERATED_DIR,
     INVOKER,
@@ -40,6 +39,7 @@ from tests.test_cli import (
     LANGS as _LANGS,
     SHOW_ERRORS,
     TESTS_DIR,
+    get_compiler,
     get_exe_filename,
     has_main_lines,
 )
@@ -269,10 +269,8 @@ class CodeGeneratorTests(unittest.TestCase):
             assert not proc.returncode
 
         try:
-            compiler = COMPILERS.get(lang)
+            compiler = get_compiler(lang)
             if compiler:
-                if not spawn.find_executable(compiler[0]):
-                    raise unittest.SkipTest(f"{compiler[0]} not available")
                 proc = run([*compiler, case_output], env=env, capture_output=True)
 
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:

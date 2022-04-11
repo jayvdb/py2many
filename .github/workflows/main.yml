@@ -4,7 +4,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ main, warp ]
   pull_request:
     branches: [ main ]
 
@@ -13,7 +13,7 @@ on:
 
 env:
   # Can be blank, or one of: cpp, dart, go, julia, kotlin, nim, smt, vlang
-  FOCUS: ''
+  FOCUS: 'kotlin'
 jobs:
   build:
 
@@ -21,13 +21,18 @@ jobs:
       matrix:
         python-version: [ '3.8' ]
         os:
-          - ubuntu-22.04
-          - macos-12
+          # ubuntu-22.04
+          # macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Check for runner dependencies
+        shell: bash
+        run: |
+          echo "$HOME/warp" >> $GITHUB_PATH
 
       - uses: actions/setup-java@v3
         if: ${{ matrix.os != 'macos-12' && (!env.FOCUS || env.FOCUS == 'kotlin') }}
@@ -101,6 +106,7 @@ jobs:
       - name: Install dependencies for ${{ runner.os }}.
         shell: bash
         run: |
+          set -ex
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt-get install --yes \
                   astyle \
@@ -116,9 +122,10 @@ jobs:
               brew install astyle clang-format cljstyle kscript ktlint z3
               # brew's vlang 0.2.4 is too old, and has no @head
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install zip curl astyle llvm
+              choco install astyle awk curl llvm zip
           fi
           echo "WHICH_KSCRIPT=$(which kscript 2>/dev/null)" >> $GITHUB_ENV
+          echo "WHICH_KTLINT=$(which ktlint 2>/dev/null)" >> $GITHUB_ENV
           echo "WHICH_V=$(which v 2>/dev/null)" >> $GITHUB_ENV
 
       - name: Install V
@@ -127,13 +134,52 @@ jobs:
         with:
           token: ${{ github.token }}
 
-      - name: Install kscript (using sdkman)
-        if: ${{ !env.WHICH_KSCRIPT && matrix.os == 'ubuntu-22.04' && (!env.FOCUS || env.FOCUS == 'kotlin') }}
+      - name: Install ktlint
+        if: ${{ !env.WHICH_KTLINT }}
         shell: bash
+        env:
+          KTLINT_VERSION: 0.41.0
+        run: |
+          set -ex
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mv ktlint ktlint.jar
+            bash -c "$(curl -fsSL https://raw.githubusercontent.com/jayvdb/warp4j/win/install)"
+            $HOME/warp/warp4j --windows --java-version 15 --no-optimize ktlint.jar
+            mkdir /tmp/ktlint
+            mv warped/ktlint-windows-x64.exe /tmp/ktlint/ktlint.exe
+            /tmp/ktlint/ktlint --help
+            echo "::add-path::/tmp/ktlint"
+            echo "::add-path::/c/msys64/usr/bin"
+          else
+            chmod a+x ktlint
+            sudo mv ktlint /usr/local/bin/
+          fi
+
+      - name: Install kscript
+        if: ${{ !env.WHICH_KSCRIPT }}
+        shell: bash
+        env:
+          WINDOWS_KSCRIPT_BIN: /c/Users/runneradmin/.sdkman/candidates/kscript/current/bin/
         run: |
           curl -s "https://get.sdkman.io" | bash
+          # sed -i.bak 's/sdkman_debug_mode=false/sdkman_debug_mode=true/' ~/.sdkman/etc/config
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install kscript
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            # To get the current manifest
+            jar -xf $WINDOWS_KSCRIPT_BIN/kscript.jar META-INF/MANIFEST.MF
+            # Create new one
+            echo 'Manifest-Version: 1.0' > META-INF/MANIFEST.MF
+            echo 'Main-Class: kscript.app.KscriptKt' >> META-INF/MANIFEST.MF
+            # Update manifest
+            jar uvfm $WINDOWS_KSCRIPT_BIN/kscript.jar META-INF/MANIFEST.MF
+            $HOME/warp/warp4j --windows --java-version 15 --no-optimize $WINDOWS_KSCRIPT_BIN/kscript.jar
+            mv warped/kscript-windows-x64.exe $WINDOWS_KSCRIPT_BIN/kscript.exe
+            cp /c/msys64/usr/bin/bash.exe /c/Windows/System32/bash.exe
+            set -e
+            kscript.exe tests/expected/assert.kt
+          fi
 
       - name: Install dart dependencies
         if: ${{ !env.FOCUS || env.FOCUS == 'dart' }}
@@ -173,7 +219,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-22.04' && (!env.FOCUS || env.FOCUS == 'smt') }}
         shell: bash
         run: |
-          if [ "$RUNNER_OS" != "Windows" ]; then
+          if [ "$RUNNER_OS" == "Linux" ]; then
             (curl -sLO https://raw.githubusercontent.com/greglook/cljstyle/main/script/install-cljstyle
              sed -i.bak 's/--overwrite//' install-cljstyle
              chmod +x install-cljstyle
@@ -182,8 +228,6 @@ jobs:
 
       - name: Run tox
         shell: bash
-        # sdkman init can be replaced with actions setup when the following is fixed
-        # https://github.com/sdkman/sdkman-action/issues/8
         run: |
           if [ -f $HOME/.sdkman/bin/sdkman-init.sh ]; then
             source "$HOME/.sdkman/bin/sdkman-init.sh"
