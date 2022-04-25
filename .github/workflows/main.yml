@@ -70,7 +70,7 @@ jobs:
             mkdir /tmp/ktlint
             mv ktlint ktlint.jar
             bash -c "$(curl -fsSL https://raw.githubusercontent.com/jayvdb/warp4j/win/install)"
-            $HOME/warp/warp4j --windows ktlint.jar
+            $HOME/warp/warp4j --windows --java-version 15 --no-optimize ktlint.jar
             mv warped/my-app-windows-x64.exe /tmp/ktlint/ktlint.exe
             /tmp/ktlint/ktlint --help ||:
             echo "::add-path::/tmp/ktlint"
@@ -177,6 +177,7 @@ jobs:
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
           if [ "$RUNNER_OS" == "Windows" ]; then
             mkdir /tmp/ktlint
+            # ktlint has a shell script header to the jar file
             mv ktlint ktlint.jar
             bash -c "$(curl -fsSL https://raw.githubusercontent.com/guziks/warp4j/stable/install)"
             $HOME/warp/warp4j --windows ktlint.jar
