@@ -110,7 +110,7 @@ jobs:
               sudo apt-get install --yes \
                   astyle \
                 && true
-              echo "CXX=clang++-12" >> $GITHUB_ENV
+              echo "CXX=clang++-14" >> $GITHUB_ENV
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
               chmod a+x ktlint
               sudo mv ktlint /usr/local/bin/
