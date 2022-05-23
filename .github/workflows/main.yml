@@ -38,7 +38,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
               cargo \
-              clang \
               clang-format \
               powershell \
               rustfmt \
@@ -109,6 +108,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt-get install --yes \
                   astyle \
+                  clang-14 \
                 && true
               echo "CXX=clang++-14" >> $GITHUB_ENV
               curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
