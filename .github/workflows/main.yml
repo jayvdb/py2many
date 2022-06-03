@@ -30,27 +30,25 @@ jobs:
 
       - name: Install wsl brew
         shell: wsl-bash {0}
-        env:
-          LB_USERNAME: linuxbrew
         run: |
           set -ex
-          if [ ! -f /home/$LB_USERNAME/.linuxbrew/bin/brew ]; then
+          if [ ! -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
             apt-get update
             apt-get install --no-install-recommends -y curl
-            rm -rf /home/$LB_USERNAME/
-            deluser $LB_USERNAME
-            adduser --disabled-password --gecos "" $LB_USERNAME
+            rm -rf /home/linuxbrew/
+            deluser linuxbrew
+            adduser --disabled-password --gecos "" linuxbrew
             wget -c https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
             # c.f. https://stackoverflow.com/questions/72435188/how-to-install-brew-using-a-shallow-clone
             sed -i 's:"git" "fetch":"git" "fetch" "--depth" "1":' install.sh
             sed -i '/"update" "--force"/d' install.sh
             mv install.sh /tmp
             chmod a+r /tmp/install.sh
-            echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> /home/$LB_USERNAME/.profile
-            su -l $LB_USERNAME -c "CI=1 USER=$LB_USERNAME bash /tmp/install.sh"
-            echo "eval \"\$(/home/$LB_USERNAME/.linuxbrew/bin/brew shellenv)\"" >> /home/$LB_USERNAME/.profile
-            chmod a+x /home/$LB_USERNAME/.linuxbrew/bin/brew
-            chmod a+x /home/$LB_USERNAME/.linuxbrew/Homebrew/bin/brew
+            echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> /home/linuxbrew/.profile
+            su -l linuxbrew -c "CI=1 USER=linuxbrew bash /tmp/install.sh"
+            echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> /home/linuxbrew/.profile
+            chmod a+x /home/linuxbrew/.linuxbrew/bin/brew
+            chmod a+x /home/linuxbrew/.linuxbrew/Homebrew/bin/brew
           fi
 
       - shell: bash
