@@ -31,8 +31,14 @@ jobs:
           wsl-shell-user: test
 
       - name: Install wsl brew
-        shell: wsl-bash  {0}
+        shell: wsl-bash {0}
         run: |
+          set -ex
+          #rm -rf /home/$LB_USERNAME/
+          #deluser $LB_USERNAME ||:
+          #adduser --disabled-password --gecos "" $LB_USERNAME
+          apt-get update
+          apt-get install --no-install-recommends -y curl
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - shell: bash
