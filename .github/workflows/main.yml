@@ -4,7 +4,7 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: [ main, wsl ]
   pull_request:
     branches: [ main ]
 
@@ -21,8 +21,6 @@ jobs:
       matrix:
         python-version: [ '3.8' ]
         os:
-          - ubuntu-22.04
-          - macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
 
