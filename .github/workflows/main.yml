@@ -32,24 +32,20 @@ jobs:
         shell: wsl-bash {0}
         run: |
           set -ex
-          if [ ! -f /home/linuxbrew/.linuxbrew/bin/brew ]; then
-            apt-get update
-            apt-get install --no-install-recommends -y curl
-            rm -rf /home/linuxbrew/
-            deluser linuxbrew
-            adduser --disabled-password --gecos "" linuxbrew
-            wget -c https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
-            # c.f. https://stackoverflow.com/questions/72435188/how-to-install-brew-using-a-shallow-clone
-            sed -i 's:"git" "fetch":"git" "fetch" "--depth" "1":' install.sh
-            sed -i '/"update" "--force"/d' install.sh
-            mv install.sh /tmp
-            chmod a+r /tmp/install.sh
-            echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> /home/linuxbrew/.profile
-            su -l linuxbrew -c "CI=1 USER=linuxbrew bash /tmp/install.sh"
-            echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> /home/linuxbrew/.profile
-            chmod a+x /home/linuxbrew/.linuxbrew/bin/brew
-            chmod a+x /home/linuxbrew/.linuxbrew/Homebrew/bin/brew
-          fi
+          apt-get update
+          apt-get install --no-install-recommends -y curl
+          adduser --disabled-password --gecos "" linuxbrew
+          wget -c https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
+          # c.f. https://stackoverflow.com/questions/72435188/how-to-install-brew-using-a-shallow-clone
+          sed -i 's:"git" "fetch":"git" "fetch" "--depth" "1":' install.sh
+          sed -i '/"update" "--force"/d' install.sh
+          mv install.sh /tmp
+          chmod a+r /tmp/install.sh
+          echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> /home/linuxbrew/.profile
+          su -l linuxbrew -c "CI=1 USER=linuxbrew bash /tmp/install.sh"
+          echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> /home/linuxbrew/.profile
+          chmod a+x /home/linuxbrew/.linuxbrew/bin/brew
+          chmod a+x /home/linuxbrew/.linuxbrew/Homebrew/bin/brew
 
       - shell: bash
         run: exit 1
