@@ -25,6 +25,19 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+
+      - uses: Vampire/setup-wsl@v1
+        with:
+          wsl-shell-user: test
+
+      - name: Install wsl brew
+        shell: wsl-bash_Ubuntu-22.04 {0}
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - shell: bash
+        run: exit 1
+
       - uses: actions/checkout@v2
 
       - uses: actions/setup-java@v3
