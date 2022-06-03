@@ -33,7 +33,7 @@ jobs:
         run: |
           set -ex
           apt-get update
-          apt-get install --no-install-recommends -y curl wget
+          apt-get install --no-install-recommends -y ca-certificates curl wget
           adduser --disabled-password --gecos "" linuxbrew
           wget -c https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh
           # c.f. https://stackoverflow.com/questions/72435188/how-to-install-brew-using-a-shallow-clone
