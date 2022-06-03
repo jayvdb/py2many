@@ -31,7 +31,7 @@ jobs:
           wsl-shell-user: test
 
       - name: Install wsl brew
-        shell: wsl-bash_Ubuntu-22.04 {0}
+        shell: wsl-bash_Ubuntu-20.04 {0}
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
