@@ -31,7 +31,7 @@ jobs:
           wsl-shell-user: test
 
       - name: Install wsl brew
-        shell: wsl-bash
+        shell: wsl-bash  {0}
         run: |
           /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
