@@ -30,6 +30,8 @@ jobs:
 
       - name: Install wsl brew
         shell: wsl-bash {0}
+        env:
+          LB_USERNAME: linuxbrew
         run: |
           set -ex
           if [ ! -f /home/$LB_USERNAME/.linuxbrew/bin/brew ]; then
