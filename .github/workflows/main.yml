@@ -191,7 +191,7 @@ jobs:
             export PATH="$PATH:/C/Program Files/LLVM/bin:/tmp/v"
           fi
           if [ "$FOCUS" ]; then
-            tox -e py38 -- -k "$FOCUS"
+            SHOW_ERRORS=1 tox -e py38 -- -k "$FOCUS and bitops"
           else
             tox -e py38
           fi
