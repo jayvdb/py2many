@@ -41,7 +41,7 @@ jobs:
           sed -i '/"update" "--force"/d' install.sh
           mv install.sh /tmp
           chmod a+r /tmp/install.sh
-          echo "export HOMEBREW_NO_AUTO_UPDATE=1" >> /home/linuxbrew/.profile
+          echo "export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1" >> /home/linuxbrew/.profile
           su -l linuxbrew -c "CI=1 USER=linuxbrew bash /tmp/install.sh"
           echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> /home/linuxbrew/.profile
           chmod a+x /home/linuxbrew/.linuxbrew/bin/brew
