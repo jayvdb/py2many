@@ -63,6 +63,14 @@ jobs:
       - uses: fwilhe2/setup-kotlin@main
         if: ${{ matrix.os != 'macos-12' && (!env.FOCUS || env.FOCUS == 'kotlin') }}
 
+      - name: Check kotlin
+        if: ${{ !env.FOCUS || env.FOCUS == 'kotlin' }}
+        shell: bash
+        run: |
+          set -ex
+          which kotlin
+          which kotlinc
+
       - uses: jiro4989/setup-nim-action@v1
         if: ${{ !env.FOCUS || env.FOCUS == 'nim' }}
       - uses: actions/setup-go@v2
@@ -169,6 +177,7 @@ jobs:
           set -ex
           java -jar $WINDOWS_KSCRIPT_BIN/kscript.jar windows tests/expected/assert.kt ||:
           which kotlin ||:
+          which kotlinc
 
       - name: Install dart dependencies
         if: ${{ !env.FOCUS || env.FOCUS == 'dart' }}
