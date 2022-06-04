@@ -260,7 +260,7 @@ class CodeGeneratorTests(unittest.TestCase):
         if settings.formatter:
             if settings.ext == ".kt" and case_output.is_absolute():
                 # KtLint does not support absolute path in globs
-                case_output = _relative_to_cwd(case_output)
+                case_output = "./" + str(_relative_to_cwd(case_output))
             proc = run([*settings.formatter, case_output], env=env, capture_output=True)
             if proc.returncode and not self.SHOW_ERRORS:
                 raise unittest.SkipTest(
