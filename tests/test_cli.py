@@ -70,7 +70,6 @@ INVOKER = {
     "dart": ["dart", "--enable-asserts"],
     "go": ["go", "run"],
     "julia": ["julia", "--compiled-modules=yes"],
-    "kotlin": get_kscript(),
     "python": [sys.executable],
     "rust": ["cargo", "script"],
     "vlang": ["v", "run"],
@@ -134,9 +133,6 @@ def get_exe_filename(case, ext):
 def get_compiler(lang):
     compiler = COMPILERS.get(lang)
     if not compiler:
-        return
-    # On Windows, compiler kotlinc can be skipped and invoker kscript used
-    if compiler == ["kotlinc"] and sys.platform == "win32":
         return
     if not spawn.find_executable(compiler[0]):
         raise unittest.SkipTest(f"{compiler[0]} not available")
