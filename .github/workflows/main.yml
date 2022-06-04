@@ -70,6 +70,8 @@ jobs:
           set -ex
           which kotlin
           which kotlinc
+          cat $(which kotlinc)
+          exit 1
 
       - uses: jiro4989/setup-nim-action@v1
         if: ${{ !env.FOCUS || env.FOCUS == 'nim' }}
