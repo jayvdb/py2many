@@ -226,7 +226,7 @@ jobs:
             export PATH="$PATH:/C/Program Files/LLVM/bin:/tmp/v"
           fi
           if [ "$FOCUS" ]; then
-            tox -e py38 -- -k "$FOCUS"
+            tox -e py38 -- -x -k "$FOCUS"
           else
             tox -e py38
           fi

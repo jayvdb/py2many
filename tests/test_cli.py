@@ -300,6 +300,7 @@ class CodeGeneratorTests(unittest.TestCase):
 
                 # Special case for kscript.jar from get_kscript() above
                 if lang == "kotlin" and invoker[0] == "java":
+                    print(f"Running {stdout}", file=sys.stderr)
                     proc = run(
                         stdout.decode("utf-8"),
                         shell=True,

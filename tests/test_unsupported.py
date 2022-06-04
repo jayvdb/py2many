@@ -5,6 +5,7 @@ import sys
 
 from distutils import spawn
 from functools import lru_cache, partial
+from pathlib import Path
 from subprocess import run
 from textwrap import dedent
 from unittest.mock import Mock
@@ -308,6 +309,8 @@ class CodeGeneratorTests(unittest.TestCase):
 
         finally:
             if not KEEP_GENERATED:
+                if isinstance(case_output, str):
+                    case_output = Path(case_output)
                 case_output.unlink(missing_ok=True)
                 exe.unlink(missing_ok=True)
 
