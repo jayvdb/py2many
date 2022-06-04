@@ -154,6 +154,7 @@ def _transpile(
             if not _suppress_exceptions or not isinstance(e, _suppress_exceptions):
                 raise
             outputs[filename] = "FAILED"
+            raise
     # return output in the same order as input
     output_list = [outputs[f] for f in filenames]
     return output_list, successful
@@ -726,6 +727,7 @@ def main(args=None, env=os.environ):
                 else:
                     print(f"{source}: {formatted_lines[-1]}", file=sys.stderr)
                 rv = False
+                raise
         else:
             if args.outdir is None:
                 outdir = source.parent / f"{source.name}-py2many"
