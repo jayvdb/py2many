@@ -31,6 +31,15 @@ KEEP_GENERATED = os.environ.get("KEEP_GENERATED", False)
 SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
 UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
 
+
+def get_kscript():
+    kscript = spawn.find_executable("kscript")
+    if kscript and kscript.endswith(".exe"):
+        return ["kscript", "windows"]
+    else:
+        return ["kscript"]
+
+
 CXX = os.environ.get("CXX", "clang++")
 LANGS = list(_get_all_settings(Mock(indent=4)).keys())
 ENV = {
@@ -53,7 +62,7 @@ INVOKER = {
     "dart": ["dart", "--enable-asserts"],
     "go": ["go", "run"],
     "julia": ["julia", "--compiled-modules=yes"],
-    "kotlin": ["kscript"],
+    "kotlin": get_kscript(),
     "python": [sys.executable],
     "rust": ["cargo", "script"],
     "vlang": ["v", "run"],

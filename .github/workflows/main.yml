@@ -23,7 +23,7 @@ jobs:
         os:
           # ubuntu-22.04
           # macos-12
-          - windows-2019
+          - windows-2022
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -178,7 +178,7 @@ jobs:
             mv warped/kscript-windows-x64.exe $WINDOWS_KSCRIPT_BIN/kscript.exe
             cp /c/msys64/usr/bin/bash.exe /c/Windows/System32/bash.exe
             set -e
-            kscript.exe tests/expected/assert.kt
+            kscript.exe windows tests/expected/assert.kt
           fi
 
       - name: Install dart dependencies
