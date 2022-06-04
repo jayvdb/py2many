@@ -166,20 +166,9 @@ jobs:
           # sed -i.bak 's/sdkman_debug_mode=false/sdkman_debug_mode=true/' ~/.sdkman/etc/config
           source "$HOME/.sdkman/bin/sdkman-init.sh"
           sdk install kscript
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            # To get the current manifest
-            jar -xf $WINDOWS_KSCRIPT_BIN/kscript.jar META-INF/MANIFEST.MF
-            # Create new one
-            echo 'Manifest-Version: 1.0' > META-INF/MANIFEST.MF
-            echo 'Main-Class: kscript.app.KscriptKt' >> META-INF/MANIFEST.MF
-            # Update manifest
-            jar uvfm $WINDOWS_KSCRIPT_BIN/kscript.jar META-INF/MANIFEST.MF
-            $HOME/warp/warp4j --windows --java-version 15 --no-optimize $WINDOWS_KSCRIPT_BIN/kscript.jar
-            mv warped/kscript-windows-x64.exe $WINDOWS_KSCRIPT_BIN/kscript.exe
-            cp /c/msys64/usr/bin/bash.exe /c/Windows/System32/bash.exe
-            set -e
-            kscript.exe windows tests/expected/assert.kt
-          fi
+          set -ex
+          java -jar $WINDOWS_KSCRIPT_BIN/kscript.jar windows tests/expected/assert.kt ||:
+          which kotlin ||:
 
       - name: Install dart dependencies
         if: ${{ !env.FOCUS || env.FOCUS == 'dart' }}

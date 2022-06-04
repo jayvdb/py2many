@@ -34,8 +34,16 @@ UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
 
 def get_kscript():
     kscript = spawn.find_executable("kscript")
-    if kscript and kscript.endswith(".exe"):
-        return ["kscript", "windows"]
+    if not kscript:
+        jarfile = os.path.expanduser(
+            "~/.sdkman/candidates/kscript/current/bin/kscript.jar"
+        )
+        if os.path.exists(jarfile):
+            if sys.platform == "win32":
+                ostype = "windows"
+            else:
+                ostype = sys.platform
+            return ["java", "-jar", jarfile, ostype]
     else:
         return ["kscript"]
 
@@ -288,8 +296,17 @@ class CodeGeneratorTests(unittest.TestCase):
                     env=env,
                     capture_output=True,
                 )
-
                 stdout = proc.stdout
+
+                # Special case for kscript.jar from get_kscript() above
+                if lang == "kotlin" and invoker[0] == "java":
+                    proc = run(
+                        stdout,
+                        shell=True,
+                        env=env,
+                        capture_output=True,
+                    )
+                    stdout = proc.stdout
 
                 if expect_failure and expected_exit_code != proc.returncode:
                     raise unittest.SkipTest(f"Execution of {case}{ext} failed")
