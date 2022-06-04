@@ -48,7 +48,7 @@ jobs:
           chmod a+x /home/linuxbrew/.linuxbrew/Homebrew/bin/brew
           su -l linuxbrew -c "CI=1 USER=linuxbrew brew tap holgerbrandl/tap"
           su -l linuxbrew -c "CI=1 USER=linuxbrew brew tap athrunsun/linuxbinary"
-          su -l linuxbrew -c "CI=1 USER=linuxbrew brew install gcc"
+          su -l linuxbrew -c "CI=1 USER=linuxbrew brew install gcc@10"
           su -l linuxbrew -c "CI=1 USER=linuxbrew brew install cljstyle"
           su -l linuxbrew -c "CI=1 USER=linuxbrew brew install ktlint kscript"
 
