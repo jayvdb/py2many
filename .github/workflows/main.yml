@@ -23,7 +23,7 @@ jobs:
         os:
           # ubuntu-22.04
           # macos-12
-          - windows-2022
+          - windows-2019
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -138,7 +138,7 @@ jobs:
         if: ${{ !env.WHICH_KTLINT }}
         shell: bash
         env:
-          KTLINT_VERSION: 0.41.0
+          KTLINT_VERSION: 0.45.2
         run: |
           set -ex
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
