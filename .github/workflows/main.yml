@@ -149,8 +149,8 @@ jobs:
             mkdir /tmp/ktlint
             mv warped/ktlint-windows-x64.exe /tmp/ktlint/ktlint.exe
             /tmp/ktlint/ktlint --help
-            echo "::add-path::/tmp/ktlint"
-            echo "::add-path::/c/msys64/usr/bin"
+            echo "/tmp/ktlint" >> $GITHUB_PATH
+            echo "/c/msys64/usr/bin" >> $GITHUB_PATH
           else
             chmod a+x ktlint
             sudo mv ktlint /usr/local/bin/
