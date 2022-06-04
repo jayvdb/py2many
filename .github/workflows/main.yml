@@ -46,6 +46,11 @@ jobs:
           echo "eval \"\$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)\"" >> /home/linuxbrew/.profile
           chmod a+x /home/linuxbrew/.linuxbrew/bin/brew
           chmod a+x /home/linuxbrew/.linuxbrew/Homebrew/bin/brew
+          su -l linuxbrew -c "CI=1 USER=linuxbrew brew tap holgerbrandl/tap"
+          su -l linuxbrew -c "CI=1 USER=linuxbrew brew tap athrunsun/linuxbinary"
+          su -l linuxbrew -c "CI=1 USER=linuxbrew brew install gcc"
+          su -l linuxbrew -c "CI=1 USER=linuxbrew brew install cljstyle"
+          su -l linuxbrew -c "CI=1 USER=linuxbrew brew install ktlint kscript"
 
       - shell: bash
         run: exit 1
