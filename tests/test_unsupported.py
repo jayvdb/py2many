@@ -46,6 +46,7 @@ from tests.test_cli import (
     LANGS as _LANGS,
     SHOW_ERRORS,
     TESTS_DIR,
+    _java_name,
     get_compiler,
     get_exe_filename,
     has_main_lines,
@@ -291,7 +292,7 @@ class CodeGeneratorTests(unittest.TestCase):
                 if not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 cmd = _create_cmd(
-                    invoker, filename=case_output, exe=exe, title_case=case.title()
+                    invoker, filename=case_output, exe=exe, title_case=_java_name(case)
                 )
                 proc = run(cmd, env=env, capture_output=True)
 

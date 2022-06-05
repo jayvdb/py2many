@@ -70,6 +70,10 @@ def get_kotlin_compiler():
     return ["kotlinc"]
 
 
+def _java_name(case):
+    return case[0].upper() + case[1:]
+
+
 CXX = os.environ.get("CXX", "clang++")
 LANGS = list(_get_all_settings(Mock(indent=4)).keys())
 ENV = {
@@ -310,7 +314,7 @@ class CodeGeneratorTests(unittest.TestCase):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 assert os.path.exists(exe), f"{exe} does not exist"
                 cmd = _create_cmd(
-                    invoker, filename=case_output, exe=exe, title_case=case.title()
+                    invoker, filename=case_output, exe=exe, title_case=_java_name(case)
                 )
                 cmd += main_args
                 proc = run(
