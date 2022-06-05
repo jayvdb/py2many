@@ -373,7 +373,8 @@ class CodeGeneratorTests(unittest.TestCase):
         finally:
             if not self.KEEP_GENERATED:
                 case_output.unlink(missing_ok=True)
-                exe.unlink(missing_ok=True)
+                if not isinstance(exe, str):
+                    exe.unlink(missing_ok=True)
         if settings.ext == ".rs":
             assert in_cargo_toml(case)
 
