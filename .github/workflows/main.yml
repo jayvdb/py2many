@@ -219,14 +219,28 @@ jobs:
         if: ${{ !env.FOCUS || env.FOCUS == 'rust' }}
         run: cargo install cargo-script
 
-      - name: Install smt dependencies
-        if: ${{ !env.WHICH_CLJSTYLE && (!env.FOCUS || env.FOCUS == 'smt') }}
+      - name: Install smt dependencies (Linux)
+        if: ${{ matrix.os == 'ubuntu-22.04' && (!env.FOCUS || env.FOCUS == 'smt') }}
         shell: bash
         run: |
           curl -sLO https://raw.githubusercontent.com/greglook/cljstyle/main/script/install-cljstyle
           sed -i.bak 's/--overwrite//' install-cljstyle
           chmod +x install-cljstyle
           ./install-cljstyle
+
+      - name: Install smt dependencies (Windows)
+        if: ${{ !env.WHICH_CLJSTYLE && (!env.FOCUS || env.FOCUS == 'smt') }}
+        shell: bash
+        env:
+          CLJSTYLE_VERSION: 0.15.0
+        run: |
+          curl -sLO https://github.com/greglook/cljstyle/releases/download/$CLJSTYLE_VERSION/cljstyle-$CLJSTYLE_VERSION.jar
+          mv cljstyle-$CLJSTYLE_VERSION.jar cljstyle.jar
+          $HOME/warp/warp4j --windows --java-version 15 --no-optimize cljstyle.jar
+          mkdir /tmp/cljstyle
+          mv warped/cljstyle-windows-x64.exe /tmp/cljstyle/cljstyle.exe
+          /tmp/cljstyle/cljstyle --help
+          echo "/tmp/cljstyle" >> $GITHUB_PATH
 
       - name: Run tox
         shell: bash
