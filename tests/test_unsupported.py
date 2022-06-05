@@ -290,7 +290,9 @@ class CodeGeneratorTests(unittest.TestCase):
                 invoker = INVOKER.get(lang)
                 if not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
-                cmd = _create_cmd(invoker, filename=case_output, exe=exe)
+                cmd = _create_cmd(
+                    invoker, filename=case_output, exe=exe, title_case=case.title()
+                )
                 proc = run(cmd, env=env, capture_output=True)
 
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:

@@ -240,7 +240,7 @@ jobs:
             export PATH="$PATH:/C/Program Files/LLVM/bin:/tmp/v"
           fi
           if [ "$FOCUS" ]; then
-            tox -e py38 -- -x -k "$FOCUS and not unsupported"
+            tox -e py38 -- -x -k "$FOCUS"
           else
             tox -e py38
           fi

@@ -45,7 +45,7 @@ def get_kotlin_invoker():
             "-cp",
             f"{KOTLIN_HOME}/lib/kotlin-runner.jar",
             "org.jetbrains.kotlin.runner.Main",
-            "{exe}",
+            "{title_case}Kt",
         ]
 
     return ["kscript"]
@@ -309,10 +309,9 @@ class CodeGeneratorTests(unittest.TestCase):
                 elif not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
                 assert os.path.exists(exe), f"{exe} does not exist"
-                print("exe", exe)
-                exe = str(case.title()) + "Kt"
-                print("exe", exe)
-                cmd = _create_cmd(invoker, filename=case_output, exe=exe)
+                cmd = _create_cmd(
+                    invoker, filename=case_output, exe=exe, title_case=case.title()
+                )
                 cmd += main_args
                 proc = run(
                     cmd,
@@ -373,8 +372,7 @@ class CodeGeneratorTests(unittest.TestCase):
         finally:
             if not self.KEEP_GENERATED:
                 case_output.unlink(missing_ok=True)
-                if not isinstance(exe, str):
-                    exe.unlink(missing_ok=True)
+                exe.unlink(missing_ok=True)
         if settings.ext == ".rs":
             assert in_cargo_toml(case)
 
