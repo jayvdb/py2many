@@ -149,7 +149,7 @@ jobs:
           token: ${{ github.token }}
 
       - name: Install ktlint
-        if: ${{ !env.WHICH_KTLINT }}
+        if: ${{ !env.WHICH_KTLINT && (!env.FOCUS || env.FOCUS == 'kotlin') }}
         shell: bash
         env:
           KTLINT_VERSION: 0.45.2
@@ -171,7 +171,7 @@ jobs:
           fi
 
       - name: Install kscript
-        if: ${{ !env.WHICH_KSCRIPT }}
+        if: ${{ !env.WHICH_KSCRIPT && (!env.FOCUS || env.FOCUS == 'kotlin') }}
         shell: bash
         env:
           WINDOWS_KSCRIPT_BIN: /c/Users/runneradmin/.sdkman/candidates/kscript/current/bin/
@@ -226,7 +226,7 @@ jobs:
           curl -sLO https://raw.githubusercontent.com/greglook/cljstyle/main/script/install-cljstyle
           sed -i.bak 's/--overwrite//' install-cljstyle
           chmod +x install-cljstyle
-          sudo ./install-cljstyle
+          ./install-cljstyle
 
       - name: Run tox
         shell: bash
