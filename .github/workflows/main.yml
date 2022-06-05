@@ -149,6 +149,13 @@ jobs:
           token: ${{ github.token }}
 
       - name: Install ktlint
+        shell: bash
+        run: |
+          set -ex
+          curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/jayvdb/warp4j/win/install)"
+
+      - name: Install ktlint
         if: ${{ !env.WHICH_KTLINT && (!env.FOCUS || env.FOCUS == 'kotlin') }}
         shell: bash
         env:
@@ -158,7 +165,6 @@ jobs:
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv ktlint ktlint.jar
-            bash -c "$(curl -fsSL https://raw.githubusercontent.com/jayvdb/warp4j/win/install)"
             $HOME/warp/warp4j --windows --java-version 15 --no-optimize ktlint.jar
             mkdir /tmp/ktlint
             mv warped/ktlint-windows-x64.exe /tmp/ktlint/ktlint.exe
