@@ -308,6 +308,7 @@ class CodeGeneratorTests(unittest.TestCase):
                     pass
                 elif not spawn.find_executable(invoker[0]):
                     raise unittest.SkipTest(f"{invoker[0]} not available")
+                assert os.path.exists(exe), f"{exe} does not exist"
                 cmd = _create_cmd(invoker, filename=case_output, exe=exe)
                 cmd += main_args
                 proc = run(
