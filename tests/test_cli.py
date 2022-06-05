@@ -31,19 +31,19 @@ KEEP_GENERATED = os.environ.get("KEEP_GENERATED", False)
 SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
 UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
 
-kotlin_jar_dir = os.environ.get("KOTLIN_JAR_DIR")
+KOTLIN_HOME = os.environ.get("KOTLIN_HOME")
 
 
 def get_kotlin_invoker():
     kscript = spawn.find_executable("kscript")
-    if not kscript and kotlin_jar_dir:
+    if not kscript and KOTLIN_HOME:
         return [
             "java",
             "-Xmx256M",
             "-Xms32M",
-            f"-Dkotlin.home={kotlin_jar_dir}/..",
+            f"-Dkotlin.home={KOTLIN_HOME}",
             "-cp",
-            f"{kotlin_jar_dir}/kotlin-runner.jar",
+            f"{KOTLIN_HOME}/lib/kotlin-runner.jar",
             "org.jetbrains.kotlin.runner.Main",
             "{exe}",
         ]
@@ -53,17 +53,17 @@ def get_kotlin_invoker():
 
 def get_kotlin_compiler():
     kotlinc = spawn.find_executable("kotlinc")
-    if not kotlinc and kotlin_jar_dir:
+    if not kotlinc and KOTLIN_HOME:
         return [
             "java",
             "-Xmx256M",
             "-Xms32M",
-            f"-Dkotlin.home={kotlin_jar_dir}/..",
+            f"-Dkotlin.home={KOTLIN_HOME}",
             "-cp",
-            f"{kotlin_jar_dir}/kotlin-preloader.jar",
+            f"{KOTLIN_HOME}/lib/kotlin-preloader.jar",
             "org.jetbrains.kotlin.preloading.Preloader",
             "-cp",
-            f"{kotlin_jar_dir}/kotlin-compiler.jar",
+            f"{KOTLIN_HOME}/lib/kotlin-compiler.jar",
             "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
         ]
 
