@@ -135,7 +135,7 @@ jobs:
               brew install astyle clang-format cljstyle kscript ktlint z3
               # brew's vlang 0.2.4 is too old, and has no @head
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install astyle awk curl llvm zip
+              choco install astyle awk curl llvm z3 zip
           fi
           echo "WHICH_CLJSTYLE=$(which cljstyle 2>/dev/null)" >> $GITHUB_ENV
           echo "WHICH_KSCRIPT=$(which kscript 2>/dev/null)" >> $GITHUB_ENV
