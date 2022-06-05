@@ -31,21 +31,43 @@ KEEP_GENERATED = os.environ.get("KEEP_GENERATED", False)
 SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
 UPDATE_EXPECTED = os.environ.get("UPDATE_EXPECTED", False)
 
+kotlin_jar_dir = os.environ.get("KOTLIN_JAR_DIR")
 
-def get_kscript():
+
+def get_kotlin_invoker():
     kscript = spawn.find_executable("kscript")
-    if not kscript:
-        jarfile = os.path.expanduser(
-            "~/.sdkman/candidates/kscript/current/bin/kscript.jar"
-        )
-        if os.path.exists(jarfile):
-            if sys.platform == "win32":
-                ostype = "windows"
-            else:
-                ostype = sys.platform
-            return ["java", "-jar", jarfile, ostype]
-    else:
-        return ["kscript"]
+    if not kscript and kotlin_jar_dir:
+        return [
+            "java",
+            "-Xmx256M",
+            "-Xms32M",
+            f"-Dkotlin.home={kotlin_jar_dir}/..",
+            "-cp",
+            f"{kotlin_jar_dir}/kotlin-runner.jar",
+            "org.jetbrains.kotlin.runner.Main",
+            "{exe}",
+        ]
+
+    return ["kscript"]
+
+
+def get_kotlin_compiler():
+    kotlinc = spawn.find_executable("kotlinc")
+    if not kotlinc and kotlin_jar_dir:
+        return [
+            "java",
+            "-Xmx256M",
+            "-Xms32M",
+            f"-Dkotlin.home={kotlin_jar_dir}/..",
+            "-cp",
+            f"{kotlin_jar_dir}/kotlin-preloader.jar",
+            "org.jetbrains.kotlin.preloading.Preloader",
+            "-cp",
+            f"{kotlin_jar_dir}/kotlin-compiler.jar",
+            "org.jetbrains.kotlin.cli.jvm.K2JVMCompiler",
+        ]
+
+    return ["kotlinc"]
 
 
 CXX = os.environ.get("CXX", "clang++")
@@ -60,7 +82,7 @@ COMPILERS = {
     + (["-o", "{exe}", "{filename}"] if sys.platform == "win32" else []),
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
-    "kotlin": ["kotlinc"],
+    "kotlin": get_kotlin_compiler(),
     "nim": ["nim", "compile", "--nimcache:."],
     "rust": ["cargo", "script", "--build-only", "--debug"],
     "vlang": ["v"],
@@ -70,6 +92,7 @@ INVOKER = {
     "dart": ["dart", "--enable-asserts"],
     "go": ["go", "run"],
     "julia": ["julia", "--compiled-modules=yes"],
+    "kotlin": get_kotlin_invoker(),
     "python": [sys.executable],
     "rust": ["cargo", "script"],
     "vlang": ["v", "run"],
@@ -293,17 +316,6 @@ class CodeGeneratorTests(unittest.TestCase):
                     capture_output=True,
                 )
                 stdout = proc.stdout
-
-                # Special case for kscript.jar from get_kscript() above
-                if lang == "kotlin" and invoker[0] == "java":
-                    print(f"Running {stdout}", file=sys.stderr)
-                    proc = run(
-                        stdout.decode("utf-8"),
-                        shell=True,
-                        env=env,
-                        capture_output=True,
-                    )
-                    stdout = proc.stdout
 
                 if expect_failure and expected_exit_code != proc.returncode:
                     raise unittest.SkipTest(f"Execution of {case}{ext} failed")

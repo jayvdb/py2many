@@ -70,8 +70,11 @@ jobs:
           set -ex
           which kotlin
           which kotlinc
+          file $(which kotlin)
           cat $(which kotlinc)
-          exit 1
+          ls /c/hostedtoolcache/windows/kotlin/1.4.30/x64/kotlinc/
+          echo "KOTLIN_JAR_DIR=/c/hostedtoolcache/windows/kotlin/1.4.30/x64/kotlinc/" >> $GITHUB_ENV
+
 
       - uses: jiro4989/setup-nim-action@v1
         if: ${{ !env.FOCUS || env.FOCUS == 'nim' }}
