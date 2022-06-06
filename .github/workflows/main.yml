@@ -132,18 +132,21 @@ jobs:
                   zip \
                 && true
 
-              mkdir -p /tmp/bin/
-              echo /tmp/bin/ >> $GITHUB_PATH
+              mkdir -p /c/tools/warped/bin/
+              echo "/c/tools/warped/bin/" >> $GITHUB_PATH
               echo "/C/Program Files/LLVM/bin" >> $GITHUB_PATH
               echo "/c/msys64/usr/bin" >> $GITHUB_PATH
 
           fi
-          echo "WHICH_CLJSTYLE=$(which cljstyle 2>/dev/null)" >> $GITHUB_ENV
           echo "WHICH_KTLINT=$(which ktlint 2>/dev/null)" >> $GITHUB_ENV
           echo "WHICH_V=$(which v 2>/dev/null)" >> $GITHUB_ENV
 
           if [ "$(which kotlinc)" ]; then
-              echo KOTLIN_HOME="$(dirname $(dirname $(readlink -f $(which kotlinc))))" >> $GITHUB_ENV
+              KOTLIN_HOME="$(dirname $(dirname $(readlink -f $(which kotlinc))))"
+              if [ "$RUNNER_OS" == "macOS" ]; then
+                  KOTLIN_HOME=$KOTLIN_HOME/libexec
+              fi
+              echo KOTLIN_HOME=$KOTLIN_HOME >> $GITHUB_ENV
           fi
 
       - name: Install V
@@ -172,7 +175,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv ktlint ktlint.jar
             warp4j --windows --java-version 15 --no-optimize ktlint.jar
-            mv warped/ktlint-windows-x64.exe /tmp/bin/ktlint.exe
+            mv warped/ktlint-windows-x64.exe /c/tools/warped/bin/ktlint.exe
             ktlint --help
           else
             chmod a+x ktlint
@@ -232,7 +235,7 @@ jobs:
           curl -sLO https://github.com/greglook/cljstyle/releases/download/$CLJSTYLE_VERSION/cljstyle-$CLJSTYLE_VERSION.jar
           mv cljstyle-$CLJSTYLE_VERSION.jar cljstyle.jar
           warp4j --windows --java-version 15 --no-optimize cljstyle.jar
-          mv warped/cljstyle-windows-x64.exe /tmp/bin/cljstyle.exe
+          mv warped/cljstyle-windows-x64.exe /c/tools/warped/bin/cljstyle.exe
           cljstyle --help
 
       - name: Run tox
