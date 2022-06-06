@@ -175,7 +175,11 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv ktlint ktlint.jar
             warp4j --windows --java-version 15 --no-optimize ktlint.jar
-            mv warped/ktlint-windows-x64.exe /c/tools/warped/bin/ktlint.exe
+            cp warped/ktlint-windows-x64.exe /c/tools/warped/bin/ktlint.exe
+            mkdir /tmp/ktlint
+            mv warped/ktlint-windows-x64.exe /tmp/ktlint/ktlint.exe
+            /tmp/ktlint/ktlint --help
+            echo "/tmp/ktlint" >> $GITHUB_PATH
             ktlint --help
           else
             chmod a+x ktlint
