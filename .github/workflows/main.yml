@@ -22,8 +22,8 @@ jobs:
         python-version: [ '3.8' ]
         os:
           - ubuntu-22.04
-          # macos-12
-          # windows-2022
+          - macos-12
+          - windows-2022
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -143,7 +143,7 @@ jobs:
           echo "WHICH_V=$(which v 2>/dev/null)" >> $GITHUB_ENV
 
           if [ "$(which kotlinc)" ]; then
-              echo KOTLIN_HOME="$(basename $(which kotlinc))" >> $GITHUB_ENV
+              echo KOTLIN_HOME="$(dirname $(dirname $(readlink -f $(which kotlinc))))" >> $GITHUB_ENV
           fi
 
       - name: Install V
@@ -244,7 +244,7 @@ jobs:
           if [ "$FOCUS" ]; then
             tox -e py38 -- -x -k "$FOCUS"
           else
-            tox -e py38 -- --cov-fail-under=89
+            tox -e py38 -- -x -k 'smt or kotlin'
           fi
 
   lint:
