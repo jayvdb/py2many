@@ -13,7 +13,7 @@ on:
 
 env:
   # Can be blank, or one of: cpp, dart, go, julia, kotlin, nim, smt, vlang
-  FOCUS: ''
+  FOCUS: 'kotlin'
 jobs:
   build:
 
@@ -21,8 +21,8 @@ jobs:
       matrix:
         python-version: [ '3.8' ]
         os:
-          - ubuntu-22.04
-          - macos-12
+          # ubuntu-22.04
+          # macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
 
@@ -238,12 +238,29 @@ jobs:
           mv warped/cljstyle-windows-x64.exe /c/tools/warped/bin/cljstyle.exe
           cljstyle --help
 
+      - name: Check PATH
+        shell: bash
+        run: |
+          echo $PATH
+          which ktlint
+          #which cljstyle
+          cat $GITHUB_PATH
+
+      - name: Check PATH
+        shell: pwsh
+        run: |
+          which ktlint
+          #which cljstyle
+
       - name: Run tox
         shell: bash
         run: |
+          set -ex
           if [ -f $HOME/.sdkman/bin/sdkman-init.sh ]; then
             source "$HOME/.sdkman/bin/sdkman-init.sh"
           fi
+
+          exit 1
           if [ "$FOCUS" ]; then
             tox -e py38 -- -x -k "$FOCUS"
           else
