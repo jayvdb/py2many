@@ -155,6 +155,7 @@ jobs:
       - name: Install warp4j (Windows)
         # This is used to convert ktlint from .jar to .exe
         shell: bash
+        if: ${{ matrix.os == 'windows-2022' }}
         run: |
           set -ex
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/jayvdb/warp4j/win/install)"
