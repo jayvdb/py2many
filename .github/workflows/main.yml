@@ -21,18 +21,13 @@ jobs:
       matrix:
         python-version: [ '3.8' ]
         os:
-          # ubuntu-22.04
-          # macos-12
+          - ubuntu-22.04
+          - macos-12
           - windows-2022
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Check for runner dependencies
-        shell: bash
-        run: |
-          echo "$HOME/warp" >> $GITHUB_PATH
 
       - uses: actions/setup-java@v3
         if: ${{ matrix.os != 'macos-12' && (!env.FOCUS || env.FOCUS == 'kotlin') }}
@@ -60,21 +55,9 @@ jobs:
 
       - uses: julia-actions/setup-julia@v1
         if: ${{ !env.FOCUS || env.FOCUS == 'julia' }}
+
       - uses: fwilhe2/setup-kotlin@main
         if: ${{ matrix.os != 'macos-12' && (!env.FOCUS || env.FOCUS == 'kotlin') }}
-
-      - name: Check kotlin
-        if: ${{ !env.FOCUS || env.FOCUS == 'kotlin' }}
-        shell: bash
-        run: |
-          set -ex
-          which kotlin
-          which kotlinc
-          file $(which kotlin)
-          cat $(which kotlinc)
-          ls /c/hostedtoolcache/windows/kotlin/1.4.30/x64/kotlinc/
-          echo "KOTLIN_HOME=/c/hostedtoolcache/windows/kotlin/1.4.30/x64/kotlinc/" >> $GITHUB_ENV
-
 
       - uses: jiro4989/setup-nim-action@v1
         if: ${{ !env.FOCUS || env.FOCUS == 'nim' }}
@@ -127,20 +110,41 @@ jobs:
                   z3 \
                 && true
               echo "CXX=clang++-14" >> $GITHUB_ENV
-              curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.41.0/ktlint
-              chmod a+x ktlint
-              sudo mv ktlint /usr/local/bin/
+
           elif [ "$RUNNER_OS" == "macOS" ]; then
               brew tap holgerbrandl/tap https://github.com/holgerbrandl/homebrew-tap
-              brew install astyle clang-format cljstyle kscript ktlint z3
+              brew install \
+                  astyle \
+                  clang-format \
+                  cljstyle \
+                  ktlint \
+                  z3 \
+                && true
               # brew's vlang 0.2.4 is too old, and has no @head
+
           elif [ "$RUNNER_OS" == "Windows" ]; then
-              choco install astyle awk curl llvm z3 zip
+              choco install \
+                  astyle \
+                  awk \
+                  curl \
+                  llvm \
+                  z3 \
+                  zip \
+                && true
+
+              mkdir -p /usr/local/bin/
+              echo /usr/local/bin/ >> $GITHUB_PATH
+              echo "/C/Program Files/LLVM/bin" >> $GITHUB_PATH
+              echo "/c/msys64/usr/bin" >> $GITHUB_PATH
+
           fi
           echo "WHICH_CLJSTYLE=$(which cljstyle 2>/dev/null)" >> $GITHUB_ENV
-          echo "WHICH_KSCRIPT=$(which kscript 2>/dev/null)" >> $GITHUB_ENV
           echo "WHICH_KTLINT=$(which ktlint 2>/dev/null)" >> $GITHUB_ENV
           echo "WHICH_V=$(which v 2>/dev/null)" >> $GITHUB_ENV
+
+          if [ "$(which kotlinc)" ]; then
+              echo KOTLIN_HOME="$(basename $(which kotlinc))" >> $GITHUB_ENV
+          fi
 
       - name: Install V
         if: ${{ !env.WHICH_V && (!env.FOCUS || env.FOCUS == 'vlang') }}
@@ -148,12 +152,13 @@ jobs:
         with:
           token: ${{ github.token }}
 
-      - name: Install ktlint
+      - name: Install warp4j (Windows)
+        # This is used to convert ktlint from .jar to .exe
         shell: bash
         run: |
           set -ex
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/jayvdb/warp4j/win/install)"
+          echo "$HOME/warp" >> $GITHUB_PATH
 
       - name: Install ktlint
         if: ${{ !env.WHICH_KTLINT && (!env.FOCUS || env.FOCUS == 'kotlin') }}
@@ -165,31 +170,13 @@ jobs:
           curl -sSLO https://github.com/pinterest/ktlint/releases/download/${KTLINT_VERSION}/ktlint
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv ktlint ktlint.jar
-            $HOME/warp/warp4j --windows --java-version 15 --no-optimize ktlint.jar
-            mkdir /tmp/ktlint
-            mv warped/ktlint-windows-x64.exe /tmp/ktlint/ktlint.exe
-            /tmp/ktlint/ktlint --help
-            echo "/tmp/ktlint" >> $GITHUB_PATH
-            echo "/c/msys64/usr/bin" >> $GITHUB_PATH
+            warp4j --windows --java-version 15 --no-optimize ktlint.jar
+            mv warped/ktlint-windows-x64.exe /usr/local/bin/ktlint.exe
+            ktlint --help
           else
             chmod a+x ktlint
             sudo mv ktlint /usr/local/bin/
           fi
-
-      - name: Install kscript
-        if: ${{ !env.WHICH_KSCRIPT && (!env.FOCUS || env.FOCUS == 'kotlin') }}
-        shell: bash
-        env:
-          WINDOWS_KSCRIPT_BIN: /c/Users/runneradmin/.sdkman/candidates/kscript/current/bin/
-        run: |
-          curl -s "https://get.sdkman.io" | bash
-          # sed -i.bak 's/sdkman_debug_mode=false/sdkman_debug_mode=true/' ~/.sdkman/etc/config
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install kscript
-          set -ex
-          java -jar $WINDOWS_KSCRIPT_BIN/kscript.jar windows tests/expected/assert.kt ||:
-          which kotlin ||:
-          which kotlinc
 
       - name: Install dart dependencies
         if: ${{ !env.FOCUS || env.FOCUS == 'dart' }}
@@ -235,18 +222,17 @@ jobs:
           ./install-cljstyle
 
       - name: Install smt dependencies (Windows)
-        if: ${{ !env.WHICH_CLJSTYLE && (!env.FOCUS || env.FOCUS == 'smt') }}
+        if: ${{ matrix.os == 'windows-2022' && (!env.FOCUS || env.FOCUS == 'smt') }}
         shell: bash
         env:
           CLJSTYLE_VERSION: 0.15.0
         run: |
+          set -ex
           curl -sLO https://github.com/greglook/cljstyle/releases/download/$CLJSTYLE_VERSION/cljstyle-$CLJSTYLE_VERSION.jar
           mv cljstyle-$CLJSTYLE_VERSION.jar cljstyle.jar
-          $HOME/warp/warp4j --windows --java-version 15 --no-optimize cljstyle.jar
-          mkdir /tmp/cljstyle
-          mv warped/cljstyle-windows-x64.exe /tmp/cljstyle/cljstyle.exe
-          /tmp/cljstyle/cljstyle --help
-          echo "/tmp/cljstyle" >> $GITHUB_PATH
+          warp4j --windows --java-version 15 --no-optimize cljstyle.jar
+          mv warped/cljstyle-windows-x64.exe /usr/local/bin/cljstyle.exe
+          cljstyle --help
 
       - name: Run tox
         shell: bash
@@ -254,14 +240,10 @@ jobs:
           if [ -f $HOME/.sdkman/bin/sdkman-init.sh ]; then
             source "$HOME/.sdkman/bin/sdkman-init.sh"
           fi
-          LINT=1
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            export PATH="$PATH:/C/Program Files/LLVM/bin:/tmp/v"
-          fi
           if [ "$FOCUS" ]; then
             tox -e py38 -- -x -k "$FOCUS"
           else
-            tox -e py38
+            tox -e py38 -- --cov-fail-under=89
           fi
 
   lint:
