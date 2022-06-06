@@ -260,7 +260,6 @@ jobs:
             source "$HOME/.sdkman/bin/sdkman-init.sh"
           fi
 
-          exit 1
           if [ "$FOCUS" ]; then
             tox -e py38 -- -x -k "$FOCUS"
           else
