@@ -1,0 +1,73 @@
+name: C++
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main, cpp-workflow ]
+    paths:
+      - .github/workflows/cpp.yml
+      - pycpp/*
+      - tests/expected/*.cpp
+  pull_request:
+    branches: [ main ]
+    paths:
+      - .github/workflows/cpp.yml
+      - pycpp/*
+      - tests/expected/*.cpp
+
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        python-version: [ '3.8' ]
+        os:
+          - ubuntu-22.04
+        compiler:
+          - g++-10
+          - g++-11
+          - g++-12
+          - clang-11
+          - clang-12
+          - clang-13
+          - clang-14
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y \
+              ${{ matrix.compiler }} \
+            && true
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install tox
+        run: |
+          pip3 --version
+          pip3 install setuptools tox
+
+      - name: Setup compiler
+        shell: bash
+        run: |
+          set -ex
+          COMPILER="${{ matrix.compiler }}"
+          if [ "${COMPILER:0:5}" = "clang" ]; then
+            echo "CXX=clang++-${COMPILER:6:2}" >> $GITHUB_ENV
+          else
+            echo "CXX=${{ matrix.compiler }}" >> $GITHUB_ENV
+          fi
+
+      - name: Run tox
+        shell: bash
+        run: |
+          tox -e py38 -- -k cpp
