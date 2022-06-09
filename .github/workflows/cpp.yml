@@ -45,6 +45,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y \
               ${{ matrix.compiler }} \
+              libstdc++-12-dev \
             && true
 
       - uses: actions/setup-python@v2
