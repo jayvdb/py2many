@@ -1,6 +1,5 @@
-
 from tempfile import NamedTemporaryFile
-from textwrap import wrap
+
 
 # Testing context manager
 class FileOp():
@@ -23,3 +22,4 @@ if __name__ == "__main__":
             file.write("test")
         with open(file_path, "r") as f:
             assert f.read() == "test"
+        print("ok")

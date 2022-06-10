@@ -112,6 +112,7 @@ class DeclarationExtractor(ast.NodeVisitor):
                 self.annotated_members[target_id] = (type_str, node.value, parent)
 
     def visit_Assign(self, node):
+        parent = node.scopes[-1]
         target = node.targets[0]
         if self.is_member(target):
             if target.attr not in self.member_assignments:
