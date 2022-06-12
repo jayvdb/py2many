@@ -226,7 +226,7 @@ def _conan_include_dirs():
     )
     return [
         "-I",
-        f"{USER_HOME}/.conan/data/{CONAN_CATCH2}/include" "-I",
+        f"{USER_HOME}/.conan/data/{CONAN_CATCH2}/include", "-I",
         f"{USER_HOME}/.conan/data/{CONAN_CPPITERTOOLS}/include",
     ]
 
