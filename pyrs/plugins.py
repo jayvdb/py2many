@@ -131,6 +131,10 @@ class RustTranspilerPlugins:
         self._allows.add("unreachable_code")
         return f"std::process::exit({vargs[0]})"
 
+    def visit_len(self, node, vargs) -> str:
+        self._usings.add("std::convert::TryInto")
+        return f"{vargs[0]}.len().try_into().unwrap()"
+
     def visit_min_max(self, node, vargs, is_max: bool) -> str:
         self._usings.add("std::cmp")
         min_max = "max" if is_max else "min"
@@ -159,7 +163,6 @@ class RustTranspilerPlugins:
 # small one liners are inlined here as lambdas
 SMALL_DISPATCH_MAP = {
     "str": lambda n, vargs: f"&{vargs[0]}.to_string()" if vargs else '""',
-    "len": lambda n, vargs: f"{vargs[0]}.len()",
     "enumerate": lambda n, vargs: f"{vargs[0]}.iter().enumerate()",
     "sum": lambda n, vargs: f"{vargs[0]}.iter().sum()",
     "int": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="i32"),
@@ -179,6 +182,7 @@ SMALL_USINGS_MAP = {
 }
 
 DISPATCH_MAP = {
+    "len": RustTranspilerPlugins.visit_len,
     "max": functools.partial(RustTranspilerPlugins.visit_min_max, is_max=True),
     "min": functools.partial(RustTranspilerPlugins.visit_min_max, is_max=False),
     "range": RustTranspilerPlugins.visit_range,
