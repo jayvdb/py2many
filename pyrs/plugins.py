@@ -173,8 +173,7 @@ SMALL_DISPATCH_MAP = {
     "int": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="i32"),
     "bool": lambda n, vargs: f"({vargs[0]} != 0)" if vargs else "false",
     "float": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="f64"),
-    # as usize below is a hack to pass comb_sort.rs. Need a better solution
-    "floor": lambda n, vargs: f"{vargs[0]}.floor() as usize",
+    "floor": lambda n, vargs: f"{vargs[0]}.floor()",
     "reversed": lambda n, vargs: f"{vargs[0]}.iter().rev()",
     "map": lambda n, vargs: f"{vargs[1]}.iter().map({vargs[0]})",
     "filter": lambda n, vargs: f"{vargs[1]}.into_iter().filter({vargs[0]})",

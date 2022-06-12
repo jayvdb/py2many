@@ -5,6 +5,7 @@ import types
 
 from ctypes import c_int8, c_int16, c_int32, c_int64
 from ctypes import c_uint8, c_uint16, c_uint32, c_uint64
+from ctypes import c_size_t
 
 from py2many.analysis import get_id, is_mutable
 from py2many.clike import class_for_typename
@@ -25,6 +26,7 @@ RUST_TYPE_MAP = {
     c_uint16: "u16",
     c_uint32: "u32",
     c_uint64: "u64",
+    "c_size_t": "usize",
 }
 
 # https://pyo3.rs/v0.13.2/conversions/tables.html
@@ -147,6 +149,8 @@ class InferRustTypesTransformer(ast.NodeTransformer):
             return node
         else:
             if left_id in self.FIXED_WIDTH_INTS_NAME:
+                left_id = "int"
+            elif left_id in ["c_size_t"]:
                 left_id = "int"
             if right_id in self.FIXED_WIDTH_INTS_NAME:
                 right_id = "int"

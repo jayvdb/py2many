@@ -20,6 +20,7 @@ from ctypes import (
     c_uint16 as u16,
     c_uint32 as u32,
     c_uint64 as u64,
+    c_size_t as size_t,
 )
 
 ilong = i64
@@ -34,6 +35,7 @@ c_uint8 = u8
 c_uint16 = u16
 c_uint32 = u32
 c_uint64 = u64
+c_size_t = size_t
 
 
 from py2many.analysis import get_id, IGNORED_MODULE_SET
@@ -94,6 +96,8 @@ def class_for_typename(typename, default_type, locals=None) -> Union[str, object
     if typename == "super" or typename.startswith("super()"):
         # Cant eval super; causes RuntimeError
         return None
+    if typename == "c_size_t":
+        return typename
     try:
         # TODO: take into account any imports happening in the file being parsed
         # and pass them into eval

@@ -2,6 +2,7 @@ import ast
 
 from ctypes import c_int8, c_int16, c_int32, c_int64
 from ctypes import c_uint8, c_uint16, c_uint32, c_uint64
+from ctypes import c_size_t
 
 from py2many.clike import CLikeTranspiler as CommonCLikeTranspiler
 
@@ -19,6 +20,7 @@ pycpp_type_map = {
     c_uint16: "uint16_t",
     c_uint32: "uint32_t",
     c_uint64: "uint64_t",
+    "c_size_t": "size_t",
 }
 
 # Commented out keywords below so we don't break existing tests

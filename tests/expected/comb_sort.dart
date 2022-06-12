@@ -5,10 +5,11 @@ import 'package:sprintf/sprintf.dart';
 import 'package:tuple/tuple.dart';
 
 List<int> comb_sort(List<int> seq) {
-  var gap = seq.length;
+  int gap = seq.length;
   bool swap = true;
   while (gap > 1 || swap) {
-    gap = max(1, (gap / 1.25).floor());
+    int n = (gap / 1.25).floor().toInt();
+    gap = max(1, n);
     swap = false;
     for (final i in ([for (var i = 0; i < (seq.length - gap); i += 1) i])) {
       if ((seq[i] ?? (throw Exception("key not found"))) >

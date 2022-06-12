@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-
+from ctypes import c_size_t, c_int32, c_uint64
 from math import floor
 from typing import List
 
 
 def comb_sort(seq: List[int]) -> List[int]:
-    gap = len(seq)
+    gap: c_size_t = len(seq)
     swap = True
     while gap > 1 or swap:
-        gap = max(1, floor(gap / 1.25))
+        n: c_int32 = int(floor(gap / 1.25))
+        gap = max(1, n)
         swap = False
         for i in range(len(seq) - gap):
             if seq[i] > seq[i + gap]:

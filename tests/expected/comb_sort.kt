@@ -2,17 +2,18 @@ import kotlin.math.floor
 import kotlin.math.max
 
 fun comb_sort(seq: Array<Int>): Array<Int> {
-    var gap = seq.size
+    var gap: Int = seq.size
     var swap = true
     while (gap > 1 || swap) {
-        gap = max(1, floor((gap.toDouble() / 1.25)).toInt())
+        var n: Int = floor((gap.toDouble() / 1.25)).toInt().toInt()
+        gap = max(1, n)
         swap = false
-        for (i in (0..(seq.size - gap) - 1)) {
-            if (seq[i] > seq[(i + gap)]) {
+        for (i in (0..(seq.size.toInt() - gap) - 1)) {
+            if (seq[i] > seq[(i.toInt() + gap)]) {
                 if (true) {
-                    val (__tmp1, __tmp2) = Pair(seq[(i + gap)], seq[i])
+                    val (__tmp1, __tmp2) = Pair(seq[(i.toInt() + gap)], seq[i])
                     seq[i] = __tmp1
-                    seq[(i + gap)] = __tmp2
+                    seq[(i.toInt() + gap)] = __tmp2
                 }
                 swap = true
             }

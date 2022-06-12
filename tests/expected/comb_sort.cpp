@@ -1,4 +1,5 @@
 #include <math.h>  // NOLINT(build/include_order)
+#include <stdint.h>
 
 #include <cassert>   // NOLINT(build/include_order)
 #include <iostream>  // NOLINT(build/include_order)
@@ -10,11 +11,11 @@
 #include "pycpp/runtime/sys.h"       // NOLINT(build/include_order)
 
 inline std::vector<int> comb_sort(std::vector<int>& seq) {
-  auto gap = seq.size();
+  size_t gap = seq.size();
   bool swap = true;
   while (gap > 1 || swap) {
-    gap = std::max(static_cast<size_t>(1),
-                   static_cast<size_t>(floor(gap / 1.25)));
+    int32_t n = pycpp::to_int(static_cast<size_t>(floor(gap / 1.25)));
+    gap = std::max(1, n);
     swap = false;
     for (auto i : rangepp::xrange((seq.size()) - gap)) {
       if (seq[i] > seq[i + gap]) {

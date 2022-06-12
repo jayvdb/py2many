@@ -2,6 +2,7 @@ import ast
 
 from ctypes import c_int8, c_int16, c_int32, c_int64
 from ctypes import c_uint8, c_uint16, c_uint32, c_uint64
+from ctypes import c_size_t
 
 from py2many.inference import get_inferred_type, InferTypesTransformer
 from py2many.clike import class_for_typename
@@ -22,6 +23,7 @@ KT_TYPE_MAP = {
     c_uint16: "UShort",
     c_uint32: "UInt",
     c_uint64: "ULong",
+    "c_size_t": "Int",
 }
 
 REVERSE_KT_TYPE_MAP = {v: k for k, v in KT_TYPE_MAP.items()}
@@ -163,6 +165,8 @@ class InferKotlinTypesTransformer(ast.NodeTransformer):
             return node
         else:
             if left_id in self.FIXED_WIDTH_INTS_NAME:
+                left_id = "int"
+            elif left_id in ["c_size_t"]:
                 left_id = "int"
             if right_id in self.FIXED_WIDTH_INTS_NAME:
                 right_id = "int"
