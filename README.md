@@ -77,9 +77,7 @@ https://github.com/adsharma/py2many/tree/main/tests/expected (fib*)
 ## Trying it out
 
 Requirements:
-- python 3
-- clang
-- rustc
+- Python 3.8+
 
 Local installation:
 
@@ -98,22 +96,30 @@ Add the py2many script to your $PATH and run:
 Transpiling:
 
 ```
-py2many --cpp=1 /tmp/fib.py
-py2many --rust=1 /tmp/fib.py
-py2many --julia=1 /tmp/fib.py
-py2many --kotlin=1 /tmp/fib.py
-py2many --nim=1 /tmp/fib.py
-py2many --dart=1 /tmp/fib.py
-py2many --go=1 /tmp/fib.py
+py2many --cpp=1 tests/cases/fib.py
+py2many --rust=1 tests/cases/fib.py
+py2many --julia=1 tests/cases/fib.py
+py2many --kotlin=1 tests/cases/fib.py
+py2many --nim=1 tests/cases/fib.py
+py2many --dart=1 tests/cases/fib.py
+py2many --go=1 tests/cases/fib.py
 ```
 
 Compiling:
 
 ```
-clang fib.cpp
-rustc fib.rs
+clang tests/cases/fib.cpp
+rustc tests/cases/fib.rs
 ...
 ```
+
+Many of the transpilers rely on a language specific formatter to parse the output and reformat it.
+Typically this is the most prominent formatter for the language, such as `rustfmt` for Rust.
+
+Most of the transpilers also rely on external libraries to provide bridges from
+Python constructs to the target language.
+
+The steps to install these external libraries can be found in `.github/workflows/main.yml`.
 
 # Contributing
 

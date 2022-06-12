@@ -4,9 +4,10 @@ import 'package:sprintf/sprintf.dart';
 import 'package:tuple/tuple.dart';
 
 List<int> bubble_sort(List<int> seq) {
-  final L = seq.length;
+  int L = seq.length;
+  int start = 1;
   for (final _ in ([for (var i = 0; i < L; i += 1) i])) {
-    for (final n in ([for (var i = 1; i < L; i += 1) i])) {
+    for (final n in ([for (var i = start; i < L; i += 1) i])) {
       if ((seq[n] ?? (throw Exception("key not found"))) <
           (seq[(n - 1)] ?? (throw Exception("key not found")))) {
         final __tmp1 = Tuple2<int, int>(

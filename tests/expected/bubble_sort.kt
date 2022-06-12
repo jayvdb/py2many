@@ -1,8 +1,9 @@
 
 fun bubble_sort(seq: Array<Int>): Array<Int> {
-    val L = seq.size
+    var L: Int = seq.size
+    var start: Int = 1
     for (__tmp1 in (0..L - 1)) {
-        for (n in (1..L - 1)) {
+        for (n in (start..L - 1)) {
             if (seq[n] < seq[(n.toInt() - 1)]) {
                 if (true) {
                     val (__tmp1, __tmp2) = Pair(seq[n], seq[(n.toInt() - 1)])
