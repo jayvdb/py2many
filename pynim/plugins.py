@@ -1,4 +1,5 @@
 import io
+import functools
 import os
 import random
 import sys
@@ -48,6 +49,10 @@ class NimTranspilerPlugins:
             "encountered range() call with unknown parameters: range({})".format(vargs)
         )
 
+    @staticmethod
+    def visit_cast(node, vargs, cast_to: str) -> str:
+        return f"{cast_to}({vargs[0]})"
+
     def visit_print(self, node, vargs: List[str]) -> str:
         args = []
         for n in vargs:
@@ -59,6 +64,14 @@ class NimTranspilerPlugins:
 
 # small one liners are inlined here as lambdas
 SMALL_DISPATCH_MAP = {
+    "c_int8": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="int8"),
+    "c_int16": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="int16"),
+    "c_int32": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="int32"),
+    "c_int64": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="int64"),
+    "c_uint8": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="uint8"),
+    "c_uint16": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="uint16"),
+    "c_uint32": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="uint32"),
+    "c_uint64": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="uint64"),
     "str": lambda n, vargs: f"$({vargs[0]})" if vargs else '""',
     "bool": lambda n, vargs: f"bool({vargs[0]})" if vargs else "false",
     "int": lambda n, vargs: f"int({vargs[0]})" if vargs else "0",

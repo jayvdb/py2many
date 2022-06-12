@@ -1,4 +1,5 @@
 import ast
+import functools
 from typing import Callable, Dict, List, Tuple, Union
 
 from .inference import get_inferred_v_type, V_WIDTH_RANK
@@ -46,6 +47,10 @@ class VTranspilerPlugins:
         else:
             return f"({self.visit(node.args[0])}).bool()"
 
+    @staticmethod
+    def visit_cast(node, vargs, cast_to: str) -> str:
+        return f"{cast_to}({vargs[0]})"
+
     def visit_int(self, node: ast.Call, vargs: List[str]) -> str:
         if not vargs:
             return "0"
@@ -64,6 +69,14 @@ class VTranspilerPlugins:
 
 
 SMALL_DISPATCH_MAP: Dict[str, Callable] = {
+    "c_int8": functools.partial(VTranspilerPlugins.visit_cast, cast_to="i8"),
+    "c_int16": functools.partial(VTranspilerPlugins.visit_cast, cast_to="i16"),
+    "c_int32": functools.partial(VTranspilerPlugins.visit_cast, cast_to="int"),
+    "c_int64": functools.partial(VTranspilerPlugins.visit_cast, cast_to="i64"),
+    "c_uint8": functools.partial(VTranspilerPlugins.visit_cast, cast_to="byte"),
+    "c_uint16": functools.partial(VTranspilerPlugins.visit_cast, cast_to="u16"),
+    "c_uint32": functools.partial(VTranspilerPlugins.visit_cast, cast_to="u32"),
+    "c_uint64": functools.partial(VTranspilerPlugins.visit_cast, cast_to="u64"),
     "str": lambda n, vargs: f"({vargs[0]}).str()" if vargs else '""',
     "floor": lambda n, vargs: f"int(math.floor({vargs[0]}))",
     "len": lambda n, vargs: f"{vargs[0]}.len",

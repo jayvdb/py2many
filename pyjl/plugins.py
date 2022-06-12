@@ -1,6 +1,7 @@
+import ast
+import functools
 import io
 import os
-import ast
 import sys
 import textwrap
 
@@ -15,7 +16,7 @@ except ImportError:
     ap_dataclass = "ap_dataclass"
 
 
-class JuiliaTranspilerPlugins:
+class JuliaTranspilerPlugins:
     def visit_argparse_dataclass(self, node):
         fields = []
         for (
@@ -104,6 +105,10 @@ class JuiliaTranspilerPlugins:
         args = ", ".join(vargs)
         return f'println(join([{args}], " "))'
 
+    @staticmethod
+    def visit_cast(node, vargs, cast_to: str) -> str:
+        return f"convert({cast_to}, {vargs[0]})"
+
     def visit_cast_int(self, node, vargs) -> str:
         if not vargs:
             return "0"
@@ -119,6 +124,14 @@ class JuiliaTranspilerPlugins:
 
 # small one liners are inlined here as lambdas
 SMALL_DISPATCH_MAP = {
+    "c_int8": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="Int8"),
+    "c_int16": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="Int16"),
+    "c_int32": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="Int32"),
+    "c_int64": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="Int64"),
+    "c_uint8": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt8"),
+    "c_uint16": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt16"),
+    "c_uint32": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt32"),
+    "c_uint64": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt64"),
     "str": lambda n, vargs: f"string({vargs[0]})" if vargs else '""',
     "len": lambda n, vargs: f"length({vargs[0]})",
     "enumerate": lambda n, vargs: f"{vargs[0]}.iter().enumerate()",
@@ -133,17 +146,17 @@ SMALL_USINGS_MAP = {
 }
 
 DISPATCH_MAP = {
-    "range": JuiliaTranspilerPlugins.visit_range,
-    "xrange": JuiliaTranspilerPlugins.visit_range,
-    "print": JuiliaTranspilerPlugins.visit_print,
-    "int": JuiliaTranspilerPlugins.visit_cast_int,
+    "range": JuliaTranspilerPlugins.visit_range,
+    "xrange": JuliaTranspilerPlugins.visit_range,
+    "print": JuliaTranspilerPlugins.visit_print,
+    "int": JuliaTranspilerPlugins.visit_cast_int,
 }
 
 MODULE_DISPATCH_TABLE: Dict[str, str] = {}
 
-DECORATOR_DISPATCH_TABLE = {ap_dataclass: JuiliaTranspilerPlugins.visit_ap_dataclass}
+DECORATOR_DISPATCH_TABLE = {ap_dataclass: JuliaTranspilerPlugins.visit_ap_dataclass}
 
-CLASS_DISPATCH_TABLE = {ap_dataclass: JuiliaTranspilerPlugins.visit_argparse_dataclass}
+CLASS_DISPATCH_TABLE = {ap_dataclass: JuliaTranspilerPlugins.visit_argparse_dataclass}
 
 ATTR_DISPATCH_TABLE = {
     "temp_file.name": lambda self, node, value, attr: f"{value}.path()",
@@ -159,10 +172,10 @@ FUNC_DISPATCH_TABLE: Dict[FuncType, Tuple[Callable, bool]] = {
     "f.read": (lambda self, node, vargs: "f.read_string()", True),
     "f.write": (lambda self, node, vargs: f"f.write_string({vargs[0]})", True),
     "f.close": (lambda self, node, vargs: "drop(f)", False),
-    open: (JuiliaTranspilerPlugins.visit_open, True),
-    NamedTemporaryFile: (JuiliaTranspilerPlugins.visit_named_temp_file, True),
-    io.TextIOWrapper.read: (JuiliaTranspilerPlugins.visit_textio_read, True),
-    io.TextIOWrapper.read: (JuiliaTranspilerPlugins.visit_textio_write, True),
+    open: (JuliaTranspilerPlugins.visit_open, True),
+    NamedTemporaryFile: (JuliaTranspilerPlugins.visit_named_temp_file, True),
+    io.TextIOWrapper.read: (JuliaTranspilerPlugins.visit_textio_read, True),
+    io.TextIOWrapper.read: (JuliaTranspilerPlugins.visit_textio_write, True),
     os.unlink: (lambda self, node, vargs: f"std::fs::remove_file({vargs[0]})", True),
     sys.exit: (lambda self, node, vargs: f"quit({vargs[0]})", True),
 }

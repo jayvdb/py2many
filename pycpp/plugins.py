@@ -124,6 +124,14 @@ class CppTranspilerPlugins:
 
 # small one liners are inlined here as lambdas
 SMALL_DISPATCH_MAP = {
+    "c_int8": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="int8_t"),
+    "c_int16": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="int16_t"),
+    "c_int32": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="int32_t"),
+    "c_int64": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="int64_t"),
+    "c_uint8": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="uint8_t"),
+    "c_uint16": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="uint16_t"),
+    "c_uint32": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="uint32_t"),
+    "c_uint64": functools.partial(CppTranspilerPlugins.visit_cast, cast_to="uint64_t"),
     "int": lambda n, vargs: f"pycpp::to_int({vargs[0]})" if vargs else "0",
     # Is pycpp::to_int() necessary?
     # "int": functools.partial(visit_cast, cast_to="i32"),
