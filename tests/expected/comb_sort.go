@@ -8,10 +8,11 @@ import (
 )
 
 func CombSort(seq []int) []int {
-	gap := len(seq)
+	var gap c_size_t = len(seq)
 	var swap bool = true
 	for gap > 1 || swap {
-		gap = int(math.Max(1, math.Floor((float64(gap) / 1.25))))
+		var n int32 = int32(math.Floor((float64(gap) / 1.25)))
+		gap = c_size_t(math.Max(1, int(n)))
 		swap = false
 		for _, i := range iter.NewIntSeq(iter.Start(0), iter.Stop((len(seq) - gap))).All() {
 			if seq[i] > seq[(i+gap)] {

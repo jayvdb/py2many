@@ -147,6 +147,8 @@ class InferGoTypesTransformer(ast.NodeTransformer):
         else:
             if left_id in self.FIXED_WIDTH_INTS_NAME:
                 left_id = "int"
+            elif left_id in ["c_size_t"]:
+                left_id = "int"
             if right_id in self.FIXED_WIDTH_INTS_NAME:
                 right_id = "int"
             if (left_id, right_id) in {("int", "float"), ("float", "int")}:

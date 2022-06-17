@@ -14,8 +14,8 @@ inline std::vector<int> comb_sort(std::vector<int>& seq) {
   size_t gap = seq.size();
   bool swap = true;
   while (gap > 1 || swap) {
-    int32_t n = pycpp::to_int(static_cast<size_t>(floor(gap / 1.25)));
-    gap = std::max(1, n);
+    int32_t n = static_cast<int32_t>(static_cast<size_t>(floor(gap / 1.25)));
+    gap = std::max(1, pycpp::to_int(n));
     swap = false;
     for (auto i : rangepp::xrange((seq.size()) - gap)) {
       if (seq[i] > seq[i + gap]) {

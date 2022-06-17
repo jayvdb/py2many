@@ -137,8 +137,7 @@ SMALL_DISPATCH_MAP = {
     "enumerate": lambda n, vargs: f"{vargs[0]}.iter().enumerate()",
     "sum": lambda n, vargs: f"{vargs[0]}.iter().sum()",
     "bool": lambda n, vargs: f"Bool({vargs[0]})" if vargs else "false",
-    # ::Int64 below is a hack to pass comb_sort.jl. Need a better solution
-    "floor": lambda n, vargs: f"Int64(floor({vargs[0]}))",
+    "floor": lambda n, vargs: f"floor({vargs[0]})",
 }
 
 SMALL_USINGS_MAP = {

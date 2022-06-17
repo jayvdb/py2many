@@ -11,8 +11,8 @@ def comb_sort(seq: List[int]) -> List[int]:
     gap: c_size_t = len(seq)
     swap: bool = True
     while gap > 1 or swap:
-        n: c_int32 = int(floor(gap / 1.25))
-        gap = max(1, n)
+        n: c_int32 = c_int32(floor(gap / 1.25))
+        gap = max(1, int(n.value))
         swap = False
         for i in range(len(seq) - gap):
             if seq[i] > seq[i + gap]:

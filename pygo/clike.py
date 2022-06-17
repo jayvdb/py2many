@@ -20,6 +20,7 @@ go_type_map = {
     "c_uint16": "uint16",
     "c_uint32": "uint32",
     "c_uint64": "uint64",
+    "c_size_t": "int",
 }
 
 # allowed as names in Python but treated as keywords in Go

@@ -9,7 +9,7 @@ List<int> comb_sort(List<int> seq) {
   bool swap = true;
   while (gap > 1 || swap) {
     int n = (gap / 1.25).floor().toInt();
-    gap = max(1, n);
+    gap = max(1, n.toInt());
     swap = false;
     for (final i in ([for (var i = 0; i < (seq.length - gap); i += 1) i])) {
       if ((seq[i] ?? (throw Exception("key not found"))) >

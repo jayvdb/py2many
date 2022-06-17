@@ -20,6 +20,7 @@ dart_type_map = {
     c_uint16: "int",
     c_uint32: "int",
     c_uint64: "int",
+    "c_size_t": "int",
 }
 
 # allowed as names in Python but treated as keywords in Dart

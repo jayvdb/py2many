@@ -20,6 +20,7 @@ julia_type_map = {
     c_uint16: "UInt16",
     c_uint32: "UInt32",
     c_uint64: "UInt64",
+    "size_t": "Csize_t",
 }
 
 # allowed as names in Python but treated as keywords in Julia

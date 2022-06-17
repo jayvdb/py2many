@@ -32,7 +32,7 @@ pub fn comb_sort(seq: &mut Vec<i32>) -> Vec<i32> {
     let mut swap: bool = true;
     while (gap as i32) > 1 || swap {
         let n: i32 = ((gap as f64) / 1.25).floor() as i32;
-        gap = cmp::max(1, n) as usize;
+        gap = cmp::max(1, n as i32) as usize;
         swap = false;
         for i in (0..(seq.len() - gap)) {
             if seq[i as usize] > seq[(i + gap) as usize] {
