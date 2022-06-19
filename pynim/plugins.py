@@ -51,6 +51,9 @@ class NimTranspilerPlugins:
 
     @staticmethod
     def visit_cast(node, vargs, cast_to: str) -> str:
+        if not vargs:
+            if cast_to == "float":
+                return "0.0"
         return f"{cast_to}({vargs[0]})"
 
     def visit_print(self, node, vargs: List[str]) -> str:
@@ -76,6 +79,7 @@ SMALL_DISPATCH_MAP = {
     "bool": lambda n, vargs: f"bool({vargs[0]})" if vargs else "false",
     "int": lambda n, vargs: f"int({vargs[0]})" if vargs else "0",
     "floor": lambda n, vargs: f"int(floor({vargs[0]}))",
+    "float": functools.partial(NimTranspilerPlugins.visit_cast, cast_to="float"),
 }
 
 SMALL_USINGS_MAP: Dict[str, str] = {}

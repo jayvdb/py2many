@@ -49,6 +49,11 @@ class VTranspilerPlugins:
 
     @staticmethod
     def visit_cast(node, vargs, cast_to: str) -> str:
+        if not vargs:
+            if cast_to == "i32":
+                return "0"
+            elif cast_to == "f64":
+                return "0.0"
         return f"{cast_to}({vargs[0]})"
 
     def visit_int(self, node: ast.Call, vargs: List[str]) -> str:

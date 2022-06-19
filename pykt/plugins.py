@@ -126,6 +126,9 @@ class KotlinTranspilerPlugins:
 
     @staticmethod
     def visit_cast(node, vargs, cast_to: str) -> str:
+        if not vargs:
+            if cast_to == "Double":
+                return "0.0"
         return f"{vargs[0]}.to{cast_to}()"
 
     def visit_floor(self, node, vargs) -> str:
