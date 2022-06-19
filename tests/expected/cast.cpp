@@ -3,7 +3,13 @@
 #include "pycpp/runtime/builtins.h"  // NOLINT(build/include_order)
 #include "pycpp/runtime/sys.h"       // NOLINT(build/include_order)
 
-inline void main_func() {
+inline void cast_types() {
+  int a = pycpp::to_int(static_cast<float>(1));
+  std::cout << a;
+  std::cout << std::endl;
+}
+
+inline void cast_ctypes() {
   int16_t a = static_cast<int16_t>(1);
   auto b = a;
   std::cout << b;
@@ -20,5 +26,6 @@ inline void main_func() {
 
 int main(int argc, char** argv) {
   pycpp::sys::argv = std::vector<std::string>(argv, argv + argc);
-  main_func();
+  cast_types();
+  cast_ctypes();
 }

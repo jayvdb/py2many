@@ -1,7 +1,12 @@
 [translated]
 module main
 
-fn main_func() {
+fn cast_types() {
+	a := int(f64(1))
+	println(a.str())
+}
+
+fn cast_ctypes() {
 	a := i16(1)
 	b := a
 	println(b.str())
@@ -14,5 +19,6 @@ fn main_func() {
 }
 
 fn main() {
-	main_func()
+	cast_types()
+	cast_ctypes()
 }

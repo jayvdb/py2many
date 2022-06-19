@@ -5,7 +5,12 @@ import sys
 from ctypes import c_int16, c_int64, c_uint64
 
 
-def main_func():
+def cast_types():
+    a: int = int(float(1))
+    print(a)
+
+
+def cast_ctypes():
     a: c_int16 = c_int16(1)
     b = a.value
     print(b)
@@ -18,4 +23,5 @@ def main_func():
 
 
 if __name__ == "__main__":
-    main_func()
+    cast_types()
+    cast_ctypes()

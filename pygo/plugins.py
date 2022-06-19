@@ -146,6 +146,7 @@ SMALL_DISPATCH_MAP = {
     "str": lambda n, vargs: f"String({vargs[0]})" if vargs else '""',
     "int": lambda n, vargs: f"int({vargs[0]})" if vargs else "0",
     "bool": lambda n, vargs: f"({vargs[0]} != 0)" if vargs else "false",
+    "float": functools.partial(GoTranspilerPlugins.visit_cast, cast_to="float64"),
 }
 
 SMALL_USINGS_MAP: Dict[str, str] = {}

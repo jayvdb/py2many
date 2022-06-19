@@ -1,7 +1,12 @@
 // @dart=2.9
 import 'package:sprintf/sprintf.dart';
 
-main_func() {
+cast_types() {
+  final int a = 1.toDouble().toInt();
+  print(sprintf("%s", [a]));
+}
+
+cast_ctypes() {
   final int a = 1.toInt();
   final b = a;
   print(sprintf("%s", [b]));
@@ -14,5 +19,6 @@ main_func() {
 }
 
 main(List<String> argv) {
-  main_func();
+  cast_types();
+  cast_ctypes();
 }

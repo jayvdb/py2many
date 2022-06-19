@@ -4,7 +4,12 @@ import (
 	"fmt"
 )
 
-func MainFunc() {
+func CastTypes() {
+	var a int = int(float64(1))
+	fmt.Printf("%v\n", a)
+}
+
+func CastCtypes() {
 	var a int16 = int16(1)
 	b := a
 	fmt.Printf("%v\n", b)
@@ -17,5 +22,6 @@ func MainFunc() {
 }
 
 func main() {
-	MainFunc()
+	CastTypes()
+	CastCtypes()
 }

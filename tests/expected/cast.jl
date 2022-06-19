@@ -1,5 +1,10 @@
 
-function main_func()
+function cast_types()
+    a = Int64(floor(float(1)))
+    println(join([a], " "))
+end
+
+function cast_ctypes()
     a = convert(Int16, 1)
     b = a
     println(join([b], " "))
@@ -12,7 +17,8 @@ function main_func()
 end
 
 function main()
-    main_func()
+    cast_types()
+    cast_ctypes()
 end
 
 main()

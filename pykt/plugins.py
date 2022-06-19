@@ -147,6 +147,7 @@ SMALL_DISPATCH_MAP = {
     # TODO: strings use .length
     "len": lambda n, vargs: f"{vargs[0]}.size",
     "int": lambda n, vargs: f"{vargs[0]}.toInt()" if vargs else "0",
+    "float": functools.partial(KotlinTranspilerPlugins.visit_cast, cast_to="Double"),
     "bool": lambda n, vargs: f"({vargs[0]} != 0)" if vargs else "false",
     "reversed": lambda n, vargs: f"{vargs[0]}.reversed()",
 }

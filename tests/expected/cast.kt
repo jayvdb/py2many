@@ -1,5 +1,10 @@
 
-fun main_func() {
+fun cast_types() {
+    val a = 1.toDouble().toInt()
+    println("$a")
+}
+
+fun cast_ctypes() {
     val a = 1.toShort()
     val b = a
     println("$b")
@@ -12,5 +17,6 @@ fun main_func() {
 }
 
 fun main(argv: Array<String>) {
-    main_func()
+    cast_types()
+    cast_ctypes()
 }

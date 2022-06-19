@@ -79,6 +79,7 @@ SMALL_DISPATCH_MAP: Dict[str, Callable] = {
     "c_uint64": functools.partial(VTranspilerPlugins.visit_cast, cast_to="u64"),
     "str": lambda n, vargs: f"({vargs[0]}).str()" if vargs else '""',
     "floor": lambda n, vargs: f"int(math.floor({vargs[0]}))",
+    "float": functools.partial(VTranspilerPlugins.visit_cast, cast_to="f64"),
     "len": lambda n, vargs: f"{vargs[0]}.len",
     "sys.exit": lambda n, vargs: f"exit({vargs[0] if vargs else '0'})",
     "all": lambda n, vargs: f"{vargs[0]}.all(it)",

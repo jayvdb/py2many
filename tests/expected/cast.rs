@@ -25,7 +25,12 @@
 extern crate anyhow;
 use anyhow::Result;
 
-pub fn main_func() {
+pub fn cast_types() {
+    let a: i32 = 1 as f64 as i32;
+    println!("{}", a);
+}
+
+pub fn cast_ctypes() {
     let a: i16 = 1 as i16;
     let b = a;
     println!("{}", b);
@@ -38,6 +43,7 @@ pub fn main_func() {
 }
 
 pub fn main() -> Result<()> {
-    main_func();
+    cast_types();
+    cast_ctypes();
     Ok(())
 }
