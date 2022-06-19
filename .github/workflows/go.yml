@@ -1,0 +1,72 @@
+name: Go
+
+"on":
+  push:
+    branches: [ main, go-workflow ]
+    paths:
+      - .github/workflows/go.yml
+      - pygo/*
+      - tests/expected/*.go
+  pull_request:
+    branches: [ main ]
+    paths:
+      - .github/workflows/go.yml
+      - pygo/*
+      - tests/expected/*.go
+
+  workflow_dispatch:
+
+jobs:
+  go:
+
+    strategy:
+      matrix:
+        python-version: [ '3.8' ]
+        os:
+          - ubuntu-22.04
+        go-version:
+          - 1.18
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-go@v2
+        # Needed as https://github.com/actions/setup-go/pull/89 is not merged
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Install go packages
+        if: ${{ !env.FOCUS || env.FOCUS == 'go' }}
+        shell: bash
+        run: |
+          set -ex
+          rm go.mod
+          rm -rf tests/build
+          mkdir -p tests/build
+          cd tests/build
+          go mod init github.com/py2many/py2many/tests
+          go get -u github.com/electrious/refutil
+          go get -u github.com/hgfischer/go-iter
+          go get -u github.com/google/go-cmp/cmp
+
+          go install github.com/mgechev/revive@latest
+
+          if [[ -d /usr/local/bin && ! -f /usr/local/bin/golint && -f $HOME/go/bin/golint ]]; then
+            (cd /usr/local/bin && sudo ln -fs $HOME/go/bin/golint)
+          fi
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install tox
+        run: |
+          pip3 --version
+          pip3 install setuptools tox
+
+      - name: Run tox
+        shell: bash
+        run: |
+          tox -e py38 -- -x -k go
