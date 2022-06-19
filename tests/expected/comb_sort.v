@@ -8,8 +8,8 @@ fn comb_sort(mut seq []int) []int {
 	mut gap := seq.len
 	mut swap := true
 	for gap > 1 || swap {
-		n := int(int(math.floor((f32(gap) / 1.25))))
-		gap = arrays.max([1, int(n)]) or { panic('!') }
+		n := int(int(math.floor((f64(gap) / 1.25))))
+		gap = int(arrays.max([f64(1), f64(n)]) or { panic('!') })
 		swap = false
 		for i in 0 .. (seq.len - gap) {
 			if seq[i] > seq[(i + gap)] {

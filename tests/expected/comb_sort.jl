@@ -2,11 +2,11 @@
 
 
 function comb_sort(seq::Array{Int64})::Array{Int64}
-    gap::UInt64 = length(seq)
+    gap::Csize_t = length(seq)
     swap = true
     while gap > 1 || swap
-        n::Int32 = Int64(Int64(floor((gap / 1.25))))
-        gap = max(1, n)
+        n::Int32 = convert(Int32, floor((gap / 1.25)))
+        gap = Int64(floor(max(float(1), float(n))))
         swap = false
         for i in (0:(length(seq)-gap)-1)
             if seq[i+1] > seq[(i+gap)+1]

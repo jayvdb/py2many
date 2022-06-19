@@ -5,15 +5,15 @@ from typing import List
 
 
 def comb_sort(seq: List[int]) -> List[int]:
-    gap: c_size_t = len(seq)
+    gap: c_size_t = c_size_t(len(seq))
     swap = True
-    while gap > 1 or swap:
-        n: c_int32 = c_int32(floor(gap / 1.25))
-        gap = int(max(1, float(n.value)))
+    while gap.value > 1 or swap:
+        n: c_int32 = c_int32(floor(gap.value / 1.25))
+        gap = c_size_t(int(max(float(1), float(n.value))))
         swap = False
-        for i in range(len(seq) - gap):
-            if seq[i] > seq[i + gap]:
-                seq[i], seq[i + gap] = seq[i + gap], seq[i]
+        for i in range(len(seq) - int(gap.value)):
+            if seq[i] > seq[i + int(gap.value)]:
+                seq[i], seq[i + int(gap.value)] = seq[i + int(gap.value)], seq[i]
                 swap = True
     return seq
 
