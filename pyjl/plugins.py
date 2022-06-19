@@ -132,6 +132,7 @@ SMALL_DISPATCH_MAP = {
     "c_uint16": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt16"),
     "c_uint32": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt32"),
     "c_uint64": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="UInt64"),
+    "c_size_t": functools.partial(JuliaTranspilerPlugins.visit_cast, cast_to="Csize_t"),
     "str": lambda n, vargs: f"string({vargs[0]})" if vargs else '""',
     "len": lambda n, vargs: f"length({vargs[0]})",
     "enumerate": lambda n, vargs: f"{vargs[0]}.iter().enumerate()",
