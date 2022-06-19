@@ -77,6 +77,7 @@ def is_ctype(val: ast.AST) -> bool:
         "c_uint16",
         "c_uint32",
         "c_uint64",
+        "c_size_t",
     ]
 
 

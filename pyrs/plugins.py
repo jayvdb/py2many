@@ -166,6 +166,7 @@ SMALL_DISPATCH_MAP = {
     "c_uint16": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="u16"),
     "c_uint32": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="u32"),
     "c_uint64": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="u64"),
+    "c_size_t": functools.partial(RustTranspilerPlugins.visit_cast, cast_to="usize"),
     "str": lambda n, vargs: f"&{vargs[0]}.to_string()" if vargs else '""',
     "len": lambda n, vargs: f"{vargs[0]}.len()",
     "enumerate": lambda n, vargs: f"{vargs[0]}.iter().enumerate()",
