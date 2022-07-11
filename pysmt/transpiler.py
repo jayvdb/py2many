@@ -18,7 +18,6 @@ from py2many.clike import class_for_typename
 from py2many.declaration_extractor import DeclarationExtractor
 from py2many.exceptions import (
     AstClassUsedBeforeDeclaration,
-    AstNotImplementedError,
     AstTypeNotSupported,
 )
 from py2many.tracer import is_list, defined_before
