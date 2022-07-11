@@ -53,8 +53,8 @@ jobs:
         with:
           flutter-version: '2.10.5'
 
-      - uses: julia-actions/setup-julia@v1
-        if: ${{ !env.FOCUS || env.FOCUS == 'julia' }}
+      # uses: julia-actions/setup-julia@v1
+      # if: ${{ !env.FOCUS || env.FOCUS == 'julia' }}
       - uses: fwilhe2/setup-kotlin@main
         if: ${{ matrix.os != 'macos-12' && (!env.FOCUS || env.FOCUS == 'kotlin') }}
 
@@ -78,7 +78,9 @@ jobs:
         run: |
           mkdir -p tests/build
           cd tests/build
-          go mod init github.com/py2many/py2many/tests
+          if [[ ! -f go.mod ]]; then
+            go mod init github.com/py2many/py2many/tests
+          fi
           go get -u github.com/electrious/refutil
           go get -u github.com/hgfischer/go-iter
           go get -u github.com/google/go-cmp/cmp
@@ -94,7 +96,7 @@ jobs:
           pip3 install setuptools tox
 
       - name: Install Julia packages
-        if: ${{ !env.FOCUS || env.FOCUS == 'julia' }}
+        if: ${{ false }} #!env.FOCUS || env.FOCUS == 'julia' }}
         shell: bash
         run: |
           julia -e 'using Pkg; Pkg.add("JuliaFormatter")'
@@ -154,15 +156,15 @@ jobs:
           conan download catch2/3.0.1@:a25d6c83542b56b72fdaa05a85db5d46f5f0f71c
 
       - name: Install V
-        if: ${{ !env.WHICH_V && (!env.FOCUS || env.FOCUS == 'vlang') }}
+        if: ${{ github.token && !env.WHICH_V && (!env.FOCUS || env.FOCUS == 'vlang') }}
         uses: vlang/setup-v@v1
         with:
           token: ${{ github.token }}
 
       - name: Install V packages
-        if: ${{ !env.FOCUS || env.FOCUS == 'vlang' }}
         shell: bash
         run: |
+          if [[ -z "$(which v)" ]]; then exit 0; fi
           v install div72.vexc
 
       - name: Install kscript (using sdkman)
