@@ -466,12 +466,8 @@ class CodeGeneratorTests(unittest.TestCase):
 
         try:
             rv = main(args=args, env=env)
-            if sys.platform == "win32" and rv != 0:
-                raise unittest.SkipTest("transpiler failed")
             assert rv == 0
             output = filecmp.dircmp(expected_output_dir, output_dir)
-            if sys.platform == "win32" and output.diff_files != []:
-                raise unittest.SkipTest("directories don't match")
             assert output.diff_files == []
         finally:
             if not self.KEEP_GENERATED:
