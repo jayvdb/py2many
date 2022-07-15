@@ -196,7 +196,7 @@ def _transpile_one(
     out.append(code)
     if transpiler.extension:
         out.append(transpiler.extension_module(tree))
-    return "\n".join(out)
+    return "\n".join(out).strip() + "\n"
 
 
 @lru_cache(maxsize=100)
@@ -563,12 +563,14 @@ def _process_many(
         filenames, source_data, settings, _suppress_exceptions=_suppress_exceptions
     )
 
+    print(outputs)
+
     output_paths = [
         _get_output_path(filename, settings.ext, outdir) for filename in filenames
     ]
     for filename, output, output_path in zip(filenames, outputs, output_paths):
-        with open(output_path, "w") as f:
-            f.write(output)
+        with open(output_path, "wb") as f:
+            f.write(output.encode("utf-8"))
 
     successful = set(successful)
     format_errors = set()
