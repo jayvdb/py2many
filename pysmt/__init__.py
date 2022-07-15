@@ -12,7 +12,7 @@ def settings(args, env=os.environ):
         SmtTranspiler(),
         ".smt",
         "SMT",
-        ["cljstyle", *cljstyle_args],
+        ["jgo", "mvxcvi:cljstyle", *cljstyle_args],
         None,
         [],
         [infer_smt_types],

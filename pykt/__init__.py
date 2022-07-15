@@ -11,9 +11,9 @@ def settings(args, env=os.environ):
         KotlinTranspiler(),
         ".kt",
         "Kotlin",
-        ["ktlint", "-F"],
+        ["jgo", "--add-opens", "java.base/java.lang=ALL-UNNAMED", "com.pinterest:ktlint", "-F"],
         rewriters=[KotlinBitOpRewriter()],
         transformers=[infer_kotlin_types],
         post_rewriters=[KotlinPrintRewriter()],
-        linter=["ktlint"],
+        linter=["jgo", "com.pinterest:ktlint"],
     )
