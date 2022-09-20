@@ -8,5 +8,8 @@ enabled = true
   runtime_version = "3.x.x"
 
 [[analyzers]]
-name = "test-coverage"
+name = "rust"
 enabled = true
+
+  [analyzers.meta]
+  msrv = "1.58.0"
