@@ -37,12 +37,17 @@ uv = "latest"
 zig = "latest"
 
 [env]
-# dfmt 0.15.2 is prebuilt by scripts/dlang-setup.sh into the dub package cache;
-# putting its bin dir on PATH lets the D formatter call the binary directly
-# instead of the race-prone, rebuild-on-every-call `dub run dfmt`
-# (https://github.com/dlang-community/dfmt/issues/407,
-# https://github.com/dlang/dub/issues/1113).
-_.path = ["~/.julia/bin", "~/.dub/packages/dfmt/0.15.2/dfmt/bin"]
+# ~/.julia/bin holds the JuliaFormatter `jlfmt` app, and dub's default package
+# cache holds the prebuilt dfmt (scripts/dlang-setup.sh). Both must be on PATH
+# so the formatters resolve directly (dfmt avoids the race-prone, per-call
+# `dub run dfmt` -- https://github.com/dlang-community/dfmt/issues/407,
+# https://github.com/dlang/dub/issues/1113). The home and dub cache locations
+# differ on Windows (native %USERPROFILE% rather than git-bash's /c/... $HOME;
+# %LOCALAPPDATA%\dub rather than ~/.dub), so these entries are OS-specific.
+_.path = [
+  "{% if os() == 'windows' %}{{ env.USERPROFILE }}{% else %}{{ env.HOME }}{% endif %}/.julia/bin",
+  "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}{% else %}{{ env.HOME }}{% endif %}/dub/packages/dfmt/0.15.2/dfmt/bin",
+]
 
 # These tasks run bash scripts and bash-isms (set -ex); force bash so they work
 # on Windows too, where mise's default task shell is cmd/PowerShell.
