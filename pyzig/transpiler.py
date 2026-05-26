@@ -372,7 +372,9 @@ class ZigTranspiler(CLikeTranspiler):
             lookup = f"{module_name}.{name}"
             if lookup in MODULE_DISPATCH_TABLE:
                 zig_module_name, zig_name = MODULE_DISPATCH_TABLE[lookup]
-                return f'const {zig_name} = @import("{zig_module_name}.zig").{zig_name};'
+                return (
+                    f'const {zig_name} = @import("{zig_module_name}.zig").{zig_name};'
+                )
         lines = []
         for name in names:
             lines.append(f'const {name} = @import("{module_name}.zig").{name};')
