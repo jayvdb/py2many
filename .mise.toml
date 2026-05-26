@@ -41,8 +41,11 @@ zig = "latest"
 # https://github.com/dlang/dub/issues/1113).
 _.path = ["~/.julia/bin", "~/.dub/packages/dfmt/0.15.2/dfmt/bin"]
 
+# These tasks run bash scripts and bash-isms (set -ex); force bash so they work
+# on Windows too, where mise's default task shell is cmd/PowerShell.
 [tasks.setup]
 description = "Install deps"
+shell = "bash -c"
 run = """
 set -ex
 ./scripts/cpp-setup.sh
@@ -55,10 +58,12 @@ set -ex
 """
 
 [tasks.test]
+shell = "bash -c"
 run = """
 tox -e py312-full -- --maxfail=10
 """
 
 [tasks.lint]
 description = "Run the lint checks from .github/workflows/main.yml::lint"
+shell = "bash -c"
 run = "./scripts/lint.sh"
