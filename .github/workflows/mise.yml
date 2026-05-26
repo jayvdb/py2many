@@ -1,0 +1,53 @@
+---
+name: Test using mise
+
+"on":
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+# this allows a subsequently queued workflow run to interrupt previous runs in pull requests only
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs:
+  mise:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install mise
+        uses: taiki-e/install-action@v2
+        with:
+          tool: mise
+
+      - name: Install tools
+        run: |
+          mise settings add idiomatic_version_file_enable_tools "[]"
+          mise settings experimental=true
+          mise settings set cargo.binstall true
+          mise use -g cargo-binstall
+          mise install
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          # GitHub release downloads occasionally take longer than mise's
+          # default 30s HTTP timeout; bump it so transient network slowness
+          # doesn't fail the whole `mise install` step.
+          MISE_HTTP_TIMEOUT: "120"
+
+      - name: Setup
+        run: |
+          mise run setup
+
+      - name: Test
+        run: |
+          mise run test
