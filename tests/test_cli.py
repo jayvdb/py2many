@@ -46,7 +46,7 @@ COMPILERS = {
     "cpp": [CXX, "-std=c++17", "-I", str(ROOT_DIR)]
     + _conan_include_args()
     + (["-stdlib=libc++"] if CXX.startswith("clang++") else [])
-    + (["-o", "{exe}", "{filename}"] if sys.platform == "win32" else []),
+    + ["-o", "{exe}", "{filename}"],
     "dlang": ["dmd"] if find_executable("dmd") else ["ldmd2"],
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
@@ -116,8 +116,6 @@ EXPECTED_COMPILE_FAILURES = [
     "test_dunder.v",
     "with.v",
 ]
-
-a_dot_out = "a.out"
 
 logger = logging.Logger("test_cli")
 
@@ -294,9 +292,6 @@ class TestCodeGenerator:
                 return
 
             stdout = None
-            if ext == ".cpp" and (BUILD_DIR / a_dot_out).exists():
-                os.rename(BUILD_DIR / a_dot_out, exe)
-
             if INVOKER.get(lang):
                 invoker = INVOKER.get(lang)
                 if os.path.exists(invoker[0]):
@@ -390,7 +385,7 @@ class TestCodeGenerator:
 
         settings.formatter = ["astyle"]
 
-        exe = BUILD_DIR / a_dot_out
+        exe = BUILD_DIR / f"{case}.lint.out"
         exe.unlink(missing_ok=True)
 
         case_filename = TESTS_DIR / "cases" / f"{case}.py"
@@ -404,7 +399,7 @@ class TestCodeGenerator:
             str(GENERATED_DIR),
         ]
 
-        linter = _create_cmd(settings.linter, case_output)
+        linter = _create_cmd(settings.linter, case_output) + ["-o", str(exe)]
 
         try:
             rv = main(args=args, env=env)
