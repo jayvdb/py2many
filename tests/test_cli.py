@@ -453,6 +453,8 @@ class TestCodeGenerator:
             env.update(ENV.get(lang))
 
         settings = _get_all_settings(Mock(indent=2))[lang]
+        if settings.formatter and not find_executable(settings.formatter[0]):
+            raise pytest.skip(f"{settings.formatter[0]} not available")
         ext = settings.ext
         expected_filename = TESTS_DIR / "ext_expected" / f"{case}{ext}"
         case_filename = TESTS_DIR / "ext_cases" / f"{case}.py"

@@ -10,6 +10,7 @@ from py2many.exceptions import (
     AstTypeNotSupported,
     AstUnrecognisedBinOp,
 )
+from py2many.process_helpers import find_executable
 
 SHOW_ERRORS = os.environ.get("SHOW_ERRORS", False)
 
@@ -105,6 +106,8 @@ class SelfTranspileTests(unittest.TestCase):
 
     def test_dlang_recursive(self):
         settings = self.SETTINGS["dlang"]
+        if settings.formatter and not find_executable(settings.formatter[0]):
+            self.skipTest(f"{settings.formatter[0]} not available")
         suppress_exceptions = (
             False if SHOW_ERRORS else (AstNotImplementedError, AstUnrecognisedBinOp)
         )
@@ -279,6 +282,8 @@ class SelfTranspileTests(unittest.TestCase):
 
     def test_vlang_recursive(self):
         settings = self.SETTINGS["vlang"]
+        if settings.formatter and not find_executable(settings.formatter[0]):
+            self.skipTest(f"{settings.formatter[0]} not available")
         suppress_exceptions = (
             False if SHOW_ERRORS else (AstNotImplementedError, AstUnrecognisedBinOp)
         )
