@@ -153,7 +153,7 @@ ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
     if should_install mojo; then \
       curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
-        | tar -xj -C /usr/local --strip-components=1 bin/micromamba \
+        | tar -xj -C /usr/local bin/micromamba \
       && micromamba create -y -n life \
          -c https://conda.modular.com/max-nightly/ \
          -c conda-forge \
