@@ -48,9 +48,10 @@ ENV = {
 # ENV["cpp"] (which only test_generated merges into its subprocess env) so g++
 # invocations in test_env_cxx_gcc don't mix libc++ and libstdc++ headers.
 if CXX.startswith("clang++") and sys.platform != "win32":
-    _libcxx_prefix = Path(
-        os.environ.get("MISE_DATA_DIR", os.path.expanduser("~/.local/share/mise"))
-    ) / "installs/conda-libcxx-devel/latest"
+    _libcxx_prefix = (
+        Path(os.environ.get("MISE_DATA_DIR", os.path.expanduser("~/.local/share/mise")))
+        / "installs/conda-libcxx-devel/latest"
+    )
     if _libcxx_prefix.is_dir():
         ENV["cpp"]["CPLUS_INCLUDE_PATH"] = str(_libcxx_prefix / "include/c++/v1")
         ENV["cpp"]["LIBRARY_PATH"] = str(_libcxx_prefix / "lib")
