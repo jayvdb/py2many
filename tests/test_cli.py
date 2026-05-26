@@ -210,6 +210,8 @@ class TestCodeGenerator:
 
     @pytest.mark.parametrize("case,lang", TEST_PARAMS)
     def test_generated(self, case, lang):
+        if lang == "kotlin" and sys.platform == "win32":
+            raise pytest.skip("kotlin jgo/ktlint formatter unsupported on Windows")
         env = os.environ.copy()
         if ENV.get(lang):
             env.update(ENV.get(lang))
@@ -484,6 +486,8 @@ class TestCodeGenerator:
 
     @pytest.mark.parametrize("case, lang", product(["test1"], LANGS))
     def test_directory(self, case, lang):
+        if lang == "kotlin" and sys.platform == "win32":
+            raise pytest.skip("kotlin jgo/ktlint formatter unsupported on Windows")
         env = os.environ.copy()
         if ENV.get(lang):
             env.update(ENV.get(lang))
