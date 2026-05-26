@@ -1,5 +1,8 @@
 [tools]
-"asdf:mise-plugins/mise-nim" = "latest"
+"asdf:mise-plugins/mise-nim" = { version = "2.2.10", os = ["linux", "macos"] }
+# asdf plugins are shell scripts that can't run on Windows; use the official
+# prebuilt Windows binary there instead.
+"http:nim" = { version = "2.2.10", url = "https://nim-lang.org/download/nim-{{ version }}_x64.zip", bin_path = "nim-{{ version }}/bin", os = ["windows"] }
 "conda:clangxx" = "latest"
 "conda:gxx" = "latest"
 "conda:libcxx-devel" = { version = "latest", os = ["linux", "macos"] }
@@ -36,6 +39,7 @@ _.path = ["~/.julia/bin"]
 [tasks.setup]
 description = "Install deps"
 run = """
+set -ex
 ./scripts/cpp-setup.sh
 ./scripts/dart-setup.sh
 ./scripts/dlang-setup.sh
