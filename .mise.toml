@@ -28,9 +28,12 @@ julia = { version = "latest", platforms = { linux-arm64 = { url = """{% if versi
 kotlin = { version = "2.0.21", asset_pattern = "kotlin-compiler-*.zip", bin_path = "kotlinc/bin" }
 maven = "latest"
 python = "3.12"
-rust = "latest"
+rust = { version = "latest", components = "rustfmt,clippy" }
 uv = "latest"
-"github:vlang/v" = "0.5.1"
+# mise's github backend auto-strips the single top-level v/ dir on Linux/macOS
+# but does so unreliably for Windows zips, leaving v.exe nested and off PATH.
+# Force the strip on all platforms so v(.exe) lands at the install root.
+"github:vlang/v" = { version = "0.5.1", strip_components = 1 }
 zig = "latest"
 
 [env]
@@ -60,7 +63,7 @@ set -ex
 [tasks.test]
 shell = "bash -c"
 run = """
-tox -e py312-full -- --maxfail=10
+tox -e py312-full
 """
 
 [tasks.lint]
