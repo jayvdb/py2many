@@ -58,7 +58,8 @@ RUN apk add --no-cache \
       z3 \
       z3-dev \
       zig \
-      zip
+      zip \
+      zstd
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -150,7 +151,19 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
     fi
 
 ARG GLIBC_VERSION=2.35-r1
+# Glibc-linked libstdc++ and libgcc_s from conda-forge; Alpine's apk versions
+# are musl-linked and can't satisfy mojo's manylinux binaries loaded via
+# sgerrand's glibc ld.so.
+ARG LIBSTDCXX_CONDA=libstdcxx-15.2.0-h934c35e_19.conda
+ARG LIBGCC_CONDA=libgcc-15.2.0-he0feb66_19.conda
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
+    extract_conda_libs() { \
+      curl -fsSL -O "https://conda.anaconda.org/conda-forge/linux-64/$1" \
+      && unzip -q "$1" -d "/tmp/conda-ext" \
+      && zstd -qd /tmp/conda-ext/pkg-*.tar.zst -o /tmp/conda.tar \
+      && tar -xf /tmp/conda.tar -C /usr/glibc-compat --wildcards "$2" \
+      && rm -rf "$1" /tmp/conda-ext /tmp/conda.tar; \
+    }; \
     if should_install mojo; then \
       curl -fsSL -o /etc/apk/keys/sgerrand.rsa.pub \
         https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
@@ -158,6 +171,8 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
         "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk" \
       && apk add --no-cache --force-overwrite "glibc-${GLIBC_VERSION}.apk" \
       && rm "glibc-${GLIBC_VERSION}.apk" \
+      && extract_conda_libs "${LIBSTDCXX_CONDA}" 'lib/libstdc++.so.6*' \
+      && extract_conda_libs "${LIBGCC_CONDA}" 'lib/libgcc_s.so*' \
       && source "${HOME}/.venv/bin/activate" \
       # Alpine's python3 is musl-linked, so pip rejects mojo's manylinux wheels
       # by default. --platform + --target lets us install glibc-tagged wheels
@@ -175,7 +190,13 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
       && for bin in /opt/mojo/bin/*; do \
            ln -sf "${bin}" "/usr/local/bin/$(basename ${bin})"; \
          done \
-      && mojo --version; \
+      # mojo's `mojo format` hardcodes /bin/mblack (Alpine /bin isn't a
+      # symlink to /usr/bin like on Debian, so PATH search doesn't help).
+      && ln -sf /opt/mojo/bin/mblack /bin/mblack \
+      && mojo --version \
+      && echo 'fn main(): pass' > /tmp/check.mojo \
+      && mojo format /tmp/check.mojo \
+      && rm /tmp/check.mojo; \
     fi
 
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
