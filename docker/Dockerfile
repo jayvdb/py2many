@@ -159,7 +159,11 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
          -c conda-forge \
          modular \
       && micromamba run -n life mojo --version \
-      && ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/mojo" /usr/local/bin/mojo; \
+      && for bin in mojo mblack max modular-crashpad-handler \
+                    mojo-lldb mojo-lldb-dap mojo-lsp-server \
+                    gpu-query lld lldb-argdumper lldb-server llvm-symbolizer; do \
+           ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/${bin}" "/usr/local/bin/${bin}"; \
+         done; \
     fi
 
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \

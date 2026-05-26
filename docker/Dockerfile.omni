@@ -148,7 +148,11 @@ RUN curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
        -c conda-forge \
        modular \
     && micromamba run -n life mojo --version \
-    && ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/mojo" /usr/local/bin/mojo
+    && for bin in mojo mblack max modular-crashpad-handler \
+                  mojo-lldb mojo-lldb-dap mojo-lsp-server \
+                  gpu-query lld lldb-argdumper lldb-server llvm-symbolizer; do \
+         ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/${bin}" "/usr/local/bin/${bin}"; \
+       done
 
 RUN julia -e 'using Pkg; Pkg.add("JuliaFormatter"); Pkg.add("SuperEnum")' \
     && printf '#!/usr/bin/env julia\nusing JuliaFormatter\nJuliaFormatter.main(ARGS)\n' > /usr/local/bin/format.jl \
