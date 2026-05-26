@@ -597,6 +597,9 @@ class VTranspiler(CLikeTranspiler):
         return "Any"
 
     def visit_FunctionDef(self, node) -> str:
+        if node.name == "__class_getitem__":
+            return ""
+
         signature = ["fn"]
         is_class_method: bool = False
         class_node = None
