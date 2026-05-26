@@ -5,7 +5,10 @@
 "github:ldc-developers/ldc" = "latest"
 "github:Z3Prover/z3" = "z3-4.15.4"
 pipx = "latest"
+"pipx:black" = "24.10.0"
 "pipx:cpplint" = "latest"
+"pipx:flake8" = "latest"
+"pipx:isort" = "latest"
 "pipx:jgo" = "latest"
 "pipx:mojo" = { version = "0.26.2.0", uvx = false, pipx_args = "--include-deps", os = ["linux/x64", "linux/arm64", "macos/arm64"] }
 "pipx:pytest" = "latest"
@@ -44,3 +47,7 @@ run = """
 run = """
 tox -e py312-full -- --maxfail=10
 """
+
+[tasks.lint]
+description = "Run the lint checks from .github/workflows/main.yml::lint"
+run = "./scripts/lint.sh"

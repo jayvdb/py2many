@@ -273,20 +273,5 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Remove expected .py files
-        run: rm tests/expected/*.py tests/dir_cases/test1-*-expected/*.py
-
-      - name: Run isort
-        run: isort --check --diff */ *.py
-
-      - name: Run black
-        run: black --check */ *.py
-
-      - name: Remove test case .py files
-        run: rm tests/cases/*.py
-
-      - name: Run flake8
-        run: flake8 .
-
-      - name: Run cpplint
-        run: cpplint --filter=-legal/copyright,-whitespace/semicolon,-runtime/reference tests/expected/*.cpp
+      - name: Run lint
+        run: ./scripts/lint.sh
