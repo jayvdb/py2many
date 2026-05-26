@@ -28,6 +28,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install astyle
+        run: sudo apt-get install --yes astyle
+
       - name: Install mise
         uses: taiki-e/install-action@v2
         with:

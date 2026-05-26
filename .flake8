@@ -10,6 +10,10 @@ exclude =
     # There's no value in checking cache directories
     __pycache__,
     build,
+    # local-only dirs created by tox/venv/setuptools, not present in CI
+    .tox,
+    .venv,
+    py2many.egg-info,
     # generated files
     tests/expected,
     tests/cases,
