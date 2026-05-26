@@ -60,8 +60,11 @@ set -ex
 ./scripts/zig-setup.sh
 """
 
+# No shell override: this is a plain command (no bash-isms), and on Windows
+# forcing it through git-bash routes the native tox/pytest subprocesses through
+# MSYS path translation, which hides mise's tool dirs from the formatters the
+# tests invoke. mise's native shell keeps a Windows PATH that resolves them.
 [tasks.test]
-shell = "bash -c"
 run = """
 tox -e py312-full
 """

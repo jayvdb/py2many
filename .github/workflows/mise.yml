@@ -70,6 +70,21 @@ jobs:
         run: |
           mise run setup
 
+      # Distinguish "installed but not on the native PATH" from "not installed"
+      # for the language formatters the test suite invokes as subprocesses.
+      # `mise which` resolves via mise's installed tools (install check);
+      # `which`/PATH shows what a spawned process actually sees.
+      - name: Debug tool resolution (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mise ls
+          echo "PATH=$PATH"
+          for t in dub v dart gofmt clang-format rustfmt nimpretty mojo; do
+            echo "== $t =="
+            mise which "$t" || echo "  mise cannot resolve (not installed?): $t"
+            which "$t" || echo "  not on PATH: $t"
+          done
+
       - name: Lint
         run: |
           mise run lint
