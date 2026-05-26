@@ -140,14 +140,15 @@ RUN curl -fsSL -o /tmp/dart.zip \
     && flutter config --no-analytics \
     && flutter --version
 
-RUN curl -fsSL https://pixi.sh/install.sh | bash \
-    && ln -sf "${HOME}/.pixi/bin/pixi" /usr/local/bin/pixi \
-    && cd "${HOME}" \
-    && pixi init life -c https://conda.modular.com/max-nightly/ -c conda-forge \
-    && cd life \
-    && pixi add modular \
-    && pixi run mojo --version \
-    && ln -sf "${HOME}/life/.pixi/envs/default/bin/mojo" /usr/local/bin/mojo
+ENV MAMBA_ROOT_PREFIX=/opt/micromamba
+RUN curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
+      | tar -xj -C /usr/local --strip-components=1 bin/micromamba \
+    && micromamba create -y -n life \
+       -c https://conda.modular.com/max-nightly/ \
+       -c conda-forge \
+       modular \
+    && micromamba run -n life mojo --version \
+    && ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/mojo" /usr/local/bin/mojo
 
 RUN julia -e 'using Pkg; Pkg.add("JuliaFormatter"); Pkg.add("SuperEnum")' \
     && printf '#!/usr/bin/env julia\nusing JuliaFormatter\nJuliaFormatter.main(ARGS)\n' > /usr/local/bin/format.jl \

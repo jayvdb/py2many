@@ -149,16 +149,17 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
       && flutter --version; \
     fi
 
+ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
     if should_install mojo; then \
-      curl -fsSL https://pixi.sh/install.sh | bash \
-      && ln -sf "${HOME}/.pixi/bin/pixi" /usr/local/bin/pixi \
-      && cd "${HOME}" \
-      && pixi init life -c https://conda.modular.com/max-nightly/ -c conda-forge \
-      && cd life \
-      && pixi add modular \
-      && pixi run mojo --version \
-      && ln -sf "${HOME}/life/.pixi/envs/default/bin/mojo" /usr/local/bin/mojo; \
+      curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
+        | tar -xj -C /usr/local --strip-components=1 bin/micromamba \
+      && micromamba create -y -n life \
+         -c https://conda.modular.com/max-nightly/ \
+         -c conda-forge \
+         modular \
+      && micromamba run -n life mojo --version \
+      && ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/mojo" /usr/local/bin/mojo; \
     fi
 
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
