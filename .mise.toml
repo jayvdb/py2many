@@ -2,10 +2,10 @@
 "asdf:mise-plugins/mise-nim" = "latest"
 "conda:clangxx" = "latest"
 "conda:gxx" = "latest"
-"conda:libcxx-devel" = "latest"
+"conda:libcxx-devel" = { version = "latest", os = ["linux", "macos"] }
 "github:ldc-developers/ldc" = "latest"
 "github:Z3Prover/z3" = "z3-4.15.4"
-pipx = "latest"
+pipx = { version = "latest", os = ["linux", "macos"] }
 "pipx:black" = "24.10.0"
 "pipx:cpplint" = "latest"
 "pipx:flake8" = "latest"
