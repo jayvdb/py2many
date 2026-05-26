@@ -7,7 +7,7 @@
 pipx = "latest"
 "pipx:cpplint" = "latest"
 "pipx:jgo" = "latest"
-"pipx:mojo" = { version = "1.0.0b1", uvx = false, pipx_args = "--include-deps --pip-args='--pre'", os = ["linux/x64", "linux/arm64", "macos/arm64"] }
+"pipx:mojo" = { version = "0.26.2.0", uvx = false, pipx_args = "--include-deps", os = ["linux/x64", "linux/arm64", "macos/arm64"] }
 "pipx:pytest" = "latest"
 "pipx:tox" = "latest"
 clang-format = "18.1.3"
