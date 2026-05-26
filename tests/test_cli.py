@@ -47,7 +47,7 @@ COMPILERS = {
     + _conan_include_args()
     + (["-stdlib=libc++"] if CXX.startswith("clang++") else [])
     + (["-o", "{exe}", "{filename}"] if sys.platform == "win32" else []),
-    "dlang": ["dmd"],
+    "dlang": ["dmd"] if find_executable("dmd") else ["ldmd2"],
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
     "nim": ["nim", "compile", "--nimcache:."],
@@ -65,7 +65,7 @@ COMPILERS = {
 
 INVOKER = {
     "dart": ["dart", "--enable-asserts"],
-    "dlang": ["dmd", "-run"],
+    "dlang": ["dmd", "-run"] if find_executable("dmd") else ["ldmd2", "-run"],
     "go": ["go", "run"],
     "julia": ["julia", "--compiled-modules=yes"],
     "python": [sys.executable],
