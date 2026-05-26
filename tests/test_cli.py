@@ -16,6 +16,7 @@ from py2many.cli import (
     _get_all_settings,
     _get_output_path,
     _relative_to_cwd,
+    _run,
     main,
 )
 from py2many.process_helpers import find_executable
@@ -295,7 +296,7 @@ class TestCodeGenerator:
                     return
                 cmd = _create_cmd(compiler, filename=case_output, exe=exe)
                 print(f"Compiling {cmd} ...")
-                proc = run(cmd, env=env, check=False)
+                proc = _run(cmd, env=env, check=False)
 
                 if proc.returncode and not expect_failure:
                     raise pytest.skip(f"{case}{ext} doesnt compile")
@@ -317,7 +318,7 @@ class TestCodeGenerator:
                 cmd = _create_cmd(invoker, filename=case_output, exe=exe)
                 cmd += main_args
                 print(f"Invoking {cmd} ...")
-                proc = run(cmd, env=env, capture_output=True)
+                proc = _run(cmd, env=env, capture_output=True)
 
                 stdout = proc.stdout
 

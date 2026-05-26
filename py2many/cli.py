@@ -181,10 +181,15 @@ def _create_cmd(parts, filename, **kw):
 
 
 def _run(cmd, **kwargs):
-    """Run a command, routing Windows .bat/.cmd launchers (e.g. the jlfmt
-    JuliaFormatter app) through cmd.exe since subprocess can't exec them."""
-    if cmd and sys.platform == "win32" and cmd[0].lower().endswith((".bat", ".cmd")):
-        cmd = ["cmd", "/c", *cmd]
+    """Run a command, routing Windows launchers that subprocess can't exec
+    directly: .bat/.cmd (e.g. the jlfmt JuliaFormatter app) through cmd.exe, and
+    .sh scripts (e.g. the rust/zig runners) through bash."""
+    if cmd and sys.platform == "win32":
+        argv0 = cmd[0].lower()
+        if argv0.endswith((".bat", ".cmd")):
+            cmd = ["cmd", "/c", *cmd]
+        elif argv0.endswith(".sh"):
+            cmd = ["bash", *cmd]
     return run(cmd, **kwargs)
 
 
