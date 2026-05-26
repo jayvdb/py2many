@@ -38,6 +38,7 @@ description = "Install deps"
 run = """
 ./scripts/cpp-setup.sh
 ./scripts/dart-setup.sh
+./scripts/dlang-setup.sh
 ./scripts/go-setup.sh
 ./scripts/julia-setup.sh
 ./scripts/v-setup.sh
