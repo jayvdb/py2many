@@ -159,7 +159,22 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
       && apk add --no-cache --force-overwrite "glibc-${GLIBC_VERSION}.apk" \
       && rm "glibc-${GLIBC_VERSION}.apk" \
       && source "${HOME}/.venv/bin/activate" \
-      && pip install mojo==0.26.2.0 \
+      # Alpine's python3 is musl-linked, so pip rejects mojo's manylinux wheels
+      # by default. --platform + --target lets us install glibc-tagged wheels
+      # into a sibling tree; sgerrand glibc on /lib lets the bundled binaries
+      # actually run. A .pth file pulls the tree into the venv's sys.path
+      # without shadowing venv-installed packages (e.g. click for black).
+      && pip install \
+           --platform=manylinux_2_34_x86_64 \
+           --python-version=3.12 \
+           --only-binary=:all: \
+           --target=/opt/mojo \
+           mojo==0.26.2.0 \
+      && site_packages=$(python3 -c 'import site; print(site.getsitepackages()[0])') \
+      && echo "/opt/mojo" > "${site_packages}/mojo-target.pth" \
+      && for bin in /opt/mojo/bin/*; do \
+           ln -sf "${bin}" "/usr/local/bin/$(basename ${bin})"; \
+         done \
       && mojo --version; \
     fi
 
