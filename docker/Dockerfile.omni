@@ -140,19 +140,9 @@ RUN curl -fsSL -o /tmp/dart.zip \
     && flutter config --no-analytics \
     && flutter --version
 
-ENV MAMBA_ROOT_PREFIX=/opt/micromamba
-RUN curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
-      | tar -xj -C /usr/local bin/micromamba \
-    && micromamba create -y -n life \
-       -c https://conda.modular.com/max-nightly/ \
-       -c conda-forge \
-       modular \
-    && micromamba run -n life mojo --version \
-    && for bin in mojo mblack max modular-crashpad-handler \
-                  mojo-lldb mojo-lldb-dap mojo-lsp-server \
-                  gpu-query lld lldb-argdumper lldb-server llvm-symbolizer; do \
-         ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/${bin}" "/usr/local/bin/${bin}"; \
-       done
+RUN source "${HOME}/.venv/bin/activate" \
+    && pip install mojo==0.26.2.0 \
+    && mojo --version
 
 RUN julia -e 'using Pkg; Pkg.add("JuliaFormatter"); Pkg.add("SuperEnum")' \
     && printf '#!/usr/bin/env julia\nusing JuliaFormatter\nJuliaFormatter.main(ARGS)\n' > /usr/local/bin/format.jl \

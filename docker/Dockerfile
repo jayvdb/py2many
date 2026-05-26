@@ -150,7 +150,6 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
     fi
 
 ARG GLIBC_VERSION=2.35-r1
-ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
     if should_install mojo; then \
       curl -fsSL -o /etc/apk/keys/sgerrand.rsa.pub \
@@ -159,18 +158,9 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
         "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk" \
       && apk add --no-cache --force-overwrite "glibc-${GLIBC_VERSION}.apk" \
       && rm "glibc-${GLIBC_VERSION}.apk" \
-      && curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
-        | tar -xj -C /usr/local bin/micromamba \
-      && micromamba create -y -n life \
-         -c https://conda.modular.com/max-nightly/ \
-         -c conda-forge \
-         modular \
-      && micromamba run -n life mojo --version \
-      && for bin in mojo mblack max modular-crashpad-handler \
-                    mojo-lldb mojo-lldb-dap mojo-lsp-server \
-                    gpu-query lld lldb-argdumper lldb-server llvm-symbolizer; do \
-           ln -sf "${MAMBA_ROOT_PREFIX}/envs/life/bin/${bin}" "/usr/local/bin/${bin}"; \
-         done; \
+      && source "${HOME}/.venv/bin/activate" \
+      && pip install mojo==0.26.2.0 \
+      && mojo --version; \
     fi
 
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
