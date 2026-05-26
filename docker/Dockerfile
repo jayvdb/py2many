@@ -157,7 +157,7 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
         https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
       && curl -fsSL -O \
         "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk" \
-      && apk add --no-cache "glibc-${GLIBC_VERSION}.apk" \
+      && apk add --no-cache --force-overwrite "glibc-${GLIBC_VERSION}.apk" \
       && rm "glibc-${GLIBC_VERSION}.apk" \
       && curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
         | tar -xj -C /usr/local bin/micromamba \
