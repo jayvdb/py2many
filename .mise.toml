@@ -9,7 +9,7 @@
 "pipx:jgo" = "latest"
 "pipx:pytest" = "latest"
 "pipx:tox" = "latest"
-clang-format = "latest"
+clang-format = "18.1.3"
 cljstyle = "latest"
 conan = "latest"
 dart = { version = "latest", url = "https://storage.googleapis.com/dart-archive/channels/stable/release/{{ version }}/sdk/dartsdk-{{ os() }}-{{ arch() }}-release.zip", version_expr = 'fromJSON(body).prefixes | filter({ # matches "^channels/stable/release/(\\d+\\.\\d+\\.\\d+)/$" }) | map({split(#, "/")[3]}) | sortVersions()', version_list_url = "https://storage.googleapis.com/storage/v1/b/dart-archive/o?prefix=channels/stable/release/&delimiter=/" }
@@ -22,8 +22,10 @@ maven = "latest"
 python = "3.12"
 rust = "latest"
 uv = "latest"
-vlang = "latest"
+"github:vlang/v" = "0.5.1"
 zig = "latest"
+"pipx:mypy" = "latest"
+"pipx:pyright" = "latest"
 
 [env]
 _.path = ["~/.julia/bin"]
@@ -40,5 +42,5 @@ run = """
 
 [tasks.test]
 run = """
-tox -e py312-full -- --maxfail=2
+tox -e py312-full -- --maxfail=10
 """
