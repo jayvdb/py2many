@@ -13,12 +13,18 @@ else
     SED="sed"
 fi
 
-# Define the directory path
-DIR="common-rust-proj"
+# Per-case project dir so parallel runs (pytest-xdist) don't clobber a shared
+# common-rust-proj/src/main.rs and end up executing the wrong case's binary.
+bin_name=$(basename -s .rs $1)
+DIR="common-rust-proj-${bin_name}"
+
+# Share the build cache across cases so cargo doesn't recompile structopt
+# (etc.) once per directory.
+export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$(pwd)/common-rust-target}"
 
 # Check if the directory exists
 if [ ! -d "$DIR" ]; then
-    # If the directory doesn't exist, create a new Cargo library project
+    # If the directory doesn't exist, create a new Cargo binary project
     cargo new --bin "$DIR"
 
     echo "Created new Cargo binary project in $DIR"
@@ -28,7 +34,6 @@ fi
 # Look for lines between ```cargo and ```
 # Remove the first 4 characters (e.g., "//! ") from each line
 $SED -n '/```cargo/,/```/p' "$1" | $SED '1d;$d' | $SED 's#^//!##' | $SED 's/^ //' > $DIR/Cargo.toml
-bin_name=$(basename -s .rs $1)
 $SED -i "s/^.package.\$/[package]\nname=\"$bin_name\"/" $DIR/Cargo.toml
 
 # Now copy the argument to the target dir
