@@ -32,12 +32,6 @@ zig = "latest"
 
 [env]
 _.path = ["~/.julia/bin"]
-# Let conda-installed clang find conda-libcxx-devel's headers and shared
-# library; mise installs each conda package in its own prefix so they don't
-# share an env the way a single conda env would.
-CPLUS_INCLUDE_PATH = "{{env.HOME}}/.local/share/mise/installs/conda-libcxx-devel/latest/include/c++/v1"
-LIBRARY_PATH = "{{env.HOME}}/.local/share/mise/installs/conda-libcxx-devel/latest/lib"
-LD_LIBRARY_PATH = "{{env.HOME}}/.local/share/mise/installs/conda-libcxx-devel/latest/lib"
 
 [tasks.setup]
 description = "Install deps"
