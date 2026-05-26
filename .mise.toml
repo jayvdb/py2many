@@ -46,7 +46,7 @@ zig = "latest"
 # %LOCALAPPDATA%\dub rather than ~/.dub), so these entries are OS-specific.
 _.path = [
   "{% if os() == 'windows' %}{{ env.USERPROFILE }}{% else %}{{ env.HOME }}{% endif %}/.julia/bin",
-  "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}{% else %}{{ env.HOME }}{% endif %}/dub/packages/dfmt/0.15.2/dfmt/bin",
+  "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/dub{% else %}{{ env.HOME }}/.dub{% endif %}/packages/dfmt/0.15.2/dfmt/bin",
 ]
 
 # These tasks run bash scripts and bash-isms (set -ex); force bash so they work

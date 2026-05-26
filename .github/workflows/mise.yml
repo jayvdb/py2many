@@ -77,6 +77,26 @@ jobs:
       - name: Put mise tools on PATH
         run: mise bin-paths >> "$GITHUB_PATH"
 
+      # Debug: jlfmt (JuliaFormatter app) isn't being found on Windows. Show
+      # where it landed and with what extension (.exe vs .cmd/.bat), and whether
+      # it resolves on PATH, so we know if it's a location or an extension issue.
+      - name: Debug jlfmt resolution (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          echo "USERPROFILE=$USERPROFILE HOME=$HOME"
+          echo "--- contents of Julia depot bin dirs ---"
+          for d in "$USERPROFILE/.julia/bin" "$HOME/.julia/bin"; do
+            echo "[$d]"
+            ls -la "$d" 2>/dev/null || echo "  (missing)"
+          done
+          echo "--- any jlfmt* anywhere under .julia ---"
+          find "$USERPROFILE/.julia" -iname 'jlfmt*' 2>/dev/null || true
+          echo "--- PATH ---"
+          echo "$PATH"
+          echo "--- resolution ---"
+          which jlfmt || echo "which: jlfmt not found"
+          where jlfmt || echo "where: jlfmt not found"
+
       - name: Lint
         run: |
           mise run lint
