@@ -149,10 +149,17 @@ RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) ret
       && flutter --version; \
     fi
 
+ARG GLIBC_VERSION=2.35-r1
 ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 RUN should_install() { case "${FOCUS}" in ""|all|omni|"${1}") return 0 ;; *) return 1 ;; esac; }; \
     if should_install mojo; then \
-      curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
+      curl -fsSL -o /etc/apk/keys/sgerrand.rsa.pub \
+        https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub \
+      && curl -fsSL -O \
+        "https://github.com/sgerrand/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk" \
+      && apk add --no-cache "glibc-${GLIBC_VERSION}.apk" \
+      && rm "glibc-${GLIBC_VERSION}.apk" \
+      && curl -fsSL "https://micro.mamba.pm/api/micromamba/linux-64/latest" \
         | tar -xj -C /usr/local bin/micromamba \
       && micromamba create -y -n life \
          -c https://conda.modular.com/max-nightly/ \
