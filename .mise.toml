@@ -2,7 +2,7 @@
 "asdf:mise-plugins/mise-nim" = "latest"
 "conda:clangxx" = "latest"
 "conda:gxx" = "latest"
-"conda:mojo" = { version = "1.0.0b1", channel = "https://conda.modular.com/max", os = ["linux/x64", "macos/arm64"] }
+# "conda:mojo" = { version = "1.0.0b1", channel = "https://conda.modular.com/max", os = ["linux/x64", "macos/arm64"] }
 "github:ldc-developers/ldc" = "latest"
 "github:Z3Prover/z3" = "z3-4.15.4"
 "pipx:cpplint" = "latest"
