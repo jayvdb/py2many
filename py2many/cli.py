@@ -180,6 +180,14 @@ def _create_cmd(parts, filename, **kw):
     return [*parts, str(filename)]
 
 
+def _run(cmd, **kwargs):
+    """Run a command, routing Windows .bat/.cmd launchers (e.g. the jlfmt
+    JuliaFormatter app) through cmd.exe since subprocess can't exec them."""
+    if cmd and sys.platform == "win32" and cmd[0].lower().endswith((".bat", ".cmd")):
+        cmd = ["cmd", "/c", *cmd]
+    return run(cmd, **kwargs)
+
+
 def _relative_to_cwd(absolute_path):
     return Path(os.path.relpath(absolute_path, CWD))
 
@@ -255,7 +263,7 @@ def _format_one(settings, output_path, env=None):
             os.chdir(output_path.parent)
             output_path = output_path.name
         cmd = _create_cmd(settings.formatter, filename=output_path)
-        proc = run(cmd, env=env, capture_output=True)
+        proc = _run(cmd, env=env, capture_output=True)
 
         if proc.returncode:
             # format.jl exit code is unreliable
@@ -276,7 +284,7 @@ def _format_one(settings, output_path, env=None):
             return False
         if settings.ext == ".kt":
             # ktlint formatter needs to be invoked twice before output is lint free
-            if run(cmd, env=env).returncode:
+            if _run(cmd, env=env).returncode:
                 print(f"Error: Could not reformat: {cmd}")
                 if restore_cwd:
                     os.chdir(restore_cwd)
@@ -339,7 +347,7 @@ def _process_dir(
 
     if settings.create_project is not None and project:
         cmd = settings.create_project + [f"{outdir}"]
-        proc = run(cmd, env=env, capture_output=True)
+        proc = _run(cmd, env=env, capture_output=True)
         if proc.returncode:
             cmd_str = " ".join(cmd)
             print(f"Error: running {cmd_str}: {proc.stderr}")
