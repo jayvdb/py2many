@@ -34,7 +34,12 @@ uv = "latest"
 zig = "latest"
 
 [env]
-_.path = ["~/.julia/bin"]
+# dfmt 0.15.2 is prebuilt by scripts/dlang-setup.sh into the dub package cache;
+# putting its bin dir on PATH lets the D formatter call the binary directly
+# instead of the race-prone, rebuild-on-every-call `dub run dfmt`
+# (https://github.com/dlang-community/dfmt/issues/407,
+# https://github.com/dlang/dub/issues/1113).
+_.path = ["~/.julia/bin", "~/.dub/packages/dfmt/0.15.2/dfmt/bin"]
 
 [tasks.setup]
 description = "Install deps"
