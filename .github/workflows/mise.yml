@@ -35,6 +35,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The windows-latest image preinstalls Strawberry Perl, whose Mojolicious
+      # `mojo` launcher (mojo.bat) is on PATH and shadows Modular's Mojo. Modular
+      # ships no Windows build, so the mojo tests should skip via
+      # find_executable("mojo") returning None -- but Perl's mojo.bat makes it
+      # return a path, so the tests try to "format" with the wrong tool and fail
+      # (or hit WinError 2, since subprocess can't exec a .bat). Delete it.
+      - name: Remove Strawberry Perl's phantom mojo launcher (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          find /c/Strawberry -type f \( -iname mojo -o -iname mojo.bat -o -iname mojo.cmd \) -print -delete 2>/dev/null || true
+          if where mojo >/dev/null 2>&1; then
+            echo "WARNING: mojo still resolvable on PATH:"; where mojo
+          else
+            echo "OK: mojo no longer resolvable (mojo tests will skip)"
+          fi
+
       - name: Install astyle (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get install --yes astyle
@@ -76,22 +92,6 @@ jobs:
       # the runner's preinstalled toolchains.
       - name: Put mise tools on PATH
         run: mise bin-paths >> "$GITHUB_PATH"
-
-      # The windows-latest image preinstalls Strawberry Perl, whose Mojolicious
-      # `mojo` launcher (mojo.bat) is on PATH and shadows Modular's Mojo. Modular
-      # ships no Windows build, so the mojo tests should skip via
-      # find_executable("mojo") returning None -- but Perl's mojo.bat makes it
-      # return a path, so the tests try to "format" with the wrong tool and fail
-      # (or hit WinError 2, since subprocess can't exec a .bat). Delete it.
-      - name: Remove Strawberry Perl's phantom mojo launcher (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          find /c/Strawberry -type f \( -iname mojo -o -iname mojo.bat -o -iname mojo.cmd \) -print -delete 2>/dev/null || true
-          if where mojo >/dev/null 2>&1; then
-            echo "WARNING: mojo still resolvable on PATH:"; where mojo
-          else
-            echo "OK: mojo no longer resolvable (mojo tests will skip)"
-          fi
 
       - name: Lint
         run: |
