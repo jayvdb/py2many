@@ -57,27 +57,10 @@ if CXX.startswith("clang++") and sys.platform != "win32":
         ENV["cpp"]["CPLUS_INCLUDE_PATH"] = str(_libcxx_prefix / "include/c++/v1")
         ENV["cpp"]["LIBRARY_PATH"] = str(_libcxx_prefix / "lib")
         ENV["cpp"]["LD_LIBRARY_PATH"] = str(_libcxx_prefix / "lib")
-
-# Standard-library / target flags for clang++. On Windows clang defaults to an
-# MSVC/libc++ setup that isn't installed; retarget it at the winlibs mingw
-# toolchain (http:mingw, on PATH) so its MinGW driver finds x86_64-w64-mingw32-gcc
-# and links libstdc++ instead. Elsewhere use conda's libc++.
-if CXX.startswith("clang++"):
-    if sys.platform == "win32":
-        _cxx_stdlib_flags = ["--target=x86_64-w64-mingw32"]
-        _gpp = find_executable("g++")
-        if _gpp:
-            _cxx_stdlib_flags.append(
-                f"--gcc-toolchain={Path(_gpp).resolve().parent.parent}"
-            )
-    else:
-        _cxx_stdlib_flags = ["-stdlib=libc++"]
-else:
-    _cxx_stdlib_flags = []
 COMPILERS = {
     "cpp": [CXX, "-std=c++17", "-I", str(ROOT_DIR)]
     + _conan_include_args()
-    + _cxx_stdlib_flags
+    + (["-stdlib=libc++"] if CXX.startswith("clang++") else [])
     + ["-o", "{exe}", "{filename}"],
     "dlang": ["dmd"] if find_executable("dmd") else ["ldmd2"],
     "dart": ["dart", "compile", "exe"],

@@ -3,25 +3,29 @@
 # asdf plugins are shell scripts that can't run on Windows; use the official
 # prebuilt Windows binary there instead.
 "http:nim" = { version = "2.2.10", url = "https://nim-lang.org/download/nim-{{ version }}_x64.zip", bin_path = "nim-{{ version }}/bin", os = ["windows"] }
-# conda's clang++ on Windows needs its own DLLs (libLLVM etc., in the env's
-# Library/bin) on PATH -- added in [env]._.path below -- or it dies at load with
-# STATUS_DLL_NOT_FOUND (0xC0000135). It also defaults to an MSVC/libc++ setup
-# that isn't installed, so the cpp test retargets it at the winlibs mingw
-# toolchain (http:mingw) for libstdc++ (see _cxx_stdlib_flags in test_cli.py).
-"conda:clangxx" = "latest"
+# conda's clang++ isn't usable standalone on Windows: its DLLs (libLLVM etc.)
+# live in the conda env's Library/bin, not on PATH via mise's shim, and Windows
+# has no RPATH, so it dies at load with STATUS_DLL_NOT_FOUND (0xC0000135). Keep
+# it off Windows; there the cpp cases compile via g++ (test_env_cxx_gcc, using
+# the winlibs http:mingw toolchain) and test_generated's cpp cases skip cleanly.
+"conda:clangxx" = { version = "latest", os = ["linux", "macos"] }
 # conda-forge's gcc isn't usable standalone on Windows: invoked directly it
 # fails with "cannot execute 'cc1plus': CreateProcess: No such file" because the
 # activation-style package can't locate its internal compiler. Use it on
 # linux/macos; on Windows install a portable winlibs MinGW-w64 toolchain (below)
 # which ships a real standalone g++ with cc1plus in the correct relative path.
 "conda:gxx" = { version = "latest", os = ["linux", "macos"] }
+"conda:libcxx-devel" = { version = "latest", os = ["linux", "macos"] }
+"github:ldc-developers/ldc" = "latest"
+# mise's github backend auto-strips the single top-level v/ dir on Linux/macOS
+# but does so unreliably for Windows zips, leaving v.exe nested and off PATH.
+# Force the strip on all platforms so v(.exe) lands at the install root.
+"github:vlang/v" = { version = "0.5.1", strip_components = 1 }
+"github:Z3Prover/z3" = "z3-4.15.4"
 # Portable standalone MinGW-w64 GCC for Windows (winlibs). The archive unpacks
 # to a top-level mingw64/, with g++ in mingw64/bin and cc1plus alongside under
 # mingw64/, so the driver resolves it correctly (unlike conda:gxx above).
 "http:mingw" = { version = "14.2.0", url = "https://github.com/brechtsanders/winlibs_mingw/releases/download/{{ version }}posix-19.1.1-12.0.0-ucrt-r2/winlibs-x86_64-posix-seh-gcc-{{ version }}-mingw-w64ucrt-12.0.0-r2.zip", bin_path = "mingw64/bin", os = ["windows"] }
-"conda:libcxx-devel" = { version = "latest", os = ["linux", "macos"] }
-"github:ldc-developers/ldc" = "latest"
-"github:Z3Prover/z3" = "z3-4.15.4"
 pipx = { version = "latest", os = ["linux", "macos"] }
 "pipx:black" = "24.10.0"
 "pipx:cpplint" = "latest"
@@ -44,10 +48,6 @@ maven = "latest"
 python = "3.12"
 rust = { version = "latest", components = "rustfmt,clippy" }
 uv = "latest"
-# mise's github backend auto-strips the single top-level v/ dir on Linux/macOS
-# but does so unreliably for Windows zips, leaving v.exe nested and off PATH.
-# Force the strip on all platforms so v(.exe) lands at the install root.
-"github:vlang/v" = { version = "0.5.1", strip_components = 1 }
 zig = "latest"
 
 [env]
@@ -61,13 +61,6 @@ zig = "latest"
 _.path = [
   "{% if os() == 'windows' %}{{ env.USERPROFILE }}{% else %}{{ env.HOME }}{% endif %}/.julia/bin",
   "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/dub{% else %}{{ env.HOME }}/.dub{% endif %}/packages/dfmt/0.15.2/dfmt/bin",
-  # Windows-only: conda clang++ keeps its DLLs (libLLVM etc.) next to clang++.exe
-  # in <install>/Library/bin, but mise only exposes the .mise-bins shim dir on
-  # PATH. Windows has no RPATH, so the loader can't find those DLLs and clang++
-  # dies at launch with STATUS_DLL_NOT_FOUND (0xC0000135). Add Library/bin so the
-  # loader resolves them. (Renders empty -> dropped by mise on linux/macos, where
-  # the binary finds its libs via RPATH.)
-  "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/mise/installs/conda-clangxx/latest/Library/bin{% endif %}",
 ]
 
 # These tasks run bash scripts and bash-isms (set -ex); force bash so they work
@@ -95,7 +88,12 @@ run = """
 tox -e py312-full
 """
 
-[tasks.lint]
-description = "Run the lint checks from .github/workflows/main.yml::lint"
+[tasks.check-lint]
+description = "Check formatting/lint without modifying files (isort/black --check, flake8, cpplint)"
 shell = "bash -c"
 run = "./scripts/lint.sh"
+
+[tasks.fmt]
+description = "Auto-format Python sources (isort + black)"
+shell = "bash -c"
+run = "./scripts/fmt.sh"

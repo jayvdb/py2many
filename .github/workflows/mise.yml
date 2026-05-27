@@ -95,7 +95,7 @@ jobs:
 
       - name: Lint
         run: |
-          mise run lint
+          mise run check-lint
 
       - name: Test
         run: |
