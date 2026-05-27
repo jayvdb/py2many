@@ -13,10 +13,12 @@ if [ $# -eq 1 ]; then
     MODE="run"
     TEST_FILE=$1
 elif [ $# -eq 2 ]; then
-    # Two arguments, first is mode, second is test file
+    # Two arguments, first is mode, second is test file. Consume the mode with
+    # shift (so the run branch's `zig run $*` forwards only the program args);
+    # the test file is then the first remaining positional ($1, not $2).
     MODE=$1
     shift
-    TEST_FILE=$2
+    TEST_FILE=$1
 else
     echo "Usage: $0 [mode] test_file.zig"
     echo "Modes: run, compile, lint"
@@ -31,6 +33,12 @@ TEST_FILE="${TEST_FILE//\\//}"
 
 # Define the directory path
 DIR="tests/build/common-zig-proj"
+
+# Debug (surfaced via the test's captured skip message on failure).
+echo "[zig-runner] MODE=$MODE positional: 1=$1 2=$2" >&2
+echo "[zig-runner] TEST_FILE=$TEST_FILE" >&2
+echo "[zig-runner] DIR=$DIR uname=$(uname) pwd=$(pwd)" >&2
+echo "[zig-runner] zig=$(command -v zig)" >&2
 
 # Check if the directory exists and is properly set up
 if [ ! -d "$DIR" ] || [ ! -f "$DIR/build.zig" ] || [ ! -f "$DIR/build.zig.zon" ]; then

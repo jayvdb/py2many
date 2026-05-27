@@ -296,10 +296,14 @@ class TestCodeGenerator:
                     return
                 cmd = _create_cmd(compiler, filename=case_output, exe=exe)
                 print(f"Compiling {cmd} ...")
-                proc = _run(cmd, env=env, check=False)
+                proc = _run(cmd, env=env, check=False, capture_output=True)
+                out = proc.stdout.decode("utf-8", "replace") if proc.stdout else ""
+                err = proc.stderr.decode("utf-8", "replace") if proc.stderr else ""
+                print(out)
+                print(err)
 
                 if proc.returncode and not expect_failure:
-                    raise pytest.skip(f"{case}{ext} doesnt compile")
+                    raise pytest.skip(f"{case}{ext} doesnt compile:\n{out}{err}")
 
                 if self.UPDATE_EXPECTED or not os.path.exists(expected_filename):
                     with open(expected_filename, "w") as f:

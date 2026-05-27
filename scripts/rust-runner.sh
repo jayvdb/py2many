@@ -29,6 +29,13 @@ DIR="common-rust-proj-${bin_name}"
 WORKDIR="$(pwd -W 2>/dev/null || pwd)"
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$WORKDIR/common-rust-target}"
 
+# Debug (surfaced via the test's captured skip message on failure).
+echo "[rust-runner] MODE=$MODE arg1=$1" >&2
+echo "[rust-runner] TEST_FILE=$TEST_FILE" >&2
+echo "[rust-runner] bin_name=$bin_name DIR=$DIR" >&2
+echo "[rust-runner] uname=$(uname) pwd=$(pwd) WORKDIR=$WORKDIR" >&2
+echo "[rust-runner] CARGO_TARGET_DIR=$CARGO_TARGET_DIR cargo=$(command -v cargo)" >&2
+
 # Check if the directory exists
 if [ ! -d "$DIR" ]; then
     # If the directory doesn't exist, create a new Cargo binary project
