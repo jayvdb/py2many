@@ -1783,7 +1783,14 @@ class VTranspiler(CLikeTranspiler):
                         op = "="
                     elif op == "=":
                         pass
-                assign.append(f"{', '.join(subtargets)} {op} {value}")
+                # V multiple assignment is `a, b := v1, v2` -- NOT `a, b := [v1, v2]`
+                # (a tuple/list RHS otherwise renders as one array value, giving
+                # "assignment mismatch: N variables 1 value").
+                if isinstance(node.value, (ast.Tuple, ast.List)) and not use_temp:
+                    rhs = ", ".join(self.visit(e) for e in node.value.elts)
+                else:
+                    rhs = value
+                assign.append(f"{', '.join(subtargets)} {op} {rhs}")
                 assign.extend(post_assign)
             elif isinstance(target, (ast.Subscript, ast.Attribute)):
                 target: str = self.visit(target)

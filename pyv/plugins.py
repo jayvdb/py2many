@@ -78,12 +78,16 @@ class VTranspilerPlugins:
     def visit_int(self, node: ast.Call, vargs: List[str]) -> str:
         if not vargs:
             return "0"
-        # For bool, use direct cast function instead of 'as int'
-        if node.args and get_inferred_v_type(node.args[0]) == "bool":
-            return f"int({vargs[0]})"
-        # Placeholder for post-processing in VTranspiler.visit_Module
-        # Converts int(x) to (x as int) for Any/Sum types
-        return f"CAST_INT({vargs[0]})"
+        # `as int` (the CAST_INT placeholder, post-processed in
+        # VTranspiler.visit_Module) is only valid for sum/Any types -- e.g. an
+        # Any-typed lambda parameter. Numeric results (literals, arithmetic,
+        # min/max, ...) must use V's int() conversion; `as int` on a non-sum type
+        # is a compile error. So only emit the `as int` form for an Any-typed
+        # variable; everything else gets int().
+        arg = node.args[0] if node.args else None
+        if isinstance(arg, ast.Name) and get_inferred_v_type(arg) == "Any":
+            return f"CAST_INT({vargs[0]})"
+        return f"int({vargs[0]})"
 
     def visit_min_max(self, node: ast.Call, vargs: List[str]) -> str:
         self._usings.add("arrays")

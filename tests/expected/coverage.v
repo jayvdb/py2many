@@ -86,7 +86,7 @@ fn show() {
 	_escape_quotes := ' foo "bar" baz '
 	assert 'aaabbccc'.contains('bbc')
 	assert 1 != 0
-	_c1, _, _c2 := [1, 2, 3]
+	_c1, _, _c2 := 1, 2, 3
 }
 
 fn main() {
