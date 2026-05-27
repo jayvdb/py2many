@@ -422,14 +422,20 @@ class TestCodeGenerator:
         exe.unlink(missing_ok=True)
 
         case_filename = TESTS_DIR / "cases" / f"{case}.py"
-        case_output = GENERATED_DIR / f"{case}{ext}"
+        # Separate outdir so this test's <case>.cpp doesn't collide with
+        # test_generated[<case>-cpp], which writes/deletes the same filename in
+        # GENERATED_DIR. Under xdist the two run concurrently on different
+        # workers, and one's cleanup would delete the other's source mid-compile.
+        out_dir = GENERATED_DIR / "cxx_gcc"
+        out_dir.mkdir(exist_ok=True)
+        case_output = out_dir / f"{case}{ext}"
 
         args = [
             f"--{lang}",
             "--comment-unsupported",
             str(case_filename),
             "--outdir",
-            str(GENERATED_DIR),
+            str(out_dir),
         ]
 
         linter = _create_cmd(settings.linter, case_output) + ["-o", str(exe)]
