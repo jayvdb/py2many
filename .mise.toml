@@ -4,7 +4,16 @@
 # prebuilt Windows binary there instead.
 "http:nim" = { version = "2.2.10", url = "https://nim-lang.org/download/nim-{{ version }}_x64.zip", bin_path = "nim-{{ version }}/bin", os = ["windows"] }
 "conda:clangxx" = "latest"
-"conda:gxx" = "latest"
+# conda-forge's gcc isn't usable standalone on Windows: invoked directly it
+# fails with "cannot execute 'cc1plus': CreateProcess: No such file" because the
+# activation-style package can't locate its internal compiler. Use it on
+# linux/macos; on Windows install a portable winlibs MinGW-w64 toolchain (below)
+# which ships a real standalone g++ with cc1plus in the correct relative path.
+"conda:gxx" = { version = "latest", os = ["linux", "macos"] }
+# Portable standalone MinGW-w64 GCC for Windows (winlibs). The archive unpacks
+# to a top-level mingw64/, with g++ in mingw64/bin and cc1plus alongside under
+# mingw64/, so the driver resolves it correctly (unlike conda:gxx above).
+"http:mingw" = { version = "14.2.0", url = "https://github.com/brechtsanders/winlibs_mingw/releases/download/{{ version }}posix-19.1.1-12.0.0-ucrt-r2/winlibs-x86_64-posix-seh-gcc-{{ version }}-mingw-w64ucrt-12.0.0-r2.zip", bin_path = "mingw64/bin", os = ["windows"] }
 "conda:libcxx-devel" = { version = "latest", os = ["linux", "macos"] }
 "github:ldc-developers/ldc" = "latest"
 "github:Z3Prover/z3" = "z3-4.15.4"
@@ -18,7 +27,7 @@ pipx = { version = "latest", os = ["linux", "macos"] }
 "pipx:pytest" = "latest"
 "pipx:tox" = "latest"
 clang-format = "18.1.3"
-cljstyle = "latest"
+cljstyle = { version = "latest", os = ["linux", "macos"] }
 conan = "latest"
 dart = { version = "3.4.4", url = "https://storage.googleapis.com/dart-archive/channels/stable/release/{{ version }}/sdk/dartsdk-{{ os() }}-{{ arch() }}-release.zip", version_expr = 'fromJSON(body).prefixes | filter({ # matches "^channels/stable/release/(\\d+\\.\\d+\\.\\d+)/$" }) | map({split(#, "/")[3]}) | sortVersions()', version_list_url = "https://storage.googleapis.com/storage/v1/b/dart-archive/o?prefix=channels/stable/release/&delimiter=/" }
 flutter = { version = "3.22.3", platforms = { linux-x64 = { url = "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_{{ version }}-stable.tar.xz" }, macos-arm64 = { url = "https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_{{ version }}-stable.zip" }, macos-x64 = { url = "https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_{{ version }}-stable.zip" }, windows-x64 = { url = "https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_{{ version }}-stable.zip" } }, version_expr = 'fromJSON(body).releases | filter({ #.channel == "stable" }) | map({ replace(#.version, "-stable", "") }) | sortVersions()', version_list_url = "https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json" }
