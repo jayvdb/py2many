@@ -140,14 +140,9 @@ RUN curl -fsSL -o /tmp/dart.zip \
     && flutter config --no-analytics \
     && flutter --version
 
-RUN curl -fsSL https://pixi.sh/install.sh | bash \
-    && ln -sf "${HOME}/.pixi/bin/pixi" /usr/local/bin/pixi \
-    && cd "${HOME}" \
-    && pixi init life -c https://conda.modular.com/max-nightly/ -c conda-forge \
-    && cd life \
-    && pixi add modular \
-    && pixi run mojo --version \
-    && ln -sf "${HOME}/life/.pixi/envs/default/bin/mojo" /usr/local/bin/mojo
+RUN source "${HOME}/.venv/bin/activate" \
+    && pip install mojo==0.26.2.0 \
+    && mojo --version
 
 RUN julia -e 'using Pkg; Pkg.add("JuliaFormatter"); Pkg.add("SuperEnum")' \
     && printf '#!/usr/bin/env julia\nusing JuliaFormatter\nJuliaFormatter.main(ARGS)\n' > /usr/local/bin/format.jl \
