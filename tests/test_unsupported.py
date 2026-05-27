@@ -32,6 +32,7 @@ from py2many.cli import (
     _create_cmd,
     _get_all_settings,
     _relative_to_cwd,
+    _run,
     _transpile,
     _transpile_one,
 )
@@ -272,6 +273,8 @@ class TestCodeGenerator:
 
     @pytest.mark.parametrize("case,lang", TEST_PARAMS)
     def test_snippet(self, case, lang):
+        if lang == "kotlin" and sys.platform == "win32":
+            raise pytest.skip("kotlin jgo/ktlint formatter unsupported on Windows")
         env = os.environ.copy()
         if ENV.get(lang):
             env.update(ENV.get(lang))
@@ -307,7 +310,9 @@ class TestCodeGenerator:
             if settings.ext == ".kt" and case_output.is_absolute():
                 # KtLint does not support absolute path in globs
                 case_output = _relative_to_cwd(case_output)
-            proc = run([*settings.formatter, case_output], env=env, capture_output=True)
+            proc = _run(
+                [*settings.formatter, case_output], env=env, capture_output=True
+            )
             if proc.returncode and not self.SHOW_ERRORS:
                 if not expect_success:
                     return
@@ -322,7 +327,7 @@ class TestCodeGenerator:
                 if not find_executable(compiler[0]):
                     raise pytest.skip(f"{compiler[0]} not available")
                 cmd = _create_cmd(compiler, filename=case_output, exe=exe)
-                proc = run(cmd, env=env, capture_output=True)
+                proc = _run(cmd, env=env, capture_output=True)
 
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:
                     return
@@ -336,7 +341,7 @@ class TestCodeGenerator:
                 invoker = INVOKER.get(lang)
                 if not find_executable(invoker[0]):
                     raise pytest.skip(f"{invoker[0]} not available")
-                proc = run([*invoker, case_output], env=env, capture_output=True)
+                proc = _run([*invoker, case_output], env=env, capture_output=True)
 
                 if proc.returncode and not expect_success and not self.SHOW_ERRORS:
                     return

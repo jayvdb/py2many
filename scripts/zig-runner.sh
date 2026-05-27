@@ -23,6 +23,12 @@ else
     exit 1
 fi
 
+# Under git-bash on Windows the test passes a native path (D:\...\foo.zig),
+# where coreutils treat '\' as an ordinary char (only '/' separates) and cp
+# mis-parses it. Normalise backslashes to forward slashes; a no-op on
+# Linux/macOS where paths contain no backslashes.
+TEST_FILE="${TEST_FILE//\\//}"
+
 # Define the directory path
 DIR="tests/build/common-zig-proj"
 
