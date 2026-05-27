@@ -365,7 +365,7 @@ class TestCodeGenerator:
                             if CXX.startswith("clang++")
                             else "-Wno-pointer-arith"
                         )
-                proc = run(linter, env=env)
+                proc = _run(linter, env=env)
                 # golint is failing regularly due to exports without docs
                 if proc.returncode and linter[0] == "golint":
                     expect_failure = True
