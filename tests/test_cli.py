@@ -394,8 +394,6 @@ class TestCodeGenerator:
                 exe.unlink(missing_ok=True)
 
     @pytest.mark.parametrize("case", TEST_CASES)
-    # This test name must be alpha before `test_generated` otherwise
-    # KEEP_GENERATED does not work.
     def test_env_cxx_gcc(self, case):
         lang = "cpp"
         ext = ".cpp"
