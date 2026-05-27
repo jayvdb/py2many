@@ -80,7 +80,7 @@ set -ex
 # tests invoke. mise's native shell keeps a Windows PATH that resolves them.
 [tasks.test]
 run = """
-tox -e py312-full -- --maxfail=10
+tox -e py312-full
 """
 
 [tasks.lint]

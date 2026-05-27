@@ -65,7 +65,12 @@ COMPILERS = {
     "dlang": ["dmd"] if find_executable("dmd") else ["ldmd2"],
     "dart": ["dart", "compile", "exe"],
     "go": ["go", "build"],
-    "nim": ["nim", "compile", "--nimcache:."],
+    # Per-case nimcache. A shared cache (e.g. --nimcache:.) poisons cross-case
+    # links: nim reuses system.nim.c.o keyed by source mtime, so one case ends up
+    # linking a system object specialized for another case's types, producing
+    # "undefined reference" errors at link time. The {filename} placeholders make
+    # _create_cmd emit the input explicitly (it no longer auto-appends it).
+    "nim": ["nim", "compile", "--nimcache:{filename}.cache", "{filename}"],
     "rust": [
         "../../scripts/rust-runner.sh",
         "compile",
