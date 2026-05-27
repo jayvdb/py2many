@@ -3,6 +3,11 @@
 # asdf plugins are shell scripts that can't run on Windows; use the official
 # prebuilt Windows binary there instead.
 "http:nim" = { version = "2.2.10", url = "https://nim-lang.org/download/nim-{{ version }}_x64.zip", bin_path = "nim-{{ version }}/bin", os = ["windows"] }
+# conda's clang++ on Windows needs its own DLLs (libLLVM etc., in the env's
+# Library/bin) on PATH -- added in [env]._.path below -- or it dies at load with
+# STATUS_DLL_NOT_FOUND (0xC0000135). It also defaults to an MSVC/libc++ setup
+# that isn't installed, so the cpp test retargets it at the winlibs mingw
+# toolchain (http:mingw) for libstdc++ (see _cxx_stdlib_flags in test_cli.py).
 "conda:clangxx" = "latest"
 # conda-forge's gcc isn't usable standalone on Windows: invoked directly it
 # fails with "cannot execute 'cc1plus': CreateProcess: No such file" because the
@@ -56,6 +61,13 @@ zig = "latest"
 _.path = [
   "{% if os() == 'windows' %}{{ env.USERPROFILE }}{% else %}{{ env.HOME }}{% endif %}/.julia/bin",
   "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/dub{% else %}{{ env.HOME }}/.dub{% endif %}/packages/dfmt/0.15.2/dfmt/bin",
+  # Windows-only: conda clang++ keeps its DLLs (libLLVM etc.) next to clang++.exe
+  # in <install>/Library/bin, but mise only exposes the .mise-bins shim dir on
+  # PATH. Windows has no RPATH, so the loader can't find those DLLs and clang++
+  # dies at launch with STATUS_DLL_NOT_FOUND (0xC0000135). Add Library/bin so the
+  # loader resolves them. (Renders empty -> dropped by mise on linux/macos, where
+  # the binary finds its libs via RPATH.)
+  "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/mise/installs/conda-clangxx/latest/Library/bin{% endif %}",
 ]
 
 # These tasks run bash scripts and bash-isms (set -ex); force bash so they work
