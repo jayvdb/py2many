@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Check if we have at least one argument
 if [ $# -eq 0 ]; then

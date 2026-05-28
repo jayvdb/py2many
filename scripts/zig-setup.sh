@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Create a zig project structure for tests
 mkdir -p tests/build/common-zig-proj

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 julia -e 'using Pkg; Pkg.add("JuliaFormatter"); Pkg.add("SuperEnum")'
 

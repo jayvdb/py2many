@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 MODE=$1
 shift
-
 
 # Determine the correct sed command
 if [[ "$(uname)" == "Darwin" ]]; then

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 dart --version
 flutter --version
-set -ex
 
 # tests/build here must be the same as defined in test_cli
 if [[ ! -f tests/build/pubspec.yaml ]]; then
