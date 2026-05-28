@@ -55,9 +55,10 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get install --yes astyle
 
-      - name: Install astyle (macOS)
+      - name: Install astyle & gnu-sed (macOS)
+        # gnu-sed is used by rust-runner.sh
         if: runner.os == 'macOS'
-        run: brew install astyle
+        run: brew install astyle gnu-sed
 
       - name: Install astyle (Windows)
         if: runner.os == 'Windows'
