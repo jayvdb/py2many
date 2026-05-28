@@ -1,0 +1,98 @@
+---
+name: Test using mise
+
+"on":
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+  #  branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: write
+
+# this allows a subsequently queued workflow run to interrupt previous runs in pull requests only
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/pull/') }}
+
+jobs:
+  mise:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The windows-latest image preinstalls Strawberry Perl, whose Mojolicious
+      # `mojo` launcher (mojo.bat) is on PATH and shadows Modular's Mojo. Modular
+      # ships no Windows build, so the mojo tests should skip via
+      # find_executable("mojo") returning None -- but Perl's mojo.bat makes it
+      # return a path, so the tests try to "format" with the wrong tool and fail
+      # (or hit WinError 2, since subprocess can't exec a .bat). Delete it.
+      - name: Remove Strawberry Perl's phantom mojo launcher (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          find /c/Strawberry -type f \( -iname mojo -o -iname mojo.bat -o -iname mojo.cmd \) -print -delete 2>/dev/null || true
+          if where mojo >/dev/null 2>&1; then
+            echo "WARNING: mojo still resolvable on PATH:"; where mojo
+          else
+            echo "OK: mojo no longer resolvable (mojo tests will skip)"
+          fi
+
+      - name: Install astyle (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install --yes astyle
+
+      - name: Install astyle (macOS)
+        if: runner.os == 'macOS'
+        run: brew install astyle
+
+      - name: Install astyle (Windows)
+        if: runner.os == 'Windows'
+        run: choco install --yes astyle
+
+      - name: Install mise
+        uses: taiki-e/install-action@v2
+        with:
+          tool: mise
+
+      - name: Install tools
+        run: |
+          mise settings add idiomatic_version_file_enable_tools "[]"
+          mise settings experimental=true
+          mise settings set cargo.binstall true
+          mise use -g cargo-binstall
+          mise install
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          # GitHub release downloads occasionally take longer than mise's
+          # default 30s HTTP timeout; bump it so transient network slowness
+          # doesn't fail the whole `mise install` step.
+          MISE_HTTP_TIMEOUT: "120"
+
+      - name: Setup
+        run: |
+          mise run setup
+
+      # mise tools are only on PATH under `mise exec`/`mise run`, so tox's test
+      # subprocesses (which invoke the language formatters by name) don't see
+      # them. Put every mise tool bin dir on PATH for all later steps, ahead of
+      # the runner's preinstalled toolchains.
+      - name: Put mise tools on PATH
+        run: mise bin-paths >> "$GITHUB_PATH"
+
+      - name: Test
+        run: |
+          mise run test
