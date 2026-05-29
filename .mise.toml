@@ -90,7 +90,7 @@ LD_LIBRARY_PATH = "{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/
 # `latest` would also track the highest *installed* kotlin, not the pinned one.
 # kscript 4.2.3 only works with a 1.7.x kotlinc. Keep this in sync with the
 # kotlin pin in the [tools] section.
-KOTLIN_HOME = "{{ env.HOME }}/.local/share/mise/installs/kotlin/1.7.20/kotlinc"
+KOTLIN_HOME = "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/mise/installs/kotlin/1.7.20/kotlinc{% else %}{{ env.HOME }}/.local/share/mise/installs/kotlin/1.7.20/kotlinc{% endif %}"
 
 # These tasks run bash scripts and bash-isms (set -ex); force bash so they work
 # on Windows too, where mise's default task shell is cmd/PowerShell.
