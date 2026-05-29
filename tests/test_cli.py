@@ -75,7 +75,6 @@ INVOKER = {
         "../../scripts/rust-runner.sh",
         "run",
     ],
-    "smt": ["z3", "-smt2"],
     "vlang": ["v", "run"],
     "mojo": ["mojo"],
     "zig": [
@@ -208,12 +207,6 @@ def standardise_eol(code):
     return code.replace("\r\n", "\n").replace("\n\n", "\n")
 
 
-def is_declarative(ext):
-    """The scripts in these languages can't be run. They declare some
-    constraints that could be verified later in the COMPILER. No INVOKER."""
-    return ext in {".smt"}
-
-
 class TestCodeGenerator:
     maxDiff = None
 
@@ -256,17 +249,16 @@ class TestCodeGenerator:
         exe.unlink(missing_ok=True)
 
         is_script = has_main(case_filename)
-        if not is_script and not is_declarative(ext):
-            raise pytest.skip(f"{case} is declarative, not suitable for {lang}")
+        if not is_script:
+            raise pytest.skip(f"{case} has no main, not suitable for {lang}")
 
-        if not is_declarative(ext):
-            main_args = CASE_ARGS.get(case, tuple())
-            expected_exit_code = CASE_EXPECTED_EXITCODE.get(case, 0)
-            expected_output = get_python_case_output(
-                case_filename, main_args, expected_exit_code
-            )
-            assert expected_output, "Test cases must print something"
-            expected_output = expected_output.splitlines()
+        main_args = CASE_ARGS.get(case, tuple())
+        expected_exit_code = CASE_EXPECTED_EXITCODE.get(case, 0)
+        expected_output = get_python_case_output(
+            case_filename, main_args, expected_exit_code
+        )
+        assert expected_output, "Test cases must print something"
+        expected_output = expected_output.splitlines()
 
         args = [
             f"--{lang}",
@@ -332,9 +324,6 @@ class TestCodeGenerator:
                 if self.UPDATE_EXPECTED or not os.path.exists(expected_filename):
                     with open(expected_filename, "w") as f:
                         f.write(generated)
-
-            if is_declarative(ext):
-                return
 
             stdout = None
             if ext == ".cpp" and (BUILD_DIR / a_dot_out).exists():
