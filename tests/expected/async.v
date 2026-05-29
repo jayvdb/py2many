@@ -1,13 +1,8 @@
 @[translated]
 module main
 
-type AnyFn = fn (Any) Any
-
-type Any = bool | int | i64 | f64 | string | []u8 | voidptr
-type List = []Any
-
-fn async_gen() chan Any {
-	ch := chan Any{cap: 100}
+fn async_gen() chan int {
+	ch := chan int{cap: 100}
 	spawn fn [ch] () {
 		defer { ch.close() }
 		for i in 0 .. 3 {

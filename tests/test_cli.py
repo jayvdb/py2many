@@ -125,7 +125,7 @@ EXTENSION_TEST_CASES = [
 EXPECTED_LINT_FAILURES = []
 
 EXPECTED_COMPILE_FAILURES = [
-    "test_dunder.v",
+    "dunder.v",
     "with.v",
     # vlang regressions tracked at py2many/py2many#793 -- the transpiler emits
     # V that no longer compiles. Skip until pyv is updated.

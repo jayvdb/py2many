@@ -151,6 +151,28 @@ class VNoneCompareRewriter(ast.NodeTransformer):
         return node
 
 
+class VForRangeTypeRewriter(ast.NodeTransformer):
+    """Annotate `range()` loop variables as int.
+
+    A range loop var is always an int, but py2many doesn't infer that, leaving it
+    untyped. That causes two problems in V: a generator yielding the var (or an
+    expression over it) is typed `chan Any` instead of `chan int` (so values
+    print as `Any(2)` rather than `2`), and binops over it get a spurious cast.
+    Typing the target propagates (via inference's visit_Name) to every use.
+    """
+
+    def visit_For(self, node):
+        self.generic_visit(node)
+        if (
+            isinstance(node.iter, ast.Call)
+            and get_id(node.iter.func) == "range"
+            and isinstance(node.target, ast.Name)
+            and not hasattr(node.target, "annotation")
+        ):
+            node.target.annotation = ast.Name(id="int")
+        return node
+
+
 class VWalrusRewriter(ast.NodeTransformer):
     def _has_walrus(self, node):
         for n in ast.walk(node):
