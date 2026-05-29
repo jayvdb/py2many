@@ -119,6 +119,18 @@ def c_symbol(node):
     return symbols[symbol_type]
 
 
+def is_dict_container_type(container_type) -> bool:
+    """Whether a generic container type denotes a dict.
+
+    ``container_type`` is the ``(value_type, index_type)`` tuple produced by
+    ``_generic_typename_from_annotation`` (the unmapped form, so the value type
+    is the literal ``"Dict"`` regardless of target language), or ``None`` when no
+    annotation was inferred. Tolerates ``None`` and empty tuples so callers don't
+    each repeat their own guards.
+    """
+    return bool(container_type) and container_type[0] == "Dict"
+
+
 class CLikeTranspiler(ast.NodeVisitor):
     """Provides a base for C-like programming languages"""
 

@@ -19,9 +19,11 @@ def settings(args, env=os.environ):
         "Mojo",
         ["mojo", "format"],
         None,
-        [MojoDictKeysInElider(), MojoInferMoveSemantics()],
+        [MojoInferMoveSemantics()],
         [infer_mojo_types],
         post_rewriters=[
+            # Runs after type inference so it can check the receiver is a Dict.
+            MojoDictKeysInElider(),
             MojoImplicitConstructor(),
         ],
     )

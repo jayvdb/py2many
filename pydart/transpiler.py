@@ -2,7 +2,7 @@ import ast
 from typing import List
 
 from py2many.analysis import get_id, is_mutable, is_void_function
-from py2many.clike import class_for_typename
+from py2many.clike import class_for_typename, is_dict_container_type
 from py2many.declaration_extractor import DeclarationExtractor
 from py2many.inference import get_inferred_type
 from py2many.tracer import defined_before, is_class_or_module, is_list, is_self_arg
@@ -188,7 +188,7 @@ class DartTranspiler(CLikeTranspiler):
             value_type = getattr(
                 node.comparators[0].annotation, "generic_container_type", None
             )
-            if value_type and value_type[0] == "Dict":
+            if is_dict_container_type(value_type):
                 right += ".keys"
 
         if right.endswith(".keys()") or right.endswith(".values()"):

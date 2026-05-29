@@ -2,6 +2,7 @@ import ast
 
 from py2many.analysis import get_id
 from py2many.ast_helpers import create_ast_node
+from py2many.tracer import is_dict
 
 
 class MojoImplicitConstructor(ast.NodeTransformer):
@@ -47,6 +48,10 @@ class MojoDictKeysInElider(ast.NodeTransformer):
                 and rhs.func.attr == "keys"
                 and not rhs.args
                 and not rhs.keywords
+                # Only elide `.keys()` for dicts: other types may have a
+                # `.keys()` whose `in` semantics differ from membership over the
+                # receiver itself.
+                and is_dict(rhs.func.value)
             ):
                 node.comparators = [rhs.func.value]
         return node

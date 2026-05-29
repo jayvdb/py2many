@@ -2,6 +2,7 @@ import ast
 
 from py2many.analysis import get_id
 from py2many.clike import CLikeTranspiler as CommonCLikeTranspiler
+from py2many.clike import is_dict_container_type
 
 from .inference import GO_CONTAINER_TYPE_MAP, GO_TYPE_MAP, GO_WIDTH_RANK
 
@@ -161,7 +162,9 @@ class CLikeTranspiler(CommonCLikeTranspiler):
         container_str = self.visit(container)
         if hasattr(container, "generic_container_type"):
             container_type, _ = container.generic_container_type
-            if container_type in {"Set" or "Dict"}:
+            if container_type == "Set" or is_dict_container_type(
+                container.generic_container_type
+            ):
                 return f"refutil.ContainsKey({container_str}, {element})"
         return f"refutil.Contains({container_str}, {element})"
 

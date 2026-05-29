@@ -70,6 +70,24 @@ def is_list(node):
         return False
 
 
+def is_dict(node):
+    """Check if a node was assigned as a dict"""
+    if isinstance(node, ast.Dict):
+        return True
+    elif isinstance(node, ast.Assign):
+        return is_dict(node.value)
+    elif isinstance(node, ast.Name):
+        var = node.scopes.find(get_id(node))
+        return (
+            hasattr(var, "assigned_from")
+            and not isinstance(var.assigned_from, ast.FunctionDef)
+            and not isinstance(var.assigned_from, ast.For)
+            and is_dict(var.assigned_from.value)
+        )
+    else:
+        return False
+
+
 # Searches for the first node of type node_type using
 # the given scope (search in reverse order)
 def find_node_by_type(node_type, scopes):

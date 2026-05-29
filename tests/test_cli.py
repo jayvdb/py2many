@@ -139,14 +139,8 @@ EXPECTED_COMPILE_FAILURES = [
     "print.v",
     "scope.v",
     "test_star.v",
-    # mojo: pymojo still emits old-mojo syntax (@value, owned, int(), List(...),
-    # CODES.keys() / CODES.values()) that mojo 0.26.2.0 has removed/replaced.
-    # Skip until pymojo catches up.
-    "bubble_sort.mojo",
-    "built_ins.mojo",
-    "comb_sort.mojo",
+    # mojo
     "dict.mojo",
-    "rect.mojo",
     # dlang: `byte sub(byte x, byte y) { return (x - y); }` -- in D, `byte - byte`
     # promotes to `int`, so the implicit narrow-back-to-byte is rejected. The
     # transpiler widens `Add` and `Mult` returns to `short` but not `Sub`, so

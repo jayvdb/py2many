@@ -11,6 +11,7 @@ from ctypes import (
 )
 
 from py2many.clike import CLikeTranspiler as CommonCLikeTranspiler
+from py2many.clike import is_dict_container_type
 
 PYCPP_TYPE_MAP = {
     bool: "bool",
@@ -183,7 +184,6 @@ class CLikeTranspiler(CommonCLikeTranspiler):
 
         _ = self._generic_typename_from_annotation(right)
         if hasattr(right, "generic_container_type"):
-            container_type, _ = right.generic_container_type
-            if container_type == "Dict":
+            if is_dict_container_type(right.generic_container_type):
                 return f"({right_str}.find({left_str}) != {right_str}.end())"
         return f"(std::find({right_str}.begin(), {right_str}.end(), {left_str}) != {right_str}.end())"

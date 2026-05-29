@@ -10,7 +10,7 @@ from py2many.analysis import (
     is_mutable,
     is_void_function,
 )
-from py2many.clike import class_for_typename
+from py2many.clike import class_for_typename, is_dict_container_type
 from py2many.declaration_extractor import DeclarationExtractor
 from py2many.exceptions import AstClassUsedBeforeDeclaration
 from py2many.inference import is_reference
@@ -434,7 +434,7 @@ class RustTranspiler(CLikeTranspiler):
             value_type = getattr(
                 node.comparators[0].annotation, "generic_container_type", None
             )
-            if value_type and value_type[0] == "Dict":
+            if is_dict_container_type(value_type):
                 right += ".keys()"
 
         cmpop = "contains"
@@ -726,8 +726,7 @@ class RustTranspiler(CLikeTranspiler):
                 index_typename = get_inferred_rust_type(self._slice_value(node))
                 if index_typename != "u64" or index_typename != "usize":
                     index = self._cast(index, "usize")
-            is_dict = value_type is not None and value_type[0] == "Dict"
-            if is_dict:
+            if is_dict_container_type(value_type):
                 value_type = getattr(node.value.annotation, "container_type", None)
                 index_typename = get_inferred_rust_type(self._slice_value(node))
                 if index_typename == value_type[1][0]:

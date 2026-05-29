@@ -3,7 +3,7 @@ from typing import List, Tuple
 
 from py2many.analysis import get_id, is_mutable, is_void_function
 from py2many.ast_helpers import create_ast_block
-from py2many.clike import class_for_typename
+from py2many.clike import class_for_typename, is_dict_container_type
 from py2many.declaration_extractor import DeclarationExtractor
 from py2many.tracer import defined_before, is_class_or_module, is_list, is_self_arg
 
@@ -414,9 +414,7 @@ class KotlinTranspiler(CLikeTranspiler):
         container_type = hasattr(node.value, "annotation") and getattr(
             node.value.annotation, "generic_container_type", None
         )
-        is_container_dict = (
-            container_type and len(container_type) > 0 and container_type[0] == "Dict"
-        )
+        is_container_dict = is_dict_container_type(container_type)
         return f"{value}[{index}]!!" if is_container_dict else f"{value}[{index}]"
 
     def visit_Index(self, node) -> str:

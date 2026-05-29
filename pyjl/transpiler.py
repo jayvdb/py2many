@@ -3,7 +3,7 @@ import textwrap
 from typing import List, Tuple
 
 from py2many.analysis import get_id, is_void_function
-from py2many.clike import _AUTO_INVOKED, class_for_typename
+from py2many.clike import _AUTO_INVOKED, class_for_typename, is_dict_container_type
 from py2many.declaration_extractor import DeclarationExtractor
 from py2many.tracer import defined_before, is_class_or_module, is_enum, is_list
 
@@ -232,7 +232,7 @@ class JuliaTranspiler(CLikeTranspiler):
             value_type = getattr(
                 node.comparators[0].annotation, "generic_container_type", None
             )
-            if value_type and value_type[0] == "Dict":
+            if is_dict_container_type(value_type):
                 right = f"keys({right})"
 
         if isinstance(node.ops[0], ast.In):
