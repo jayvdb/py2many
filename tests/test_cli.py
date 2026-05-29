@@ -111,6 +111,66 @@ if os.getenv("KOTLIN_HOME"):
 else:
     COMPILERS["kotlin"] = ["kotlinc"]
 
+# DEBUG (py2many/py2many): Windows CI keeps failing kscript -> kotlinc.bat with
+# "The system cannot find the path specified". Dump what's actually at
+# KOTLIN_HOME and abort immediately so the CI log shows the diagnostic without
+# wasting time running the rest of the suite (which would otherwise just hit
+# the same kscript failure repeatedly). Windows-only so other platforms stay
+# unaffected.
+if platform.system() == "Windows":
+    _kh_debug = os.getenv("KOTLIN_HOME") or ""
+    print(
+        f"[debug-kotlin] platform=Windows KOTLIN_HOME={_kh_debug!r} "
+        f"isdir={os.path.isdir(_kh_debug)}",
+        file=sys.stderr,
+        flush=True,
+    )
+    if _kh_debug:
+        # Walk up parents to find the highest existing dir, then list it.
+        # Reveals whether mise stashed kotlin under a sibling path (older
+        # version dir, no `kotlinc/` wrapper, etc.).
+        _p = _kh_debug
+        while _p and not os.path.exists(_p):
+            _p = os.path.dirname(_p)
+        if _p and _p != _kh_debug:
+            print(
+                f"[debug-kotlin] KOTLIN_HOME missing; highest existing parent={_p!r}",
+                file=sys.stderr,
+                flush=True,
+            )
+        if _p:
+            try:
+                for _e in sorted(os.listdir(_p)):
+                    _sub = os.path.join(_p, _e)
+                    print(
+                        f"[debug-kotlin]   {_e}{'/' if os.path.isdir(_sub) else ''}",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+            except OSError as _e:
+                print(
+                    f"[debug-kotlin] listdir({_p!r}) failed: {_e}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+        _kbin = os.path.join(_kh_debug, "bin")
+        if os.path.isdir(_kbin):
+            print(f"[debug-kotlin] bin/ contents:", file=sys.stderr, flush=True)
+            for _e in sorted(os.listdir(_kbin)):
+                print(f"[debug-kotlin]   bin/{_e}", file=sys.stderr, flush=True)
+        for _fname in ("kotlinc", "kotlinc.bat", "kotlin", "kotlin.bat"):
+            _fp = os.path.join(_kh_debug, "bin", _fname)
+            print(
+                f"[debug-kotlin] bin/{_fname}: isfile={os.path.isfile(_fp)} "
+                f"path={_fp!r}",
+                file=sys.stderr,
+                flush=True,
+            )
+    # Abort the test run -- running the full suite on Windows would just hit
+    # the same kscript failure on every kotlin case and bury the diagnostic.
+    sys.stderr.flush()
+    sys.exit("[debug-kotlin] aborting Windows run after diagnostic dump")
+
 TEST_CASES = [item.stem for item in (TESTS_DIR / "cases").glob("*.py")]
 TEST_PARAMS = [(case, lang) for case, lang in product(TEST_CASES, LANGS)]
 
