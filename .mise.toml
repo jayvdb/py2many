@@ -75,6 +75,12 @@ _.path = [
 CCC_OVERRIDE_OPTIONS = "{% if os() == 'macos' %}{% else %}+-isystem +{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/include/c++/v1 +-L +{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/lib{% endif %}"
 LD_LIBRARY_PATH = "{% if os() == 'macos' %}{% else %}{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/lib{% endif %}"
 
+# test_env_cxx_gcc needs a real GCC g++. On macOS plain `g++` is Apple's
+# clang shim, so point at conda-gxx's binary (and the test augments PATH with
+# its bin/ so g++ finds its sibling clang assembler). On Linux plain `g++` is
+# real GCC. On Windows the test uses the http:mingw toolchain.
+CXX_GCC = "{% if os() == 'macos' %}{{ env.HOME }}/.local/share/mise/installs/conda-gxx/latest/bin/g++{% endif %}"
+
 # Without KOTLIN_HOME the test harness has no way to run kotlin (a bare .class
 # isn't executable), so the kotlin cases used to rely on kotlinc being absent to
 # skip -- but mise installs it. Point KOTLIN_HOME at the mise kotlin install so
