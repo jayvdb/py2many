@@ -128,6 +128,31 @@ EXPECTED_LINT_FAILURES = []
 EXPECTED_COMPILE_FAILURES = [
     "test_dunder.v",
     "with.v",
+    # vlang regressions tracked at py2many/py2many#793 -- the transpiler emits
+    # V that no longer compiles. Skip until pyv is updated.
+    "async.v",
+    "bubble_sort.v",
+    "built_ins.v",
+    "comb_sort.v",
+    "coverage.v",
+    "dict_comp.v",
+    "print.v",
+    "scope.v",
+    "test_star.v",
+    # mojo: pymojo still emits old-mojo syntax (@value, owned, int(), List(...),
+    # CODES.keys() / CODES.values()) that mojo 0.26.2.0 has removed/replaced.
+    # Skip until pymojo catches up.
+    "bubble_sort.mojo",
+    "built_ins.mojo",
+    "comb_sort.mojo",
+    "dict.mojo",
+    "rect.mojo",
+    # dlang: `byte sub(byte x, byte y) { return (x - y); }` -- in D, `byte - byte`
+    # promotes to `int`, so the implicit narrow-back-to-byte is rejected. The
+    # transpiler widens `Add` and `Mult` returns to `short` but not `Sub`, so
+    # only this function trips it. Skip until the inference widens `Sub` too
+    # (or until per-language widening is introduced).
+    "infer_ops.d",
 ]
 
 a_dot_out = "a.out"
@@ -301,7 +326,7 @@ class TestCodeGenerator:
                 print(err)
 
                 if proc.returncode and not expect_failure:
-                    raise pytest.skip(
+                    raise pytest.fail(
                         f"{case}{ext} doesnt compile (exit={proc.returncode})\n"
                         f"cmd: {cmd}\n"
                         f"resolved {compiler[0]!r} -> {find_executable(compiler[0])!r}\n"
