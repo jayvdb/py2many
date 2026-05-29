@@ -67,16 +67,13 @@ _.path = [
   "{% if os() == 'windows' %}{{ env.LOCALAPPDATA }}/dub{% else %}{{ env.HOME }}/.dub{% endif %}/packages/dfmt/0.15.2/dfmt/bin",
 ]
 
-# The cpp tests compile with clang++ -stdlib=libc++ (linux/macos), so point clang
-# at conda-libcxx-devel's headers/libs and let the compiled binaries find libc++
-# at runtime. CCC_OVERRIDE_OPTIONS is a clang-DRIVER-only knob (g++ ignores it,
-# so test_env_cxx_gcc's g++ never sees libc++ and needs no special handling); it
-# injects the include (-isystem) and link (-L) dirs into every clang/clang++
-# invocation -- both the compile and the lint step -- with no test-rig wiring.
-# Each space-separated token is an edit; "+X" appends arg X. conda-libcxx-devel
-# is linux/macos-only, so on Windows these dirs don't exist and clang ignores them.
-CCC_OVERRIDE_OPTIONS = "+-isystem +{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/include/c++/v1 +-L +{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/lib"
-LD_LIBRARY_PATH = "{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/lib"
+# Inject conda-libcxx-devel into clang's include/link paths for the cpp tests
+# (CCC_OVERRIDE_OPTIONS is clang-driver only; g++ ignores it). Windows ignores
+# missing dirs. macOS skips the override because conda-libcxx-devel conflicts
+# with Apple's Command Line Tools SDK headers (`xcode-select --install`), which
+# the cpp tests then depend on instead.
+CCC_OVERRIDE_OPTIONS = "{% if os() == 'macos' %}{% else %}+-isystem +{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/include/c++/v1 +-L +{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/lib{% endif %}"
+LD_LIBRARY_PATH = "{% if os() == 'macos' %}{% else %}{{ env.HOME }}/.local/share/mise/installs/conda-libcxx-devel/latest/lib{% endif %}"
 
 # Without KOTLIN_HOME the test harness has no way to run kotlin (a bare .class
 # isn't executable), so the kotlin cases used to rely on kotlinc being absent to
