@@ -89,9 +89,9 @@ class TestSMT:
                 proc = run(cmd, check=False, capture_output=True)
                 out = (proc.stdout or b"").decode("utf-8", "replace")
                 err = (proc.stderr or b"").decode("utf-8", "replace")
-                assert proc.returncode == 0, (
-                    f"z3 rejected {case}{ext} (exit={proc.returncode})\n{out}{err}"
-                )
+                assert (
+                    proc.returncode == 0
+                ), f"z3 rejected {case}{ext} (exit={proc.returncode})\n{out}{err}"
         finally:
             if not self.KEEP_GENERATED:
                 case_output.unlink(missing_ok=True)
