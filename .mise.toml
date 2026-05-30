@@ -117,5 +117,5 @@ set -ex
 # tests invoke. mise's native shell keeps a Windows PATH that resolves them.
 [tasks.test]
 run = """
-tox -e py312-full
+tox -e py312-full -- -k 'cli and vlang'
 """

@@ -125,19 +125,6 @@ EXTENSION_TEST_CASES = [
 EXPECTED_LINT_FAILURES = []
 
 EXPECTED_COMPILE_FAILURES = [
-    "dunder.v",
-    "with.v",
-    # vlang regressions tracked at py2many/py2many#793 -- the transpiler emits
-    # V that no longer compiles. Skip until pyv is updated.
-    "async.v",
-    "bubble_sort.v",
-    "built_ins.v",
-    "comb_sort.v",
-    "coverage.v",
-    "dict_comp.v",
-    "print.v",
-    "scope.v",
-    "test_star.v",
     # mojo
     "dict.mojo",
     # dlang: `byte sub(byte x, byte y) { return (x - y); }` -- in D, `byte - byte`
