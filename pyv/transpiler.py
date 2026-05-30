@@ -270,6 +270,8 @@ class VTranspiler(CLikeTranspiler):
         self._attr_dispatch_table = ATTR_DISPATCH_TABLE
         self._generated_code_has_any_type = False
         self._generated_code_uses_any_to_string = False
+        self._generated_code_uses_globals = False
+        self._current_any_fields: Set[str] = set()
         self._tmp_var_id = 0
         self._int_enums: Set[str] = set()
         self._str_enums: Set[str] = set()
@@ -286,6 +288,42 @@ class VTranspiler(CLikeTranspiler):
     def _is_module_scope(node: ast.AST) -> bool:
         scopes = getattr(node, "scopes", None)
         return bool(scopes) and isinstance(scopes[-1], ast.Module)
+
+    def _classes_with_del(self, node: ast.AST) -> Set[str]:
+        """Names of classes defining `__del__` (mapped to V's `free()`). An
+        instance assigned to a local gets a `defer { x.free() }` so the
+        destructor runs on scope exit, matching CPython's deterministic cleanup."""
+        scopes = getattr(node, "scopes", None)
+        module = scopes[0] if scopes else None
+        if module is None:
+            return set()
+        cache = getattr(self, "_classes_with_del_cache", None)
+        if cache is None or cache[0] is not module:
+            names: Set[str] = set()
+            for n in ast.walk(module):
+                if isinstance(n, ast.ClassDef) and any(
+                    isinstance(b, ast.FunctionDef) and b.name == "__del__"
+                    for b in n.body
+                ):
+                    names.add(n.name)
+            self._classes_with_del_cache = (module, names)
+        return self._classes_with_del_cache[1]
+
+    def _mutable_global_names(self, node: ast.AST) -> Set[str]:
+        """Names declared in any `global` statement in the module -- i.e. module
+        vars reassigned from a function, which must be emitted as `__global`."""
+        scopes = getattr(node, "scopes", None)
+        module = scopes[0] if scopes else None
+        if module is None:
+            return set()
+        cache = getattr(self, "_mutable_globals_cache", None)
+        if cache is None or cache[0] is not module:
+            names: Set[str] = set()
+            for n in ast.walk(module):
+                if isinstance(n, ast.Global):
+                    names.update(n.names)
+            self._mutable_globals_cache = (module, names)
+        return self._mutable_globals_cache[1]
 
     def visit_Module(self, node: ast.Module) -> str:
         filename = getattr(node, "__file__", None)
@@ -548,6 +586,16 @@ class VTranspiler(CLikeTranspiler):
             return "ResultError"
         return super().visit_Name(node)
 
+    def _is_any_self_field(self, node) -> bool:
+        """True for `self.<field>` where the current class declares the field as
+        `Any`. Such a value interpolated in an f-string renders as `Any('x')`."""
+        return (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "self"
+            and node.attr in self._current_any_fields
+        )
+
     def visit_JoinedStr(self, node: ast.JoinedStr) -> str:
         if (
             len(node.values) == 3
@@ -585,7 +633,9 @@ class VTranspiler(CLikeTranspiler):
                 parts.append(str(val.value))
             elif isinstance(val, ast.FormattedValue):
                 formatted = self.visit(val.value)
-                if getattr(val.value, "v_needs_any_to_string", False):
+                if getattr(
+                    val.value, "v_needs_any_to_string", False
+                ) or self._is_any_self_field(val.value):
                     self._generated_code_uses_any_to_string = True
                     formatted = f"any_to_string({formatted})"
                 parts.append(f"${{{formatted}}}")
@@ -1409,6 +1459,7 @@ class VTranspiler(CLikeTranspiler):
                     return ret
 
         fields = []
+        any_fields = set()
         if declarations:
             fields.append("pub mut:")
         for declaration, typename in declarations.items():
@@ -1416,6 +1467,7 @@ class VTranspiler(CLikeTranspiler):
                 declaration = declaration.split(".", 1)[1]
             if typename in {None, "", "Any"}:
                 typename = "Any"
+                any_fields.add(declaration)
             fields.append(f"{declaration} {typename}")
 
         for b in node.body:
@@ -1425,11 +1477,16 @@ class VTranspiler(CLikeTranspiler):
         struct_def = "pub struct {0} {{\n{1}\n}}\n\n".format(
             self._v_safe_name(node.name), "\n".join(fields)
         )
+        # Track which `self.` fields are `Any` so f-strings can unwrap them
+        # (an interpolated `Any` renders as `Any('x')`; see visit_JoinedStr).
+        prev_any_fields = self._current_any_fields
+        self._current_any_fields = any_fields
         buf = [
             self.visit(b)
             for b in node.body
             if isinstance(b, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
         ]
+        self._current_any_fields = prev_any_fields
         buf_str = "\n".join(buf)
         return f"{struct_def}{buf_str}"
 
@@ -1781,10 +1838,23 @@ class VTranspiler(CLikeTranspiler):
 
             if self._is_module_scope(node) and isinstance(target, ast.Name):
                 target_name: str = self.visit(target)
-                assign.append(f"const {target_name} = {value}")
+                # A module var reassigned from a function (via `global x`) must
+                # be a mutable `__global`, not an immutable `const`. Python
+                # requires the `global` statement for such assignment, so its
+                # presence flags the var as a mutable global.
+                if get_id(target) in self._mutable_global_names(node):
+                    self._generated_code_uses_globals = True
+                    assign.append(f"__global ( {target_name} = {value} )")
+                else:
+                    assign.append(f"const {target_name} = {value}")
                 continue
 
             if isinstance(target, (ast.Tuple, ast.List)):
+                # V multi-assignment is `a, b := x, y`, not `a, b := [x, y]`, so
+                # a tuple/list literal RHS must be emitted as comma-separated
+                # values rather than an array literal.
+                if isinstance(node.value, (ast.Tuple, ast.List)) and not use_temp:
+                    value = ", ".join(self.visit(e) for e in node.value.elts)
                 subtargets: List[str] = []
                 post_assign: List[str] = []
                 op: str = ":="
@@ -1844,6 +1914,17 @@ class VTranspiler(CLikeTranspiler):
                 target: str = self.visit(target)
 
                 assign.append(f"{kw}{target} := {value}")
+
+        # Run a class's `__del__` (V `free()`) on scope exit for a local
+        # instance, matching CPython's deterministic destructor timing.
+        if (
+            len(node.targets) == 1
+            and isinstance(node.targets[0], ast.Name)
+            and isinstance(node.value, ast.Call)
+            and get_id(node.value.func) in self._classes_with_del(node)
+            and not self._is_module_scope(node)
+        ):
+            assign.append(f"defer {{ {self.visit(node.targets[0])}.free() }}")
         return "\n".join(assign)
 
     def _handle_starred_unpack(self, target, value, node):

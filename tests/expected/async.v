@@ -14,13 +14,15 @@ fn async_gen() chan int {
 
 fn show_async() {
 	// WARNING: async for converted to sync for
-	for val in async_gen() {
+	__gen1 := async_gen()
+	for {
+		val := <-__gen1 or { break }
 		println(val.str())
 	}
 }
 
 fn show() {
-	asyncio.run(show_async())
+	show_async()
 }
 
 fn main() {
